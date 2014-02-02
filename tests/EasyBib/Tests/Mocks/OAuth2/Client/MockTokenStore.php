@@ -12,6 +12,11 @@ class MockTokenStore implements TokenStoreInterface
     private $token;
 
     /**
+     * @var string
+     */
+    private $refreshToken;
+
+    /**
      * @var int
      */
     private $expirationTime;
@@ -30,6 +35,22 @@ class MockTokenStore implements TokenStoreInterface
     public function getToken()
     {
         return $this->token;
+    }
+
+    /**
+     * @param string $refreshToken
+     */
+    public function setRefreshToken($refreshToken)
+    {
+        $this->refreshToken = $refreshToken;
+    }
+
+    /**
+     * @return string
+     */
+    public function getRefreshToken()
+    {
+        return $this->refreshToken;
     }
 
     /**

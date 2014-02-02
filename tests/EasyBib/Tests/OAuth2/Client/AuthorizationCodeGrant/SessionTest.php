@@ -45,11 +45,16 @@ class SessionTest extends TestCase
 
     public function testEnsureTokenWhenNotSet()
     {
-        $redirectUrl = urlencode($this->clientConfig->getParams()['redirect_url']);
-
-        $message = "Redirecting to $this->apiBaseUrl/oauth/authorize"
-            . "?response_type=code&client_id=client_123&redirect_url=$redirectUrl"
-            . "&scope=USER_READ+DATA_READ_WRITE";
+        $message = vsprintf(
+            'Redirecting to %s?response_type=%s&client_id=%s&redirect_url=%s&scope=%s',
+            [
+                $this->apiBaseUrl . $this->serverConfig->getParams()['authorization_endpoint'],
+                'code',
+                'client_123',
+                urlencode($this->clientConfig->getParams()['redirect_url']),
+                'USER_READ+DATA_READ_WRITE',
+            ]
+        );
 
         $this->setExpectedException(MockRedirectException::class, $message);
 
@@ -58,12 +63,38 @@ class SessionTest extends TestCase
 
     public function testEnsureTokenWhenSet()
     {
-        $this->tokenStore->setToken('ABC123');
+        $token = 'ABC123';
+
+        $this->tokenStore->setToken($token);
         $this->session->ensureToken();
 
         $lastRequest = $this->makeRequest();
 
-        $this->assertEquals('Bearer ABC123', $lastRequest->getHeader('Authorization'));
+        $this->assertEquals(
+            sprintf('Bearer %s', $token),
+            $lastRequest->getHeader('Authorization')
+        );
+    }
+
+    public function testEnsureTokenWhenExpiredHavingRefreshToken()
+    {
+        $oldToken = 'ABC123';
+        $newToken = 'XYZ987';
+        $refreshToken = 'REFRESH_456';
+
+        $this->given->iHaveAnExpiredToken($oldToken, $this->tokenStore);
+        $this->given->iHaveARefreshToken($refreshToken, $this->tokenStore);
+        $this->given->iAmReadyToRespondToATokenRequest($newToken, $this->mockResponses);
+
+        $this->session->ensureToken();
+
+        $this->shouldHaveMadeATokenRefreshRequest($refreshToken);
+        $this->shouldHaveATokenAssigned($newToken);
+    }
+
+    public function testEnsureTokenWhenExpiredHavingNoRefreshToken()
+    {
+        $this->markTestIncomplete();
     }
 
     public function testHandleAuthorizationResponse()
@@ -73,8 +104,25 @@ class SessionTest extends TestCase
 
         $this->session->handleAuthorizationResponse($this->authorization);
 
-        $this->shouldHaveMadeATokenRequest();
+        $this->shouldHaveMadeATokenRequest($token);
         $this->shouldHaveATokenAssigned($token);
+    }
+
+    /**
+     * @param string $refreshToken
+     */
+    private function shouldHaveMadeATokenRefreshRequest($refreshToken)
+    {
+        $lastRequest = $this->history->getLastRequest();
+
+        $this->assertEquals(
+            $this->apiBaseUrl . $this->serverConfig->getParams()['token_endpoint'],
+            $lastRequest->getUrl()
+        );
+
+        $this->assertEquals('POST', $lastRequest->getMethod());
+        $this->assertEquals('refresh_token', $lastRequest->getPostFields()['grant_type']);
+        $this->assertEquals($refreshToken, $lastRequest->getPostFields()['refresh_token']);
     }
 
     private function shouldHaveATokenAssigned($token)

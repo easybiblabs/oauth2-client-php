@@ -16,6 +16,16 @@ interface TokenStoreInterface
     public function getToken();
 
     /**
+     * @param string $refreshToken
+     */
+    public function setRefreshToken($refreshToken);
+
+    /**
+     * @return string
+     */
+    public function getRefreshToken();
+
+    /**
      * @param int $time
      * @return void
      */

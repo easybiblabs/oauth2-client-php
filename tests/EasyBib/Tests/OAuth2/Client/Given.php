@@ -2,6 +2,7 @@
 
 namespace EasyBib\Tests\OAuth2\Client;
 
+use EasyBib\OAuth2\Client\TokenStore\TokenStoreInterface;
 use Guzzle\Http\Message\Response;
 use Guzzle\Plugin\Mock\MockPlugin;
 
@@ -13,7 +14,7 @@ class Given
     }
 
     /**
-     * @param $token
+     * @param string $token
      * @param \Guzzle\Plugin\Mock\MockPlugin $mockResponses
      */
     public function iAmReadyToRespondToATokenRequest($token, MockPlugin $mockResponses)
@@ -28,5 +29,24 @@ class Given
 
         $rawTokenResponse = new Response(200, [], $tokenData);
         $mockResponses->addResponse($rawTokenResponse);
+    }
+
+    /**
+     * @param string $token
+     * @param TokenStoreInterface $tokenStore
+     */
+    public function iHaveAnExpiredToken($token, TokenStoreInterface $tokenStore)
+    {
+        $tokenStore->setToken($token);
+        $tokenStore->setExpirationTime(time() - 100);
+    }
+
+    /**
+     * @param $refreshToken
+     * @param TokenStoreInterface $tokenStore
+     */
+    public function iHaveARefreshToken($refreshToken, TokenStoreInterface $tokenStore)
+    {
+        $tokenStore->setRefreshToken($refreshToken);
     }
 }

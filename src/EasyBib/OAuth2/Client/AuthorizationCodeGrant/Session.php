@@ -120,11 +120,25 @@ class Session
         return $this->tokenStore->getExpirationTime() < $timeWithBuffer;
     }
 
+    private function refreshToken()
+    {
+        $refreshRequest = new TokenRefreshRequest(
+            $this->tokenStore->getRefreshToken(),
+            $this->serverConfig,
+            $this->httpClient
+        );
+
+        $tokenResponse = $refreshRequest->send();
+        $this->handleTokenResponse($tokenResponse);
+    }
+
     /**
      * @param TokenResponse $tokenResponse
      */
     private function handleTokenResponse(TokenResponse $tokenResponse)
     {
+        // TODO need to handle expiration and refreshTOken...
+        // should be TokenStore::receive(TokenResponse)
         $token = $tokenResponse->getToken();
         $this->tokenStore->setToken($token);
         $this->pushTokenToHttpClient($token);
