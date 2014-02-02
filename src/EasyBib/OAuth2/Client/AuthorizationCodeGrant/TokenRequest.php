@@ -10,7 +10,7 @@ class TokenRequest
     const GRANT_TYPE = 'authorization_code';
 
     /**
-     * @var \Easybib\OAuth2\AuthorizationCodeGrant\ClientConfig
+     * @var ClientConfig
      */
     private $clientConfig;
 

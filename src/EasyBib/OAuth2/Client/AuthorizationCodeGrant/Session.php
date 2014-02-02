@@ -12,7 +12,7 @@ use Guzzle\Http\ClientInterface;
 class Session
 {
     /**
-     * @var \Easybib\OAuth2\TokenStore\TokenStoreInterface
+     * @var \EasyBib\OAuth2\Client\TokenStore\TokenStoreInterface
      */
     private $tokenStore;
 
