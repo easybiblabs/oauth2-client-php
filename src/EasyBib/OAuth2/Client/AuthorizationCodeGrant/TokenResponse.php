@@ -2,7 +2,6 @@
 
 namespace EasyBib\OAuth2\Client\AuthorizationCodeGrant;
 
-use EasyBib\OAuth2\Client\ArrayValidationException;
 use EasyBib\OAuth2\Client\ArrayValidator;
 
 class TokenResponse
@@ -61,12 +60,18 @@ class TokenResponse
         return $this->params['access_token'];
     }
 
+    /**
+     * @return bool
+     */
     private function isSuccess()
     {
         $validator = new ArrayValidator(self::$requiredParams);
-        return $this->isValidWith($validator);
+        return $validator->validate($this->params);
     }
 
+    /**
+     * @return bool
+     */
     private function isError()
     {
         $validator = new ArrayValidator(
@@ -74,20 +79,6 @@ class TokenResponse
             self::$permittedErrorParams
         );
 
-        return $this->isValidWith($validator);
-    }
-
-    /**
-     * @param ArrayValidator $validator
-     * @return bool
-     */
-    private function isValidWith(ArrayValidator $validator)
-    {
-        try {
-            $validator->validate($this->params);
-            return true;
-        } catch (ArrayValidationException $e) {
-            return false;
-        }
+        return $validator->validate($this->params);
     }
 }

@@ -26,20 +26,26 @@ class ArrayValidator
 
     /**
      * @param array $params
-     * @throws ArrayValidationException
+     * @return bool
      */
     public function validate(array $params)
     {
-        if ($missingKeys = array_diff($this->requiredKeys, array_keys($params))) {
-            throw new ArrayValidationException('Missing key(s) ' . implode(', ', $missingKeys));
+        $missingKeys = array_diff($this->requiredKeys, array_keys($params));
+
+        if ($missingKeys) {
+            return false;
         }
 
         if (!$this->permittedKeys) {
-            return;
+            return true;
         }
 
-        if ($unexpectedKeys = array_diff(array_keys($params), $this->permittedKeys)) {
-            throw new ArrayValidationException('Unexpected key(s) ' . implode(', ', $unexpectedKeys));
+        $unexpectedKeys = array_diff(array_keys($params), $this->permittedKeys);
+
+        if ($unexpectedKeys) {
+            return false;
         }
+
+        return true;
     }
 }

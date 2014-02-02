@@ -3,7 +3,6 @@
 namespace EasyBib\OAuth2\Client\AuthorizationCodeGrant\Authorization;
 
 
-use EasyBib\OAuth2\Client\ArrayValidationException;
 use EasyBib\OAuth2\Client\ArrayValidator;
 
 class AuthorizationResponse
@@ -77,33 +76,19 @@ class AuthorizationResponse
     /**
      * @return bool
      */
-    public function isSuccess()
+    private function isSuccess()
     {
-        $successValidator = new ArrayValidator(self::$validSuccessParams, self::$validSuccessParams);
-        return $this->isValidWith($successValidator);
+        $validator = new ArrayValidator(self::$validSuccessParams, self::$validSuccessParams);
+        return $validator->validate($this->params);
     }
 
-    public function isError()
+    private function isError()
     {
-        $errorValidator = new ArrayValidator(
+        $validator = new ArrayValidator(
             self::$requiredErrorParams,
             self::$permittedErrorParams
         );
 
-        return $this->isValidWith($errorValidator);
-    }
-
-    /**
-     * @param ArrayValidator $validator
-     * @return bool
-     */
-    private function isValidWith(ArrayValidator $validator)
-    {
-        try {
-            $validator->validate($this->params);
-            return true;
-        } catch (ArrayValidationException $e) {
-            return false;
-        }
+        return $validator->validate($this->params);
     }
 }

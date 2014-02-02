@@ -25,8 +25,6 @@ class AuthorizationResponseTest extends \PHPUnit_Framework_TestCase
         ];
 
         $response = new AuthorizationResponse($params);
-        $this->assertTrue($response->isSuccess());
-        $this->assertFalse($response->isError());
         $this->assertEquals('ABC123', $response->getCode());
     }
 
@@ -37,8 +35,6 @@ class AuthorizationResponseTest extends \PHPUnit_Framework_TestCase
         ];
 
         $response = new AuthorizationResponse($params);
-        $this->assertFalse($response->isSuccess());
-        $this->assertTrue($response->isError());
 
         $this->setExpectedException(
             AuthorizationErrorException::class,
