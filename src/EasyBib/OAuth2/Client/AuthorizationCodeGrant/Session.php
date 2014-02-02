@@ -90,7 +90,10 @@ class Session
 
     public function ensureToken()
     {
-        // TODO handle expired token
+        if ($this->isTokenExpired()) {
+            $this->refreshToken();
+        }
+
         $token = $this->tokenStore->getToken();
 
         if (!$token) {
@@ -98,6 +101,23 @@ class Session
         }
 
         $this->pushTokenToHttpClient($token);
+    }
+
+    /**
+     * @todo make this private? right now TDD'ing it, so needs to be public.
+     *   we could conceivably replace the direct tests with tests to assert that
+     *   a refresh is requested
+     * @return bool
+     */
+    public function isTokenExpired()
+    {
+        if (null === $this->tokenStore->getExpirationTime()) {
+            return false;
+        }
+
+        $timeWithBuffer = time() + 10;
+
+        return $this->tokenStore->getExpirationTime() < $timeWithBuffer;
     }
 
     /**

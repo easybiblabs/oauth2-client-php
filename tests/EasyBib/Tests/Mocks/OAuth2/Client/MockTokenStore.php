@@ -40,4 +40,12 @@ class MockTokenStore implements TokenStoreInterface
     {
         $this->expirationTime = $time;
     }
+
+    /**
+     * @return int
+     */
+    public function getExpirationTime()
+    {
+        return $this->expirationTime;
+    }
 }

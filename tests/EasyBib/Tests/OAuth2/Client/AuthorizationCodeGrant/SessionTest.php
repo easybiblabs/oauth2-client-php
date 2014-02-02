@@ -31,6 +31,18 @@ class SessionTest extends TestCase
         $this->session = $this->getSession();
     }
 
+    public function testIsTokenExpired()
+    {
+        $this->tokenStore->setExpirationTime(null);
+        $this->assertFalse($this->session->isTokenExpired());
+
+        $this->tokenStore->setExpirationTime(time() + 1000);
+        $this->assertFalse($this->session->isTokenExpired());
+
+        $this->tokenStore->setExpirationTime(time() - 100);
+        $this->assertTrue($this->session->isTokenExpired());
+    }
+
     public function testEnsureTokenWhenNotSet()
     {
         $redirectUrl = urlencode($this->clientConfig->getParams()['redirect_url']);

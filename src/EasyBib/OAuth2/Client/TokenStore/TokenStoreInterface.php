@@ -20,4 +20,9 @@ interface TokenStoreInterface
      * @return void
      */
     public function setExpirationTime($time);
+
+    /**
+     * @return int
+     */
+    public function getExpirationTime();
 }
