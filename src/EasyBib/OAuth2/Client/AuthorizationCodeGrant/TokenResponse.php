@@ -16,6 +16,7 @@ class TokenResponse
      */
     private static $requiredParams = [
         'access_token',
+        'token_type',
     ];
 
     /**

@@ -17,6 +17,7 @@ class TokenResponseTest extends \PHPUnit_Framework_TestCase
             [
                 [
                     'access_token' => 'ABC123',
+                    'token_type' => 'bearer',
                 ],
                 'ABC123',
             ],
