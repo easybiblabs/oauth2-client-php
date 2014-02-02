@@ -42,10 +42,6 @@ class ArrayValidator
 
         $unexpectedKeys = array_diff(array_keys($params), $this->permittedKeys);
 
-        if ($unexpectedKeys) {
-            return false;
-        }
-
-        return true;
+        return !$unexpectedKeys;
     }
 }
