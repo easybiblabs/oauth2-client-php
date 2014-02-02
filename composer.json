@@ -1,0 +1,37 @@
+{
+    "name": "easybiblabs/oauth2-client-php",
+    "description": "OAuth2 client for PHP",
+    "license": "BSD-2-Clause",
+    "authors": [
+        {
+            "name": "Yitzchak Schaffer",
+            "email": "yitzchak@imagineeasy.com"
+        }
+    ],
+    "repositories": [
+        {
+            "type": "vcs",
+            "url": "git@github.com:fabpot/PHP-CS-Fixer.git"
+        }
+    ],
+    "require": {
+        "php": ">=5.5",
+        "guzzle/guzzle": "3.8.*",
+        "fkooman/guzzle-bearer-auth-plugin": "0.2.*"
+    },
+    "require-dev": {
+      "phpunit/phpunit": ">=3.7",
+      "phpmd/phpmd": "*",
+      "fabpot/php-cs-fixer": "dev-master",
+      "squizlabs/php_codesniffer": "1.*"
+    },
+    "minimum-stability": "stable",
+    "prefer-stable": true,
+    "autoload": {
+        "psr-0": {
+            "EasyBib\\OAuth2\\Client\\": "src/",
+            "EasyBib\\Tests\\OAuth2\\Client\\": "tests/"
+        },
+        "classmap": ["tests/"]
+    }
+}
