@@ -59,11 +59,11 @@ class AuthorizationResponse
      */
     public function getCode()
     {
-        if ($this->isSuccess()) {
-            return $this->params['code'];
+        if ($this->isError()) {
+            throw new AuthorizationErrorException($this->params['error']);
         }
 
-        throw new AuthorizationErrorException($this->params['error']);
+        return $this->params['code'];
     }
 
     /**
