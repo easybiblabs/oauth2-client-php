@@ -25,8 +25,9 @@ application.
 ## Implementing this client in your app
 
 The `Session` class is the heart of this library. It wraps a Guzzle `Client`,
-and adds such headers, etc. as are necessary to allow you to make requests
-against resource servers secured with OAuth.
+which it uses to communicate with the OAuth server. It also allows you to
+attach any number of Guzzle clients as token subscribers, which you will then
+use to make requests against resource servers secured with OAuth.
 
 During the initial authorization step of the OAuth transaction, your app will
 need to redirect the user to the OAuth server. After authorization, the OAuth
