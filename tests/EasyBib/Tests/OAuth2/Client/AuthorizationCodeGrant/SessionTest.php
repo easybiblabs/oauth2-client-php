@@ -45,8 +45,8 @@ class SessionTest extends TestCase
         $refreshToken = 'REFRESH_456';
 
         $this->given->iHaveATokenInSession($oldToken, $this->tokenSession);
-        $this->given->myTokenIsExpired($this->tokenSession);
         $this->given->iHaveARefreshToken($refreshToken, $this->tokenSession);
+        $this->given->myTokenIsExpired($this->tokenSession);
         $this->given->iAmReadyToRespondToATokenRequest($newToken, $this->mockResponses);
 
         $this->makeResourceRequest();
