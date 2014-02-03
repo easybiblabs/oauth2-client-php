@@ -8,6 +8,11 @@ use Guzzle\Common\Event;
 use Guzzle\Http\Exception\BadResponseException;
 use Symfony\Component\EventDispatcher\EventSubscriberInterface;
 
+/**
+ * Class BearerAuth
+ * @link https://github.com/fkooman/guzzle-bearer-auth-plugin
+ * @package EasyBib\Guzzle\Plugin\BearerAuth
+ */
 class BearerAuth implements EventSubscriberInterface
 {
     /**

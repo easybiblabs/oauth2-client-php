@@ -6,6 +6,11 @@ use Guzzle\Http\Message\RequestInterface;
 use Guzzle\Http\Message\Response;
 use Guzzle\Http\Exception\ClientErrorResponseException;
 
+/**
+ * Class BearerErrorResponseException
+ * @link https://github.com/fkooman/guzzle-bearer-auth-plugin
+ * @package EasyBib\Guzzle\Plugin\BearerAuth\Exception
+ */
 class BearerErrorResponseException extends ClientErrorResponseException
 {
     private $bearerReason;
