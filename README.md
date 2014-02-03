@@ -64,6 +64,8 @@ First, instantiate the basic objects and use them to create an OAuth Session.
 use EasyBib\OAuth2\Client\AuthorizationCodeGrant\ClientConfig;
 use EasyBib\OAuth2\Client\AuthorizationCodeGrant\ServerConfig;
 use EasyBib\OAuth2\Client\AuthorizationCodeGrant\Session;
+use EasyBib\OAuth2\Client\Scope;
+use EasyBib\OAuth2\Client\TokenStore;
 use Symfony\Component\HttpFoundation\Session\Session as SymfonySession;
 
 class MyWebController
