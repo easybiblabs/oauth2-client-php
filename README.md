@@ -1,7 +1,10 @@
-# OAuth2 Client for PHP
+# OAuth 2.0 Client for PHP
 
-You can read all about OAuth2 at the
-[standard site](http://tools.ietf.org/html/rfc6749).
+You can read all about OAuth at the
+[standard](http://tools.ietf.org/html/rfc6749).
+
+Currently, only [Authorization Code Grants](http://tools.ietf.org/html/rfc6749#section-4.1)
+are supported.
 
 ## Installation
 
@@ -10,75 +13,49 @@ This library requires PHP 5.5 or later.
 Use [Composer](https://getcomposer.org/) to add this project to your project's
 dependencies.
 
-Currently, only [Authorization Code Grants](http://tools.ietf.org/html/rfc6749#section-4.1)
-are supported.
+## Token store
 
-## Extension for your app
+In order to keep your user logged in, you will need a persistent token store.
+This is implemented using the Session component of the Symfony HTTP Foundation
+package. You can use
+[that framework](http://symfony.com/doc/current/components/http_foundation/sessions.html)
+to implement whatever backend makes sense in the context of your
+application.
 
-In order to use this client, you will need to implement several interfaces at
-key integration points.
+## Implementing this client in your app
 
-### Token storage
+The `Session` class is the heart of this library. It wraps a Guzzle `Client`,
+and adds such headers, etc. as are necessary to allow you to make requests
+against resource servers secured with OAuth.
 
-Tokens might be stored in session or in a database. For a session implementation,
-you might use something like the following:
+During the initial authorization step of the OAuth transaction, your app will
+need to redirect the user to the OAuth server. After authorization, the OAuth
+server will redirect your user back to you.
 
-```php
-use EasyBib\OAuth2\Client\TokenStore\TokenStoreInterface;
-
-class SessionTokenStore implements TokenStoreInterface
-{
-    private $sessionWrapper;
-
-    public function __constructor(MySessionWrapper $sessionWrapper)
-    {
-        $this->sessionWrapper = $sessionWrapper;
-    }
-
-    public function getToken()
-    {
-        return $this->sessionWrapper->get('easybib.api.token');
-    }
-
-    public function setToken($token)
-    {
-        $this->sessionWrapper->set('easybib.api.token', $token);
-    }
-
-    public function setExpirationTime($time)
-    {
-        $this->sessionWrapper->expireAt($time);
-    }
-}
-```
-
-### Redirection
-
-To make the initial authorization call, your app must redirect the user's
-browser to EasyBib's authorization page for confirmation. Your application's
-redirect mechanism must be injected via something like this:
+In order for this OAuth client to initiate the redirect, you will need to
+implement our RedirectorInterface within the context of your application. That
+may be as simple as calling `header()` to send the Location, or it may involve
+a call to your web framework.
 
 ```php
 use EasyBib\OAuth2\Client\RedirectorInterface;
 
 class MyRedirector implements RedirectorInterface
 {
-    private $responseWrapper;
+    private $controller;
 
-    public function __construct(MyResponseWrapper $responseWrapper)
+    public function __construct(MyWebController $controller)
     {
-        $this->responseWrapper = $responseWrapper;
+        $this->controller = $controller;
     }
 
     public function redirect($url)
     {
-        // throws exception or calls header() to redirect user
-        $this->responseWrapper->redirect($url);
+        // does something which eventually calls header() to redirect user
+        $this->controller->redirect($url);
     }
 }
 ```
-
-## Usage
 
 First, instantiate the basic objects and use them to create an OAuth Session.
 
@@ -86,42 +63,73 @@ First, instantiate the basic objects and use them to create an OAuth Session.
 use EasyBib\OAuth2\Client\AuthorizationCodeGrant\ClientConfig;
 use EasyBib\OAuth2\Client\AuthorizationCodeGrant\ServerConfig;
 use EasyBib\OAuth2\Client\AuthorizationCodeGrant\Session;
+use Symfony\Component\HttpFoundation\Session\Session as SymfonySession;
 
-$tokenStore = new SessionTokenStore($session);
-$httpClient = new Client('http://myoauth2provider.example.com');
-$redirector = new MyRedirector($response);
+class MyWebController
+{
+    private oauthSession;
 
-$clientConfig = new ClientConfig([
-    'client_id' => 'client_123',
-    'redirect_url' => 'http://myapp.example.com/',
-]);
+    private function setUpOAuth()
+    {
+        // Symfony uses native PHP sessions as the default backend
+        tokenStore = new TokenStore(new SymfonySession());
 
-$serverConfig = new ServerConfig([
-    'authorization_endpoint' => '/oauth/authorize',
-    'token_endpoint' => '/oauth/token',
-]);
+        $httpClient = new Client('http://myoauth2provider.example.com');
+        $redirector = new MyRedirector($this);
 
-$session = new Session(
-    $tokenStore,
-    $httpClient,
-    $redirector,
-    $clientConfig,
-    $serverConfig
-);
+        // your application's settings for the OAuth provider
+        $clientConfig = new ClientConfig([
+            'client_id' => 'client_123',
+            'redirect_url' => 'http://myapp.example.com/',
+        ]);
+
+        // the OAuth provider's settings
+        $serverConfig = new ServerConfig([
+            'authorization_endpoint' => '/oauth/authorize',
+            'token_endpoint' => '/oauth/token',
+        ]);
+
+        $this->oauthSession = new Session(
+            $tokenStore,
+            $httpClient,
+            $redirector,
+            $clientConfig,
+            $serverConfig
+        );
+
+        $scope = new Scope(['USER_READ', 'DATA_READ_WRITE']);
+        $this->oauthSession->setScope($scope);
+    }
+}
 ```
 
-When you are ready to connect to the service providing OAuth2, you will need to authorize
-your user.
+When you are ready to connect to the service secured with OAuth, you will need
+to authorize your user.
 
-> TODO fill me in
+```php
+$this->oauthSession->authorize();
+```
 
-The OAuth2 server will redirect the user back to your application
+The OAuth server will redirect the user back to your application
 with the user's token. Your application should handle that request as follows:
 
-> TODO fill me in
+```php
+use EasyBib\OAuth2\Client\AuthorizationCodeGrant\Authorization\AuthorizationResponse;
 
-At this point you can access the service being provided, by including with each
-request an Authorization header containing the token you received:
+class MyWebController
+{
+    // this is the action which handles the redirect from the OAuth server
+    public function actionReceiveAuthorizationResponseFromOAuth()
+    {
+        $authorizationResponse = new AuthorizationResponse($_GET);
+        $this->oauthSession->handleAuthorizationResponse($authorizationResponse);
+    }
+}
+```
+
+At this point you can access the service being provided, via the Guzzle client
+you used in setting up OAuth. A subscriber has been added to the client which
+will add the necessary header to subsequent requests:
 
 ```
 GET /some/resource HTTP/1.1
