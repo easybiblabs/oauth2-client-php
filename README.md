@@ -146,6 +146,23 @@ GET /some/resource HTTP/1.1
 Authorization: Bearer token_foo_bar_baz
 ```
 
+## Token expiration and invalidation
+
+This client will automatically handle token renewal when communicating with
+OAuth servers which provide a refresh_token.
+
+In the event that the resource server you are communicating with invalidates
+the token, e.g. the user logs out, you will need to handle that condition
+within your application, as
+[the OAuth standard does not specify behavior of the resource server in that case](http://tools.ietf.org/html/rfc6749#section-1.5).
+
+When that situation is detected within your app, call the `authorize` method
+again:
+
+```php
+$this->oauthSession->authorize();
+```
+
 ## License
 
 This library is licensed under the BSD 2-Clause License. Enjoy!
