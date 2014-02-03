@@ -12,11 +12,6 @@ class TokenResponse
     private $params;
 
     /**
-     * @var int
-     */
-    private $expiresAt;
-
-    /**
      * @var array
      */
     private static $requiredParams = [
@@ -51,10 +46,6 @@ class TokenResponse
         if (!$this->isSuccess() && !$this->isError()) {
             throw new InvalidTokenResponseException();
         }
-
-        if ($expiresIn = $this->paramOrNull('expires_in')) {
-            $this->expiresAt = time() + $expiresIn;
-        }
     }
 
     /**
@@ -81,9 +72,9 @@ class TokenResponse
     /**
      * @return int
      */
-    public function getExpiresAt()
+    public function getExpiresIn()
     {
-        return $this->expiresAt;
+        return $this->paramOrNull('expires_in');
     }
 
     /**

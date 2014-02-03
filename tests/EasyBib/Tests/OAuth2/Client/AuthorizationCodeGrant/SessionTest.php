@@ -7,18 +7,9 @@ use EasyBib\OAuth2\Client\AuthorizationCodeGrant\Session;
 use EasyBib\Tests\Mocks\OAuth2\Client\ExceptionMockRedirector;
 use EasyBib\Tests\Mocks\OAuth2\Client\MockRedirectException;
 use EasyBib\Tests\OAuth2\Client\TestCase;
-use Guzzle\Http\Client;
 
-/**
- * @SuppressWarnings(PHPMD.CouplingBetweenObjects)
- */
 class SessionTest extends TestCase
 {
-    /**
-     * @var string
-     */
-    private $redirectUrl = 'http://myapp.example.org/handle/oauth';
-
     /**
      * @var Session
      */
@@ -28,36 +19,12 @@ class SessionTest extends TestCase
     {
         parent::setUp();
 
-        $this->session = $this->getSession();
-    }
-
-    public function testIsTokenExpired()
-    {
-        $this->tokenStore->setExpiresAt(null);
-        $this->assertFalse($this->session->isTokenExpired());
-
-        $this->tokenStore->setExpiresAt(time() + 1000);
-        $this->assertFalse($this->session->isTokenExpired());
-
-        $this->tokenStore->setExpiresAt(time() - 100);
-        $this->assertTrue($this->session->isTokenExpired());
+        $this->session = $this->createSession();
     }
 
     public function testEnsureTokenWhenNotSet()
     {
-        $message = vsprintf(
-            'Redirecting to %s?response_type=%s&client_id=%s&redirect_url=%s&scope=%s',
-            [
-                $this->apiBaseUrl . $this->serverConfig->getParams()['authorization_endpoint'],
-                'code',
-                'client_123',
-                urlencode($this->clientConfig->getParams()['redirect_url']),
-                'USER_READ+DATA_READ_WRITE',
-            ]
-        );
-
-        $this->setExpectedException(MockRedirectException::class, $message);
-
+        $this->expectRedirectToAuthorizationEndpoint();
         $this->session->ensureToken();
     }
 
@@ -65,15 +32,10 @@ class SessionTest extends TestCase
     {
         $token = 'ABC123';
 
-        $this->tokenStore->setToken($token);
+        $this->given->iHaveATokenInSession($token, $this->tokenSession);
+
         $this->session->ensureToken();
-
-        $lastRequest = $this->makeRequest();
-
-        $this->assertEquals(
-            sprintf('Bearer %s', $token),
-            $lastRequest->getHeader('Authorization')
-        );
+        $this->shouldHaveTokenInHeaderForResourceRequests($token);
     }
 
     public function testEnsureTokenWhenExpiredHavingRefreshToken()
@@ -82,19 +44,28 @@ class SessionTest extends TestCase
         $newToken = 'XYZ987';
         $refreshToken = 'REFRESH_456';
 
-        $this->given->iHaveAnExpiredToken($oldToken, $this->tokenStore);
-        $this->given->iHaveARefreshToken($refreshToken, $this->tokenStore);
+        $this->given->iHaveATokenInSession($oldToken, $this->tokenSession);
+        $this->given->myTokenIsPushedToMyHttpClient($oldToken, $this->httpClient);
+        $this->given->myTokenIsExpired($this->tokenSession);
+        $this->given->iHaveARefreshToken($refreshToken, $this->tokenSession);
         $this->given->iAmReadyToRespondToATokenRequest($newToken, $this->mockResponses);
 
         $this->session->ensureToken();
 
         $this->shouldHaveMadeATokenRefreshRequest($refreshToken);
-        $this->shouldHaveTokenInHeaderForNewRequests($newToken);
+        $this->shouldHaveTokenInHeaderForResourceRequests($newToken);
     }
 
     public function testEnsureTokenWhenExpiredHavingNoRefreshToken()
     {
-        $this->markTestIncomplete();
+        $oldToken = 'ABC123';
+
+        $this->given->iHaveATokenInSession($oldToken, $this->tokenSession);
+        $this->given->myTokenIsPushedToMyHttpClient($oldToken, $this->httpClient);
+        $this->given->myTokenIsExpired($this->tokenSession);
+
+        $this->expectRedirectToAuthorizationEndpoint();
+        $this->session->ensureToken();
     }
 
     public function testHandleAuthorizationResponse()
@@ -105,7 +76,7 @@ class SessionTest extends TestCase
         $this->session->handleAuthorizationResponse($this->authorization);
 
         $this->shouldHaveMadeATokenRequest($token);
-        $this->shouldHaveTokenInHeaderForNewRequests($token);
+        $this->shouldHaveTokenInHeaderForResourceRequests($token);
     }
 
     /**
@@ -125,18 +96,45 @@ class SessionTest extends TestCase
         $this->assertEquals($refreshToken, $lastRequest->getPostFields()['refresh_token']);
     }
 
-    private function shouldHaveTokenInHeaderForNewRequests($token)
+    private function shouldHaveTokenInHeaderForResourceRequests($token)
     {
-        $lastRequest = $this->makeRequest();
+        $lastRequest = $this->makeResourceRequest();
 
         $this->assertEquals($token, $this->tokenStore->getToken());
         $this->assertEquals('Bearer ' . $token, $lastRequest->getHeader('Authorization'));
     }
 
     /**
+     * @return \Guzzle\Http\Message\RequestInterface
+     */
+    private function makeResourceRequest()
+    {
+        $request = $this->httpClient->get('http://example.org');
+        $request->send();
+
+        return $this->history->getLastRequest();
+    }
+
+    private function expectRedirectToAuthorizationEndpoint()
+    {
+        $message = vsprintf(
+            'Redirecting to %s?response_type=%s&client_id=%s&redirect_url=%s&scope=%s',
+            [
+                $this->apiBaseUrl . $this->serverConfig->getParams()['authorization_endpoint'],
+                'code',
+                'client_123',
+                urlencode($this->clientConfig->getParams()['redirect_url']),
+                'USER_READ+DATA_READ_WRITE',
+            ]
+        );
+
+        $this->setExpectedException(MockRedirectException::class, $message);
+    }
+
+    /**
      * @return Session
      */
-    private function getSession()
+    private function createSession()
     {
         $session = new Session(
             $this->tokenStore,
@@ -150,16 +148,5 @@ class SessionTest extends TestCase
         $session->setScope($scope);
 
         return $session;
-    }
-
-    /**
-     * @return \Guzzle\Http\Message\RequestInterface
-     */
-    private function makeRequest()
-    {
-        $request = $this->httpClient->get('http://example.org');
-        $request->send();
-
-        return $this->history->getLastRequest();
     }
 }

@@ -2,17 +2,14 @@
 
 namespace EasyBib\Tests\OAuth2\Client;
 
-use EasyBib\OAuth2\Client\TokenStore\TokenStoreInterface;
+use fkooman\Guzzle\Plugin\BearerAuth\BearerAuth;
+use Guzzle\Http\ClientInterface;
 use Guzzle\Http\Message\Response;
 use Guzzle\Plugin\Mock\MockPlugin;
+use Symfony\Component\HttpFoundation\Session\Session;
 
 class Given
 {
-    public function iHaveAnAccessToken()
-    {
-        return 'ABC123';
-    }
-
     /**
      * @param string $token
      * @param \Guzzle\Plugin\Mock\MockPlugin $mockResponses
@@ -33,20 +30,33 @@ class Given
 
     /**
      * @param string $token
-     * @param TokenStoreInterface $tokenStore
+     * @param Session $session
      */
-    public function iHaveAnExpiredToken($token, TokenStoreInterface $tokenStore)
+    public function iHaveATokenInSession($token, Session $session)
     {
-        $tokenStore->setToken($token);
-        $tokenStore->setExpiresAt(time() - 100);
+        $session->set('token', $token);
+    }
+
+    public function myTokenIsExpired(Session $session)
+    {
+        $session->set('expires_at', time() - 100);
     }
 
     /**
      * @param $refreshToken
-     * @param TokenStoreInterface $tokenStore
+     * @param Session $session
      */
-    public function iHaveARefreshToken($refreshToken, TokenStoreInterface $tokenStore)
+    public function iHaveARefreshToken($refreshToken, Session $session)
     {
-        $tokenStore->setRefreshToken($refreshToken);
+        $session->set('refresh_token', $refreshToken);
+    }
+
+    /**
+     * @param string $token
+     * @param ClientInterface $httpClient
+     */
+    public function myTokenIsPushedToMyHttpClient($token, ClientInterface $httpClient)
+    {
+        $httpClient->addSubscriber(new BearerAuth($token));
     }
 }

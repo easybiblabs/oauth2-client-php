@@ -5,15 +5,12 @@ namespace EasyBib\OAuth2\Client\AuthorizationCodeGrant;
 use EasyBib\OAuth2\Client\AuthorizationCodeGrant\Authorization\AuthorizationResponse;
 use EasyBib\OAuth2\Client\RedirectorInterface;
 use EasyBib\OAuth2\Client\Scope;
-use EasyBib\OAuth2\Client\TokenStore\TokenStoreInterface;
+use EasyBib\OAuth2\Client\TokenStore;
 use fkooman\Guzzle\Plugin\BearerAuth\BearerAuth;
 use Guzzle\Http\ClientInterface;
 
 class Session
 {
-    /**
-     * @var \EasyBib\OAuth2\Client\TokenStore\TokenStoreInterface
-     */
     private $tokenStore;
 
     /**
@@ -42,14 +39,14 @@ class Session
     private $scope;
 
     /**
-     * @param TokenStoreInterface $tokenStore
+     * @param TokenStore $tokenStore
      * @param ClientInterface $httpClient
      * @param RedirectorInterface $redirector
      * @param ClientConfig $clientConfig
      * @param ServerConfig $serverConfig
      */
     public function __construct(
-        TokenStoreInterface $tokenStore,
+        TokenStore $tokenStore,
         ClientInterface $httpClient,
         RedirectorInterface $redirector,
         ClientConfig $clientConfig,
@@ -91,38 +88,27 @@ class Session
 
     public function ensureToken()
     {
-        if ($this->isTokenExpired()) {
-            $this->refreshToken();
-        }
-
         $token = $this->tokenStore->getToken();
 
-        if (!$token) {
-            // redirects browser
-            $this->authorize();
+        if ($token) {
+            $this->pushTokenToHttpClient($token);
+            return;
         }
 
-        $this->pushTokenToHttpClient($token);
+        if ($this->tokenStore->isRefreshable()) {
+            $token = $this->getRefreshedToken();
+            $this->pushTokenToHttpClient($token);
+            return;
+        }
+
+        // redirects browser
+        $this->authorize();
     }
 
     /**
-     * @todo make this private? right now TDD'ing it, so needs to be public.
-     *   we could conceivably replace the direct tests with tests to assert that
-     *   a refresh is requested
-     * @return bool
+     * @return string
      */
-    public function isTokenExpired()
-    {
-        if (null === $this->tokenStore->getExpiresAt()) {
-            return false;
-        }
-
-        $timeWithBuffer = time() + 10;
-
-        return $this->tokenStore->getExpiresAt() < $timeWithBuffer;
-    }
-
-    private function refreshToken()
+    private function getRefreshedToken()
     {
         $refreshRequest = new TokenRefreshRequest(
             $this->tokenStore->getRefreshToken(),
@@ -132,7 +118,8 @@ class Session
 
         $tokenResponse = $refreshRequest->send();
         $this->tokenStore->updateFromTokenResponse($tokenResponse);
-        $this->pushTokenToHttpClient($tokenResponse->getToken());
+
+        return $tokenResponse->getToken();
     }
 
     /**
