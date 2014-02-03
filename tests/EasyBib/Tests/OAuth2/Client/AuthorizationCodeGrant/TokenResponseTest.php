@@ -2,9 +2,9 @@
 
 namespace EasyBib\Tests\OAuth2\Client\AuthorizationCodeGrant;
 
-use EasyBib\OAuth2\Client\AuthorizationCodeGrant\InvalidTokenResponseException;
-use EasyBib\OAuth2\Client\AuthorizationCodeGrant\TokenResponse;
-use EasyBib\OAuth2\Client\AuthorizationCodeGrant\TokenResponseErrorException;
+use EasyBib\OAuth2\Client\TokenResponse\InvalidTokenResponseException;
+use EasyBib\OAuth2\Client\TokenResponse\TokenResponse;
+use EasyBib\OAuth2\Client\TokenResponse\TokenResponseErrorException;
 
 class TokenResponseTest extends \PHPUnit_Framework_TestCase
 {

@@ -2,7 +2,7 @@
 
 namespace EasyBib\OAuth2\Client;
 
-use EasyBib\OAuth2\Client\AuthorizationCodeGrant\TokenResponse;
+use EasyBib\OAuth2\Client\TokenResponse\TokenResponse;
 use Symfony\Component\HttpFoundation\Session\Session;
 
 class TokenStore
@@ -52,7 +52,7 @@ class TokenStore
     }
 
     /**
-     * @param TokenResponse $tokenResponse
+     * @param \EasyBib\OAuth2\Client\TokenResponse\TokenResponse $tokenResponse
      */
     public function updateFromTokenResponse(TokenResponse $tokenResponse)
     {
@@ -64,7 +64,7 @@ class TokenStore
     }
 
     /**
-     * @param TokenResponse $tokenResponse
+     * @param \EasyBib\OAuth2\Client\TokenResponse\TokenResponse $tokenResponse
      * @return int
      */
     private function expirationTimeFor(TokenResponse $tokenResponse)
