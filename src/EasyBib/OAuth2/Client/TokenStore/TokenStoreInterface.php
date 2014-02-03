@@ -2,6 +2,8 @@
 
 namespace EasyBib\OAuth2\Client\TokenStore;
 
+use EasyBib\OAuth2\Client\AuthorizationCodeGrant\TokenResponse;
+
 interface TokenStoreInterface
 {
     /**
@@ -29,10 +31,15 @@ interface TokenStoreInterface
      * @param int $time
      * @return void
      */
-    public function setExpirationTime($time);
+    public function setExpiresAt($time);
 
     /**
      * @return int
      */
-    public function getExpirationTime();
+    public function getExpiresAt();
+
+    /**
+     * @param TokenResponse $tokenResponse
+     */
+    public function updateFromTokenResponse(TokenResponse $tokenResponse);
 }

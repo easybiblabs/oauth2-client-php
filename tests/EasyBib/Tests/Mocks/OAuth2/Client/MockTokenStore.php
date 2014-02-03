@@ -2,6 +2,7 @@
 
 namespace EasyBib\Tests\Mocks\OAuth2\Client;
 
+use EasyBib\OAuth2\Client\AuthorizationCodeGrant\TokenResponse;
 use EasyBib\OAuth2\Client\TokenStore\TokenStoreInterface;
 
 class MockTokenStore implements TokenStoreInterface
@@ -19,7 +20,7 @@ class MockTokenStore implements TokenStoreInterface
     /**
      * @var int
      */
-    private $expirationTime;
+    private $expiresAt;
 
     /**
      * @param string $token
@@ -57,16 +58,26 @@ class MockTokenStore implements TokenStoreInterface
      * @param int $time
      * @return void
      */
-    public function setExpirationTime($time)
+    public function setExpiresAt($time)
     {
-        $this->expirationTime = $time;
+        $this->expiresAt = $time;
     }
 
     /**
      * @return int
      */
-    public function getExpirationTime()
+    public function getExpiresAt()
     {
-        return $this->expirationTime;
+        return $this->expiresAt;
+    }
+
+    /**
+     * @param TokenResponse $tokenResponse
+     */
+    public function updateFromTokenResponse(TokenResponse $tokenResponse)
+    {
+        $this->setToken($tokenResponse->getToken());
+        $this->setRefreshToken($tokenResponse->getRefreshToken());
+        $this->setExpiresAt($tokenResponse->getExpiresAt());
     }
 }

@@ -33,13 +33,13 @@ class SessionTest extends TestCase
 
     public function testIsTokenExpired()
     {
-        $this->tokenStore->setExpirationTime(null);
+        $this->tokenStore->setExpiresAt(null);
         $this->assertFalse($this->session->isTokenExpired());
 
-        $this->tokenStore->setExpirationTime(time() + 1000);
+        $this->tokenStore->setExpiresAt(time() + 1000);
         $this->assertFalse($this->session->isTokenExpired());
 
-        $this->tokenStore->setExpirationTime(time() - 100);
+        $this->tokenStore->setExpiresAt(time() - 100);
         $this->assertTrue($this->session->isTokenExpired());
     }
 
@@ -89,7 +89,7 @@ class SessionTest extends TestCase
         $this->session->ensureToken();
 
         $this->shouldHaveMadeATokenRefreshRequest($refreshToken);
-        $this->shouldHaveATokenAssigned($newToken);
+        $this->shouldHaveTokenInHeaderForNewRequests($newToken);
     }
 
     public function testEnsureTokenWhenExpiredHavingNoRefreshToken()
@@ -105,7 +105,7 @@ class SessionTest extends TestCase
         $this->session->handleAuthorizationResponse($this->authorization);
 
         $this->shouldHaveMadeATokenRequest($token);
-        $this->shouldHaveATokenAssigned($token);
+        $this->shouldHaveTokenInHeaderForNewRequests($token);
     }
 
     /**
@@ -125,7 +125,7 @@ class SessionTest extends TestCase
         $this->assertEquals($refreshToken, $lastRequest->getPostFields()['refresh_token']);
     }
 
-    private function shouldHaveATokenAssigned($token)
+    private function shouldHaveTokenInHeaderForNewRequests($token)
     {
         $lastRequest = $this->makeRequest();
 

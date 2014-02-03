@@ -85,7 +85,8 @@ class Session
         );
 
         $tokenResponse = $tokenRequest->send();
-        $this->handleTokenResponse($tokenResponse);
+        $this->tokenStore->updateFromTokenResponse($tokenResponse);
+        $this->pushTokenToHttpClient($tokenResponse->getToken());
     }
 
     public function ensureToken()
@@ -97,6 +98,7 @@ class Session
         $token = $this->tokenStore->getToken();
 
         if (!$token) {
+            // redirects browser
             $this->authorize();
         }
 
@@ -111,13 +113,13 @@ class Session
      */
     public function isTokenExpired()
     {
-        if (null === $this->tokenStore->getExpirationTime()) {
+        if (null === $this->tokenStore->getExpiresAt()) {
             return false;
         }
 
         $timeWithBuffer = time() + 10;
 
-        return $this->tokenStore->getExpirationTime() < $timeWithBuffer;
+        return $this->tokenStore->getExpiresAt() < $timeWithBuffer;
     }
 
     private function refreshToken()
@@ -129,19 +131,8 @@ class Session
         );
 
         $tokenResponse = $refreshRequest->send();
-        $this->handleTokenResponse($tokenResponse);
-    }
-
-    /**
-     * @param TokenResponse $tokenResponse
-     */
-    private function handleTokenResponse(TokenResponse $tokenResponse)
-    {
-        // TODO need to handle expiration and refreshTOken...
-        // should be TokenStore::receive(TokenResponse)
-        $token = $tokenResponse->getToken();
-        $this->tokenStore->setToken($token);
-        $this->pushTokenToHttpClient($token);
+        $this->tokenStore->updateFromTokenResponse($tokenResponse);
+        $this->pushTokenToHttpClient($tokenResponse->getToken());
     }
 
     /**

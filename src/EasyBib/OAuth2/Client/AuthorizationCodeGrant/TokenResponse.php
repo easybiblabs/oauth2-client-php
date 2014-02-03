@@ -12,6 +12,11 @@ class TokenResponse
     private $params;
 
     /**
+     * @var int
+     */
+    private $expiresAt;
+
+    /**
      * @var array
      */
     private static $requiredParams = [
@@ -46,6 +51,10 @@ class TokenResponse
         if (!$this->isSuccess() && !$this->isError()) {
             throw new InvalidTokenResponseException();
         }
+
+        if ($expiresIn = $this->paramOrNull('expires_in')) {
+            $this->expiresAt = time() + $expiresIn;
+        }
     }
 
     /**
@@ -59,6 +68,22 @@ class TokenResponse
         }
 
         return $this->params['access_token'];
+    }
+
+    /**
+     * @return string
+     */
+    public function getRefreshToken()
+    {
+        return $this->paramOrNull('refresh_token');
+    }
+
+    /**
+     * @return int
+     */
+    public function getExpiresAt()
+    {
+        return $this->expiresAt;
     }
 
     /**
@@ -81,5 +106,18 @@ class TokenResponse
         );
 
         return $validator->validate($this->params);
+    }
+
+    /**
+     * @param string $name
+     * @return string
+     */
+    private function paramOrNull($name)
+    {
+        if (isset($this->params[$name])) {
+            return $this->params[$name];
+        }
+
+        return null;
     }
 }

@@ -38,7 +38,7 @@ class Given
     public function iHaveAnExpiredToken($token, TokenStoreInterface $tokenStore)
     {
         $tokenStore->setToken($token);
-        $tokenStore->setExpirationTime(time() - 100);
+        $tokenStore->setExpiresAt(time() - 100);
     }
 
     /**
