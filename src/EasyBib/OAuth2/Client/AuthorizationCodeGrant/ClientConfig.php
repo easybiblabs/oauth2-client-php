@@ -38,6 +38,9 @@ class ClientConfig
     private static function validate(array $params)
     {
         $validator = new ArrayValidator(self::$requiredParams, self::$permittedParams);
-        $validator->validate($params);
+
+        if (!$validator->validate($params)) {
+            throw new InvalidClientConfigException();
+        }
     }
 }

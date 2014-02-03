@@ -2,7 +2,6 @@
 
 namespace EasyBib\Tests\Api\Client\Mocks\Session;
 
-use EasyBib\OAuth2\Client\ArrayValidationException;
 use EasyBib\OAuth2\Client\ArrayValidator;
 
 class ArrayValidatorTest extends \PHPUnit_Framework_TestCase
@@ -38,7 +37,7 @@ class ArrayValidatorTest extends \PHPUnit_Framework_TestCase
         foreach (array_keys($this->getValidData()[0][0]) as $key) {
             $data = $this->getValidData()[0];
             unset($data[0][$key]);
-            $invalidData[] = [$data[0], $data[1], $key];
+            $invalidData[] = [$data[0], $data[1]];
         }
 
         return $invalidData;
@@ -53,7 +52,7 @@ class ArrayValidatorTest extends \PHPUnit_Framework_TestCase
 
         $data = $this->getValidData()[0];
         $data[0]['jamma'] = 'bamma';
-        $invalidData[] = [$data[0], $data[1], 'jamma'];
+        $invalidData[] = [$data[0], $data[1]];
 
         return $invalidData;
     }
@@ -62,46 +61,33 @@ class ArrayValidatorTest extends \PHPUnit_Framework_TestCase
      * @dataProvider getWithMissingData
      * @params array $input
      * @params array $requiredKeys
-     * @params string $expectedMissingKey
      */
-    public function testValidateWithMissingData(array $input, array $requiredKeys, $expectedMissingKey)
+    public function testValidateWithMissingData(array $input, array $requiredKeys)
     {
-        $this->setExpectedException(
-            ArrayValidationException::class,
-            'Missing key(s) ' . $expectedMissingKey
-        );
-
         $validator = new ArrayValidator($requiredKeys);
-        $validator->validate($input);
+        $this->assertFalse($validator->validate($input));
     }
 
     /**
      * @dataProvider getWithExtraData
      * @params array $input
      * @params array $expectedKeys
-     * @params string $expectedMissingKey
      */
-    public function testValidateWithExtraData(array $input, array $expectedKeys, $expectedExtraKey)
+    public function testValidateWithExtraData(array $input, array $expectedKeys)
     {
-        $this->setExpectedException(
-            ArrayValidationException::class,
-            'Unexpected key(s) ' . $expectedExtraKey
-        );
-
         $validator = new ArrayValidator($expectedKeys, $expectedKeys);
-        $validator->validate($input);
+        $this->assertFalse($validator->validate($input));
     }
 
     /**
      * @dataProvider getWithExtraData
      * @params array $input
      * @params array $expectedKeys
-     * @params string $expectedMissingKey
      */
-    public function testValidateWithExtraDataNoPermittedKeysGiven(array $input, array $expectedKeys, $expectedExtraKey)
+    public function testValidateWithExtraDataNoPermittedKeysGiven(array $input, array $expectedKeys)
     {
         $validator = new ArrayValidator($expectedKeys);
-        $validator->validate($input);
+        $this->assertTrue($validator->validate($input));
     }
 
     /**
@@ -112,6 +98,6 @@ class ArrayValidatorTest extends \PHPUnit_Framework_TestCase
     public function testValidateWithValidData(array $input, array $requiredKeys)
     {
         $validator = new ArrayValidator($requiredKeys);
-        $validator->validate($input);
+        $this->assertTrue($validator->validate($input));
     }
 }

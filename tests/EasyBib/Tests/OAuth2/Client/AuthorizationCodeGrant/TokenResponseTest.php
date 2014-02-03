@@ -2,8 +2,9 @@
 
 namespace EasyBib\Tests\OAuth2\Client\AuthorizationCodeGrant;
 
-use EasyBib\OAuth2\Client\ArrayValidationException;
+use EasyBib\OAuth2\Client\AuthorizationCodeGrant\InvalidTokenResponseException;
 use EasyBib\OAuth2\Client\AuthorizationCodeGrant\TokenResponse;
+use EasyBib\OAuth2\Client\AuthorizationCodeGrant\TokenResponseErrorException;
 
 class TokenResponseTest extends \PHPUnit_Framework_TestCase
 {
@@ -18,6 +19,21 @@ class TokenResponseTest extends \PHPUnit_Framework_TestCase
                     'access_token' => 'ABC123',
                 ],
                 'ABC123',
+            ],
+        ];
+    }
+
+    /**
+     * @return array
+     */
+    public function getErrorParamSets()
+    {
+        return [
+            [
+                [
+                    'error' => 'invalid_request',
+                ],
+                'invalid_request',
             ],
         ];
     }
@@ -46,7 +62,7 @@ class TokenResponseTest extends \PHPUnit_Framework_TestCase
      */
     public function testConstructorValidates(array $params)
     {
-        $this->setExpectedException(ArrayValidationException::class);
+        $this->setExpectedException(InvalidTokenResponseException::class);
         new TokenResponse($params);
     }
 
@@ -59,5 +75,18 @@ class TokenResponseTest extends \PHPUnit_Framework_TestCase
     {
         $incomingToken = new TokenResponse($params);
         $this->assertEquals($token, $incomingToken->getToken());
+    }
+
+    /**
+     * @dataProvider getErrorParamSets
+     * @param array $params
+     * @param $expectedError
+     */
+    public function testGetTokenWithErrorCondition(array $params, $expectedError)
+    {
+        $incomingToken = new TokenResponse($params);
+        $this->setExpectedException(TokenResponseErrorException::class, $expectedError);
+
+        $incomingToken->getToken();
     }
 }
