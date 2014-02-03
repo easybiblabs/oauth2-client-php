@@ -8,6 +8,12 @@ use Symfony\Component\HttpFoundation\Session\Session;
 class TokenStore
 {
     /**
+     * treat token as expired if fewer than this number of seconds remains
+     * until the expires_in point is reached
+     */
+    const EXPIRATION_WIGGLE_ROOM = 10;
+
+    /**
      * This is a persistent store for token data, which does not necessarily
      * strictly correspond to a user's PHP session
      *
@@ -79,7 +85,7 @@ class TokenStore
     {
         $expiresAt = $this->get('expires_at');
 
-        return $expiresAt && $expiresAt < time();
+        return $expiresAt && $expiresAt < time() + self::EXPIRATION_WIGGLE_ROOM;
     }
 
     /**
