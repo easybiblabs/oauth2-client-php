@@ -1,0 +1,46 @@
+<?php
+
+namespace EasyBib\Guzzle\Plugin\BearerAuth;
+
+use EasyBib\Guzzle\Plugin\BearerAuth\Exception\BearerErrorResponseException;
+use EasyBib\OAuth2\Client\AuthorizationCodeGrant\Session;
+use Guzzle\Common\Event;
+use Guzzle\Http\Exception\BadResponseException;
+use Symfony\Component\EventDispatcher\EventSubscriberInterface;
+
+class BearerAuth implements EventSubscriberInterface
+{
+    /**
+     * @var Session
+     */
+    private $session;
+
+    public function __construct(Session $session)
+    {
+        $this->session = $session;
+    }
+
+    public static function getSubscribedEvents()
+    {
+        return array(
+            'request.before_send' => 'onRequestBeforeSend',
+            'request.exception' => 'onRequestException'
+        );
+    }
+
+    public function onRequestBeforeSend(Event $event)
+    {
+        $event['request']->setHeader(
+            'Authorization',
+            sprintf('Bearer %s', $this->session->getToken())
+        );
+    }
+
+    public function onRequestException(Event $event)
+    {
+        if (null !== $event['response']->getHeader("WWW-Authenticate")) {
+            throw BearerErrorResponseException::factory($event['request'], $event['response']);
+        }
+        throw BadResponseException::factory($event['request'], $event['response']);
+    }
+}

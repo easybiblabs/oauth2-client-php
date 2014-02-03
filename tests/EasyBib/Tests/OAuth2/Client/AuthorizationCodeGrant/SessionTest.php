@@ -7,6 +7,8 @@ use EasyBib\OAuth2\Client\AuthorizationCodeGrant\Session;
 use EasyBib\Tests\Mocks\OAuth2\Client\ExceptionMockRedirector;
 use EasyBib\Tests\Mocks\OAuth2\Client\MockRedirectException;
 use EasyBib\Tests\OAuth2\Client\TestCase;
+use Guzzle\Http\Client;
+use Guzzle\Plugin\History\HistoryPlugin;
 
 class SessionTest extends TestCase
 {
@@ -22,50 +24,46 @@ class SessionTest extends TestCase
         $this->session = $this->createSession();
     }
 
-    public function testEnsureTokenWhenNotSet()
+    public function testGetTokenWhenNotSet()
     {
         $this->expectRedirectToAuthorizationEndpoint();
-        $this->session->ensureToken();
+        $this->session->getToken();
     }
 
-    public function testEnsureTokenWhenSet()
+    public function testResourceRequestWhenSet()
     {
         $token = 'ABC123';
 
         $this->given->iHaveATokenInSession($token, $this->tokenSession);
-
-        $this->session->ensureToken();
         $this->shouldHaveTokenInHeaderForResourceRequests($token);
     }
 
-    public function testEnsureTokenWhenExpiredHavingRefreshToken()
+    public function testResourceRequestWhenExpiredHavingRefreshToken()
     {
         $oldToken = 'ABC123';
         $newToken = 'XYZ987';
         $refreshToken = 'REFRESH_456';
 
         $this->given->iHaveATokenInSession($oldToken, $this->tokenSession);
-        $this->given->myTokenIsPushedToMyHttpClient($oldToken, $this->httpClient);
         $this->given->myTokenIsExpired($this->tokenSession);
         $this->given->iHaveARefreshToken($refreshToken, $this->tokenSession);
         $this->given->iAmReadyToRespondToATokenRequest($newToken, $this->mockResponses);
 
-        $this->session->ensureToken();
+        $this->makeResourceRequest();
 
         $this->shouldHaveMadeATokenRefreshRequest($refreshToken);
         $this->shouldHaveTokenInHeaderForResourceRequests($newToken);
     }
 
-    public function testEnsureTokenWhenExpiredHavingNoRefreshToken()
+    public function testResourceRequestWhenExpiredHavingNoRefreshToken()
     {
         $oldToken = 'ABC123';
 
         $this->given->iHaveATokenInSession($oldToken, $this->tokenSession);
-        $this->given->myTokenIsPushedToMyHttpClient($oldToken, $this->httpClient);
         $this->given->myTokenIsExpired($this->tokenSession);
 
         $this->expectRedirectToAuthorizationEndpoint();
-        $this->session->ensureToken();
+        $this->makeResourceRequest();
     }
 
     public function testHandleAuthorizationResponse()
@@ -109,10 +107,17 @@ class SessionTest extends TestCase
      */
     private function makeResourceRequest()
     {
-        $request = $this->httpClient->get('http://example.org');
+        $history = new HistoryPlugin();
+
+        $httpClient = new Client();
+        $httpClient->addSubscriber($history);
+
+        $this->session->addResourceSubscriber($httpClient);
+
+        $request = $httpClient->get('http://example.org');
         $request->send();
 
-        return $this->history->getLastRequest();
+        return $history->getLastRequest();
     }
 
     private function expectRedirectToAuthorizationEndpoint()

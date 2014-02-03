@@ -127,8 +127,18 @@ class MyWebController
 }
 ```
 
-At this point you can access the service being provided, via the Guzzle client
-you used in setting up OAuth. A subscriber has been added to the client which
+At this point you can access the service being provided, via a fresh Guzzle
+client. Do **not** reuse the same client you used in setting up the OAuth
+connection itself.
+
+```php
+$resourceHttpClient = new Client('http://coolresources.example.com');
+$this->oauthSession->addResourceHttpClient($resourceHttpClient);
+$request = $resourceHttpClient->get('/some/resource');
+// etc.
+```
+
+A subscriber has been added to the client which
 will add the necessary header to subsequent requests:
 
 ```

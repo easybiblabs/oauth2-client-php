@@ -2,11 +2,11 @@
 
 namespace EasyBib\OAuth2\Client\AuthorizationCodeGrant;
 
+use EasyBib\Guzzle\Plugin\BearerAuth\BearerAuth;
 use EasyBib\OAuth2\Client\AuthorizationCodeGrant\Authorization\AuthorizationResponse;
 use EasyBib\OAuth2\Client\RedirectorInterface;
 use EasyBib\OAuth2\Client\Scope;
 use EasyBib\OAuth2\Client\TokenStore;
-use fkooman\Guzzle\Plugin\BearerAuth\BearerAuth;
 use Guzzle\Http\ClientInterface;
 
 class Session
@@ -70,6 +70,15 @@ class Session
     }
 
     /**
+     * @param ClientInterface $httpClient
+     */
+    public function addResourceSubscriber(ClientInterface $httpClient)
+    {
+        $subscriber = new BearerAuth($this);
+        $httpClient->addSubscriber($subscriber);
+    }
+
+    /**
      * @param AuthorizationResponse $authorizationResponse
      */
     public function handleAuthorizationResponse(AuthorizationResponse $authorizationResponse)
@@ -83,22 +92,22 @@ class Session
 
         $tokenResponse = $tokenRequest->send();
         $this->tokenStore->updateFromTokenResponse($tokenResponse);
-        $this->pushTokenToHttpClient($tokenResponse->getToken());
     }
 
-    public function ensureToken()
+
+    /**
+     * @return string
+     */
+    public function getToken()
     {
         $token = $this->tokenStore->getToken();
 
         if ($token) {
-            $this->pushTokenToHttpClient($token);
-            return;
+            return $token;
         }
 
         if ($this->tokenStore->isRefreshable()) {
-            $token = $this->getRefreshedToken();
-            $this->pushTokenToHttpClient($token);
-            return;
+            return $this->getRefreshedToken();
         }
 
         // redirects browser
@@ -139,13 +148,5 @@ class Session
             '?',
             http_build_query($params),
         ]);
-    }
-
-    /**
-     * @param $token
-     */
-    private function pushTokenToHttpClient($token)
-    {
-        $this->httpClient->addSubscriber(new BearerAuth($token));
     }
 }

@@ -2,8 +2,6 @@
 
 namespace EasyBib\Tests\OAuth2\Client;
 
-use fkooman\Guzzle\Plugin\BearerAuth\BearerAuth;
-use Guzzle\Http\ClientInterface;
 use Guzzle\Http\Message\Response;
 use Guzzle\Plugin\Mock\MockPlugin;
 use Symfony\Component\HttpFoundation\Session\Session;
@@ -49,14 +47,5 @@ class Given
     public function iHaveARefreshToken($refreshToken, Session $session)
     {
         $session->set('refresh_token', $refreshToken);
-    }
-
-    /**
-     * @param string $token
-     * @param ClientInterface $httpClient
-     */
-    public function myTokenIsPushedToMyHttpClient($token, ClientInterface $httpClient)
-    {
-        $httpClient->addSubscriber(new BearerAuth($token));
     }
 }
