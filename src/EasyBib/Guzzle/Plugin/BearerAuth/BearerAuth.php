@@ -20,11 +20,17 @@ class BearerAuth implements EventSubscriberInterface
      */
     private $session;
 
+    /**
+     * @param Session $session
+     */
     public function __construct(Session $session)
     {
         $this->session = $session;
     }
 
+    /**
+     * @return array
+     */
     public static function getSubscribedEvents()
     {
         return array(
@@ -33,6 +39,9 @@ class BearerAuth implements EventSubscriberInterface
         );
     }
 
+    /**
+     * @param Event $event
+     */
     public function onRequestBeforeSend(Event $event)
     {
         $event['request']->setHeader(
@@ -41,6 +50,11 @@ class BearerAuth implements EventSubscriberInterface
         );
     }
 
+    /**
+     * @param Event $event
+     * @throws \Guzzle\Http\Exception\BadResponseException
+     * @throws \Guzzle\Http\Exception\BadResponseException
+     */
     public function onRequestException(Event $event)
     {
         if (null !== $event['response']->getHeader("WWW-Authenticate")) {

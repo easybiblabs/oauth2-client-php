@@ -13,18 +13,32 @@ use Guzzle\Http\Exception\ClientErrorResponseException;
  */
 class BearerErrorResponseException extends ClientErrorResponseException
 {
+    /**
+     * @var string
+     */
     private $bearerReason;
 
+    /**
+     * @return string
+     */
     public function getBearerReason()
     {
         return $this->bearerReason;
     }
 
+    /**
+     * @param string $bearerReason
+     */
     public function setBearerReason($bearerReason)
     {
         $this->bearerReason = $bearerReason;
     }
 
+    /**
+     * @param RequestInterface $request
+     * @param Response $response
+     * @return \Guzzle\Http\Exception\BadResponseException
+     */
     public static function factory(RequestInterface $request, Response $response)
     {
         $label = 'Bearer error response';
@@ -44,6 +58,10 @@ class BearerErrorResponseException extends ClientErrorResponseException
         return $exception;
     }
 
+    /**
+     * @param string $header
+     * @return string
+     */
     public static function headerToReason($header)
     {
         if (null !== $header) {
