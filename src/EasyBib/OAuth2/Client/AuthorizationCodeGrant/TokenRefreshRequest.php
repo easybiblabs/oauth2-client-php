@@ -39,6 +39,9 @@ class TokenRefreshRequest
         $this->httpClient = $httpClient;
     }
 
+    /**
+     * @return TokenResponse
+     */
     public function send()
     {
         $url = $this->serverConfig->getParams()['token_endpoint'];
