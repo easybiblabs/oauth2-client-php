@@ -1,6 +1,6 @@
 <?php
 
-namespace EasyBib\OAuth2\Client\AuthorizationCodeGrant;
+namespace EasyBib\OAuth2\Client\TokenResponse;
 
 use EasyBib\OAuth2\Client\ArrayValidator;
 
@@ -16,6 +16,7 @@ class TokenResponse
      */
     private static $requiredParams = [
         'access_token',
+        'token_type',
     ];
 
     /**
@@ -48,16 +49,32 @@ class TokenResponse
     }
 
     /**
-     * @throws TokenResponseErrorException
+     * @throws TokenRequestErrorException
      * @return string
      */
     public function getToken()
     {
         if ($this->isError()) {
-            throw new TokenResponseErrorException($this->params['error']);
+            throw new TokenRequestErrorException($this->params['error']);
         }
 
         return $this->params['access_token'];
+    }
+
+    /**
+     * @return string
+     */
+    public function getRefreshToken()
+    {
+        return $this->paramOrNull('refresh_token');
+    }
+
+    /**
+     * @return int
+     */
+    public function getExpiresIn()
+    {
+        return $this->paramOrNull('expires_in');
     }
 
     /**
@@ -80,5 +97,18 @@ class TokenResponse
         );
 
         return $validator->validate($this->params);
+    }
+
+    /**
+     * @param string $name
+     * @return string
+     */
+    private function paramOrNull($name)
+    {
+        if (isset($this->params[$name])) {
+            return $this->params[$name];
+        }
+
+        return null;
     }
 }

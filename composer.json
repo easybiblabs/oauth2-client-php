@@ -17,7 +17,7 @@
     "require": {
         "php": ">=5.5",
         "guzzle/guzzle": "3.8.*",
-        "fkooman/guzzle-bearer-auth-plugin": "0.2.*"
+        "symfony/http-foundation": ">=2.3.0"
     },
     "require-dev": {
       "phpunit/phpunit": ">=3.7",
@@ -29,6 +29,7 @@
     "prefer-stable": true,
     "autoload": {
         "psr-0": {
+            "EasyBib\\Guzzle\\": "src/",
             "EasyBib\\OAuth2\\Client\\": "src/",
             "EasyBib\\Tests\\OAuth2\\Client\\": "tests/"
         },

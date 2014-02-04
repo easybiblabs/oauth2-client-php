@@ -2,9 +2,9 @@
 
 namespace EasyBib\Tests\OAuth2\Client\AuthorizationCodeGrant;
 
-use EasyBib\OAuth2\Client\AuthorizationCodeGrant\InvalidTokenResponseException;
-use EasyBib\OAuth2\Client\AuthorizationCodeGrant\TokenResponse;
-use EasyBib\OAuth2\Client\AuthorizationCodeGrant\TokenResponseErrorException;
+use EasyBib\OAuth2\Client\TokenResponse\InvalidTokenResponseException;
+use EasyBib\OAuth2\Client\TokenResponse\TokenResponse;
+use EasyBib\OAuth2\Client\TokenResponse\TokenRequestErrorException;
 
 class TokenResponseTest extends \PHPUnit_Framework_TestCase
 {
@@ -17,6 +17,7 @@ class TokenResponseTest extends \PHPUnit_Framework_TestCase
             [
                 [
                     'access_token' => 'ABC123',
+                    'token_type' => 'bearer',
                 ],
                 'ABC123',
             ],
@@ -85,7 +86,7 @@ class TokenResponseTest extends \PHPUnit_Framework_TestCase
     public function testGetTokenWithErrorCondition(array $params, $expectedError)
     {
         $incomingToken = new TokenResponse($params);
-        $this->setExpectedException(TokenResponseErrorException::class, $expectedError);
+        $this->setExpectedException(TokenRequestErrorException::class, $expectedError);
 
         $incomingToken->getToken();
     }

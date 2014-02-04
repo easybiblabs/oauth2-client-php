@@ -3,7 +3,7 @@
 namespace EasyBib\Tests\OAuth2\Client\AuthorizationCodeGrant;
 
 use EasyBib\OAuth2\Client\AuthorizationCodeGrant\TokenRequest;
-use EasyBib\OAuth2\Client\AuthorizationCodeGrant\TokenResponse;
+use EasyBib\OAuth2\Client\TokenResponse\TokenResponse;
 use EasyBib\Tests\OAuth2\Client\TestCase;
 
 class TokenRequestTest extends TestCase

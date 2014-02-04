@@ -8,17 +8,10 @@ use EasyBib\Tests\Mocks\OAuth2\Client\ExceptionMockRedirector;
 use EasyBib\Tests\Mocks\OAuth2\Client\MockRedirectException;
 use EasyBib\Tests\OAuth2\Client\TestCase;
 use Guzzle\Http\Client;
+use Guzzle\Plugin\History\HistoryPlugin;
 
-/**
- * @SuppressWarnings(PHPMD.CouplingBetweenObjects)
- */
 class SessionTest extends TestCase
 {
-    /**
-     * @var string
-     */
-    private $redirectUrl = 'http://myapp.example.org/handle/oauth';
-
     /**
      * @var Session
      */
@@ -28,30 +21,49 @@ class SessionTest extends TestCase
     {
         parent::setUp();
 
-        $this->session = $this->getSession();
+        $this->session = $this->createSession();
     }
 
-    public function testEnsureTokenWhenNotSet()
+    public function testGetTokenWhenNotSet()
     {
-        $redirectUrl = urlencode($this->clientConfig->getParams()['redirect_url']);
-
-        $message = "Redirecting to $this->apiBaseUrl/oauth/authorize"
-            . "?response_type=code&client_id=client_123&redirect_url=$redirectUrl"
-            . "&scope=USER_READ+DATA_READ_WRITE";
-
-        $this->setExpectedException(MockRedirectException::class, $message);
-
-        $this->session->ensureToken();
+        $this->expectRedirectToAuthorizationEndpoint();
+        $this->session->getToken();
     }
 
-    public function testEnsureTokenWhenSet()
+    public function testResourceRequestWhenSet()
     {
-        $this->tokenStore->setToken('ABC123');
-        $this->session->ensureToken();
+        $token = 'ABC123';
 
-        $lastRequest = $this->makeRequest();
+        $this->given->iHaveATokenInSession($token, $this->tokenSession);
+        $this->shouldHaveTokenInHeaderForResourceRequests($token);
+    }
 
-        $this->assertEquals('Bearer ABC123', $lastRequest->getHeader('Authorization'));
+    public function testResourceRequestWhenExpiredHavingRefreshToken()
+    {
+        $oldToken = 'ABC123';
+        $newToken = 'XYZ987';
+        $refreshToken = 'REFRESH_456';
+
+        $this->given->iHaveATokenInSession($oldToken, $this->tokenSession);
+        $this->given->iHaveARefreshToken($refreshToken, $this->tokenSession);
+        $this->given->myTokenIsExpired($this->tokenSession);
+        $this->given->iAmReadyToRespondToATokenRequest($newToken, $this->mockResponses);
+
+        $this->makeResourceRequest();
+
+        $this->shouldHaveMadeATokenRefreshRequest($refreshToken);
+        $this->shouldHaveTokenInHeaderForResourceRequests($newToken);
+    }
+
+    public function testResourceRequestWhenExpiredHavingNoRefreshToken()
+    {
+        $oldToken = 'ABC123';
+
+        $this->given->iHaveATokenInSession($oldToken, $this->tokenSession);
+        $this->given->myTokenIsExpired($this->tokenSession);
+
+        $this->expectRedirectToAuthorizationEndpoint();
+        $this->makeResourceRequest();
     }
 
     public function testHandleAuthorizationResponse()
@@ -61,45 +73,86 @@ class SessionTest extends TestCase
 
         $this->session->handleAuthorizationResponse($this->authorization);
 
-        $this->shouldHaveMadeATokenRequest();
-        $this->shouldHaveATokenAssigned($token);
+        $this->shouldHaveMadeATokenRequest($token);
+        $this->shouldHaveTokenInHeaderForResourceRequests($token);
     }
 
-    private function shouldHaveATokenAssigned($token)
+    /**
+     * @param string $refreshToken
+     */
+    private function shouldHaveMadeATokenRefreshRequest($refreshToken)
     {
-        $lastRequest = $this->makeRequest();
+        $lastRequest = $this->history->getLastRequest();
+
+        $this->assertEquals(
+            $this->apiBaseUrl . $this->serverConfig->getParams()['token_endpoint'],
+            $lastRequest->getUrl()
+        );
+
+        $this->assertEquals('POST', $lastRequest->getMethod());
+        $this->assertEquals('refresh_token', $lastRequest->getPostFields()['grant_type']);
+        $this->assertEquals($refreshToken, $lastRequest->getPostFields()['refresh_token']);
+    }
+
+    private function shouldHaveTokenInHeaderForResourceRequests($token)
+    {
+        $lastRequest = $this->makeResourceRequest();
 
         $this->assertEquals($token, $this->tokenStore->getToken());
         $this->assertEquals('Bearer ' . $token, $lastRequest->getHeader('Authorization'));
     }
 
     /**
+     * @return \Guzzle\Http\Message\RequestInterface
+     */
+    private function makeResourceRequest()
+    {
+        $history = new HistoryPlugin();
+
+        $httpClient = new Client();
+        $httpClient->addSubscriber($history);
+
+        $this->session->addResourceSubscriber($httpClient);
+
+        $request = $httpClient->get('http://example.org');
+        $request->send();
+
+        return $history->getLastRequest();
+    }
+
+    private function expectRedirectToAuthorizationEndpoint()
+    {
+        $message = vsprintf(
+            'Redirecting to %s?response_type=%s&client_id=%s&redirect_url=%s&scope=%s',
+            [
+                $this->apiBaseUrl . $this->serverConfig->getParams()['authorization_endpoint'],
+                'code',
+                'client_123',
+                urlencode($this->clientConfig->getParams()['redirect_url']),
+                'USER_READ+DATA_READ_WRITE',
+            ]
+        );
+
+        $this->setExpectedException(MockRedirectException::class, $message);
+    }
+
+    /**
      * @return Session
      */
-    private function getSession()
+    private function createSession()
     {
         $session = new Session(
-            $this->tokenStore,
             $this->httpClient,
             new ExceptionMockRedirector(),
             $this->clientConfig,
             $this->serverConfig
         );
 
+        $session->setTokenStore($this->tokenStore);
+
         $scope = new Scope(['USER_READ', 'DATA_READ_WRITE']);
         $session->setScope($scope);
 
         return $session;
-    }
-
-    /**
-     * @return \Guzzle\Http\Message\RequestInterface
-     */
-    private function makeRequest()
-    {
-        $request = $this->httpClient->get('http://example.org');
-        $request->send();
-
-        return $this->history->getLastRequest();
     }
 }

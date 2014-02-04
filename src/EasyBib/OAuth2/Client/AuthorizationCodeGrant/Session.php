@@ -2,17 +2,18 @@
 
 namespace EasyBib\OAuth2\Client\AuthorizationCodeGrant;
 
+use EasyBib\Guzzle\Plugin\BearerAuth\BearerAuth;
 use EasyBib\OAuth2\Client\AuthorizationCodeGrant\Authorization\AuthorizationResponse;
 use EasyBib\OAuth2\Client\RedirectorInterface;
 use EasyBib\OAuth2\Client\Scope;
-use EasyBib\OAuth2\Client\TokenStore\TokenStoreInterface;
-use fkooman\Guzzle\Plugin\BearerAuth\BearerAuth;
+use EasyBib\OAuth2\Client\TokenStore;
 use Guzzle\Http\ClientInterface;
+use Symfony\Component\HttpFoundation\Session\Session as SymfonySession;
 
 class Session
 {
     /**
-     * @var \EasyBib\OAuth2\Client\TokenStore\TokenStoreInterface
+     * @var \EasyBib\OAuth2\Client\TokenStore
      */
     private $tokenStore;
 
@@ -42,24 +43,23 @@ class Session
     private $scope;
 
     /**
-     * @param TokenStoreInterface $tokenStore
      * @param ClientInterface $httpClient
      * @param RedirectorInterface $redirector
      * @param ClientConfig $clientConfig
      * @param ServerConfig $serverConfig
      */
     public function __construct(
-        TokenStoreInterface $tokenStore,
         ClientInterface $httpClient,
         RedirectorInterface $redirector,
         ClientConfig $clientConfig,
         ServerConfig $serverConfig
     ) {
-        $this->tokenStore = $tokenStore;
         $this->httpClient = $httpClient;
         $this->redirector = $redirector;
         $this->clientConfig = $clientConfig;
         $this->serverConfig = $serverConfig;
+
+        $this->tokenStore = new TokenStore(new SymfonySession());
     }
 
     public function setScope(Scope $scope)
@@ -70,6 +70,15 @@ class Session
     public function authorize()
     {
         $this->redirector->redirect($this->getAuthorizeUrl());
+    }
+
+    /**
+     * @param ClientInterface $httpClient
+     */
+    public function addResourceSubscriber(ClientInterface $httpClient)
+    {
+        $subscriber = new BearerAuth($this);
+        $httpClient->addSubscriber($subscriber);
     }
 
     /**
@@ -85,29 +94,52 @@ class Session
         );
 
         $tokenResponse = $tokenRequest->send();
-        $this->handleTokenResponse($tokenResponse);
+        $this->tokenStore->updateFromTokenResponse($tokenResponse);
     }
 
-    public function ensureToken()
+
+    /**
+     * @return string
+     */
+    public function getToken()
     {
-        // TODO handle expired token
         $token = $this->tokenStore->getToken();
 
-        if (!$token) {
-            $this->authorize();
+        if ($token) {
+            return $token;
         }
 
-        $this->pushTokenToHttpClient($token);
+        if ($this->tokenStore->isRefreshable()) {
+            return $this->getRefreshedToken();
+        }
+
+        // redirects browser
+        $this->authorize();
     }
 
     /**
-     * @param TokenResponse $tokenResponse
+     * @param TokenStore $tokenStore
      */
-    private function handleTokenResponse(TokenResponse $tokenResponse)
+    public function setTokenStore(TokenStore $tokenStore)
     {
-        $token = $tokenResponse->getToken();
-        $this->tokenStore->setToken($token);
-        $this->pushTokenToHttpClient($token);
+        $this->tokenStore = $tokenStore;
+    }
+
+    /**
+     * @return string
+     */
+    private function getRefreshedToken()
+    {
+        $refreshRequest = new TokenRefreshRequest(
+            $this->tokenStore->getRefreshToken(),
+            $this->serverConfig,
+            $this->httpClient
+        );
+
+        $tokenResponse = $refreshRequest->send();
+        $this->tokenStore->updateFromTokenResponse($tokenResponse);
+
+        return $tokenResponse->getToken();
     }
 
     /**
@@ -127,13 +159,5 @@ class Session
             '?',
             http_build_query($params),
         ]);
-    }
-
-    /**
-     * @param $token
-     */
-    private function pushTokenToHttpClient($token)
-    {
-        $this->httpClient->addSubscriber(new BearerAuth($token));
     }
 }

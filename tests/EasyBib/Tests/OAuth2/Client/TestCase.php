@@ -5,10 +5,12 @@ namespace EasyBib\Tests\OAuth2\Client;
 use EasyBib\OAuth2\Client\AuthorizationCodeGrant\ClientConfig;
 use EasyBib\OAuth2\Client\AuthorizationCodeGrant\Authorization\AuthorizationResponse;
 use EasyBib\OAuth2\Client\AuthorizationCodeGrant\ServerConfig;
-use EasyBib\Tests\Mocks\OAuth2\Client\MockTokenStore;
+use EasyBib\OAuth2\Client\TokenStore;
 use Guzzle\Http\Client;
 use Guzzle\Plugin\History\HistoryPlugin;
 use Guzzle\Plugin\Mock\MockPlugin;
+use Symfony\Component\HttpFoundation\Session\Session;
+use Symfony\Component\HttpFoundation\Session\Storage\MockArraySessionStorage;
 
 /**
  * @SuppressWarnings(PHPMD.CouplingBetweenObjects)
@@ -41,7 +43,12 @@ abstract class TestCase extends \PHPUnit_Framework_TestCase
     protected $mockResponses;
 
     /**
-     * @var MockTokenStore
+     * @var Session
+     */
+    protected $tokenSession;
+
+    /**
+     * @var TokenStore
      */
     protected $tokenStore;
 
@@ -60,16 +67,11 @@ abstract class TestCase extends \PHPUnit_Framework_TestCase
      */
     protected $authorization;
 
-    public function __construct()
-    {
-        parent::__construct();
-
-        $this->given = new Given();
-    }
-
     public function setUp()
     {
         parent::setUp();
+
+        $this->given = new Given();
 
         $this->clientConfig = new ClientConfig([
             'client_id' => 'client_123',
@@ -87,11 +89,13 @@ abstract class TestCase extends \PHPUnit_Framework_TestCase
         $this->httpClient->addSubscriber($this->mockResponses);
         $this->httpClient->addSubscriber($this->history);
 
-        $this->tokenStore = new MockTokenStore();
+        $this->tokenSession = new Session(new MockArraySessionStorage());
+        $this->tokenStore = new TokenStore($this->tokenSession);
+
         $this->authorization = new AuthorizationResponse(['code' => 'ABC123']);
     }
 
-    public function shouldHaveMadeATokenRequest()
+    protected function shouldHaveMadeATokenRequest()
     {
         $lastRequest = $this->history->getLastRequest();
 
