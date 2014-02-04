@@ -36,21 +36,29 @@ class TokenRequest implements TokenRequestInterface
     private $scope;
 
     /**
+     * @var int
+     */
+    private $baseTime;
+
+    /**
      * @param ClientConfig $clientConfig
      * @param ServerConfig $serverConfig
      * @param ClientInterface $httpClient
      * @param Scope $scope
+     * @param int $baseTime
      */
     public function __construct(
         ClientConfig $clientConfig,
         ServerConfig $serverConfig,
         ClientInterface $httpClient,
-        Scope $scope
+        Scope $scope,
+        $baseTime
     ) {
         $this->clientConfig = $clientConfig;
         $this->serverConfig = $serverConfig;
         $this->httpClient = $httpClient;
         $this->scope = $scope;
+        $this->baseTime = $baseTime;
     }
 
     /**
@@ -75,9 +83,9 @@ class TokenRequest implements TokenRequestInterface
             'iss' => $this->clientConfig->getParams()['client_id'],
             'sub' => $this->clientConfig->getParams()['subject'],
             'aud' => $this->getTokenEndpoint(),
-            'exp' => time() + TokenRequest::EXPIRES_IN_TIME,
-            'nbf' => time() - TokenRequest::NOT_BEFORE_TIME,
-            'iat' => time(),
+            'exp' => $this->baseTime + TokenRequest::EXPIRES_IN_TIME,
+            'nbf' => $this->baseTime - TokenRequest::NOT_BEFORE_TIME,
+            'iat' => $this->baseTime,
             'jti' => '',
             'typ' => '',
         ];

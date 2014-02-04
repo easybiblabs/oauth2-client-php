@@ -110,6 +110,7 @@ class JsonWebTokenSessionTest extends TestCase
 
         $session->setTokenStore($this->tokenStore);
         $session->setScope($this->scope);
+        $session->setBaseTime($this->baseTime);
 
         return $session;
     }

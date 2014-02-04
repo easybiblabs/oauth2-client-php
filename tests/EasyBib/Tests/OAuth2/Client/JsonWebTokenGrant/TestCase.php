@@ -36,6 +36,8 @@ abstract class TestCase extends \PHPUnit_Framework_TestCase
 
     protected $scope;
 
+    protected $baseTime;
+
     public function setUp()
     {
         parent::setUp();
@@ -60,6 +62,7 @@ abstract class TestCase extends \PHPUnit_Framework_TestCase
         $this->httpClient->addSubscriber($this->history);
 
         $this->scope = new Scope(['USER_READ', 'DATA_READ_WRITE']);
+        $this->baseTime = time();
     }
 
     public function shouldHaveMadeATokenRequest()
@@ -83,9 +86,9 @@ abstract class TestCase extends \PHPUnit_Framework_TestCase
             'iss' => $this->clientConfig->getParams()['client_id'],
             'sub' => $this->clientConfig->getParams()['subject'],
             'aud' => $this->getTokenEndpoint(),
-            'exp' => time() + TokenRequest::EXPIRES_IN_TIME,
-            'nbf' => time() - TokenRequest::NOT_BEFORE_TIME,
-            'iat' => time(),
+            'exp' => $this->baseTime + TokenRequest::EXPIRES_IN_TIME,
+            'nbf' => $this->baseTime - TokenRequest::NOT_BEFORE_TIME,
+            'iat' => $this->baseTime,
             'jti' => '',
             'typ' => '',
         ];

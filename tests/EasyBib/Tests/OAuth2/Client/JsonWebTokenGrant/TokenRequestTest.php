@@ -16,7 +16,8 @@ class TokenRequestTest extends TestCase
             $this->clientConfig,
             $this->serverConfig,
             $this->httpClient,
-            $this->scope
+            $this->scope,
+            $this->baseTime
         );
 
         $tokenResponse = $tokenRequest->send();

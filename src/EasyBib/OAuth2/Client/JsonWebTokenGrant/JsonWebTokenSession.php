@@ -38,6 +38,15 @@ class JsonWebTokenSession extends AbstractSession
     private $scope;
 
     /**
+     * Used for testing: the value to use for the current time of the request.
+     * Ensures that the tests and the implementation are using the same
+     * value
+     *
+     * @var int
+     */
+    private $baseTime;
+
+    /**
      * @param ClientInterface $httpClient
      * @param RedirectorInterface $redirector
      * @param ClientConfig $clientConfig
@@ -55,6 +64,7 @@ class JsonWebTokenSession extends AbstractSession
         $this->serverConfig = $serverConfig;
 
         $this->tokenStore = new TokenStore(new Session());
+        $this->baseTime = time();
     }
 
     /**
@@ -81,6 +91,14 @@ class JsonWebTokenSession extends AbstractSession
         $this->tokenStore = $tokenStore;
     }
 
+    /**
+     * @param int $baseTime
+     */
+    public function setBaseTime($baseTime)
+    {
+        $this->baseTime = $baseTime;
+    }
+
     public function setScope(Scope $scope)
     {
         $this->scope = $scope;
@@ -95,7 +113,8 @@ class JsonWebTokenSession extends AbstractSession
             $this->clientConfig,
             $this->serverConfig,
             $this->httpClient,
-            $this->scope
+            $this->scope,
+            $this->baseTime
         );
 
         $tokenResponse = $tokenRequest->send();
