@@ -8,7 +8,6 @@ use EasyBib\OAuth2\Client\Scope;
 use EasyBib\OAuth2\Client\JsonWebTokenGrant\JsonWebTokenSession;
 use EasyBib\OAuth2\Client\TokenStore;
 use EasyBib\Tests\Mocks\OAuth2\Client\ExceptionMockRedirector;
-use EasyBib\Tests\Mocks\OAuth2\Client\MockRedirectException;
 use EasyBib\Tests\OAuth2\Client\Given;
 use Guzzle\Http\Client;
 use Guzzle\Plugin\History\HistoryPlugin;
@@ -17,10 +16,6 @@ use Symfony\Component\HttpFoundation\Session\Storage\MockArraySessionStorage;
 
 class JsonWebTokenSessionTest extends TestCase
 {
-    private $clientConfig;
-
-    private $serverConfig;
-
     /**
      * @var JsonWebTokenSession
      */
@@ -34,18 +29,6 @@ class JsonWebTokenSessionTest extends TestCase
     {
         parent::setUp();
 
-        $this->given = new Given();
-
-        $this->clientConfig = new ClientConfig([
-            'client_id' => 'client_123',
-            'client_secret' => 'client_secret_456',
-        ]);
-
-        $this->serverConfig = new ServerConfig([
-            'authorization_endpoint' => '/oauth/authorize',
-            'token_endpoint' => '/oauth/token',
-        ]);
-
         $this->tokenSession = new Session(new MockArraySessionStorage());
         $this->tokenStore = new TokenStore($this->tokenSession);
 
@@ -54,7 +37,6 @@ class JsonWebTokenSessionTest extends TestCase
 
     public function testGetTokenWhenNotSet()
     {
-        $this->markTestIncomplete();
         $token = 'ABC123';
         $this->given->iAmReadyToRespondToATokenRequest($token, $this->mockResponses);
 
@@ -66,7 +48,6 @@ class JsonWebTokenSessionTest extends TestCase
 
     public function testResourceRequestWhenSet()
     {
-        $this->markTestIncomplete();
         $token = 'ABC123';
 
         $this->given->iHaveATokenInSession($token, $this->tokenSession);
@@ -75,10 +56,8 @@ class JsonWebTokenSessionTest extends TestCase
 
     public function testResourceRequestWhenExpired()
     {
-        $this->markTestIncomplete();
         $oldToken = 'ABC123';
         $newToken = 'XYZ987';
-        $refreshToken = 'REFRESH_456';
 
         $this->given->iHaveATokenInSession($oldToken, $this->tokenSession);
         $this->given->myTokenIsExpired($this->tokenSession);
@@ -117,22 +96,6 @@ class JsonWebTokenSessionTest extends TestCase
         return $history->getLastRequest();
     }
 
-    private function expectRedirectToAuthorizationEndpoint()
-    {
-        $message = vsprintf(
-            'Redirecting to %s?response_type=%s&client_id=%s&redirect_url=%s&scope=%s',
-            [
-                $this->apiBaseUrl . $this->serverConfig->getParams()['authorization_endpoint'],
-                'code',
-                'client_123',
-                urlencode($this->clientConfig->getParams()['redirect_url']),
-                'USER_READ+DATA_READ_WRITE',
-            ]
-        );
-
-        $this->setExpectedException(MockRedirectException::class, $message);
-    }
-
     /**
      * @return JsonWebTokenSession[
      */
@@ -147,6 +110,7 @@ class JsonWebTokenSessionTest extends TestCase
 
         $session->setTokenStore($this->tokenStore);
 
+        // TODO capture scope as dependency
         $scope = new Scope(['USER_READ', 'DATA_READ_WRITE']);
         $session->setScope($scope);
 

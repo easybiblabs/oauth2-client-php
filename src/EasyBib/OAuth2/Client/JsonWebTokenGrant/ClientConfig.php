@@ -15,6 +15,7 @@ class ClientConfig
     private static $requiredParams = [
         'client_id',
         'client_secret',
+        'subject',
     ];
 
     public function __construct(array $params)

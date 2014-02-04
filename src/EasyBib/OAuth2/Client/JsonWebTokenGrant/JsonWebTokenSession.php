@@ -8,6 +8,7 @@ use EasyBib\OAuth2\Client\Scope;
 use EasyBib\OAuth2\Client\SessionInterface;
 use EasyBib\OAuth2\Client\TokenStore;
 use Guzzle\Http\ClientInterface;
+use Symfony\Component\HttpFoundation\Session\Session;
 
 class JsonWebTokenSession implements SessionInterface
 {
@@ -57,6 +58,8 @@ class JsonWebTokenSession implements SessionInterface
         $this->redirector = $redirector;
         $this->clientConfig = $clientConfig;
         $this->serverConfig = $serverConfig;
+
+        $this->tokenStore = new TokenStore(new Session());
     }
 
     /**
@@ -64,7 +67,15 @@ class JsonWebTokenSession implements SessionInterface
      */
     public function getToken()
     {
+        $token = $this->tokenStore->getToken();
 
+        if ($token) {
+            return $token;
+        }
+
+        $this->retrieveToken();
+
+        return $this->tokenStore->getToken();
     }
 
     /**
@@ -88,5 +99,20 @@ class JsonWebTokenSession implements SessionInterface
     {
         $subscriber = new BearerAuth($this);
         $httpClient->addSubscriber($subscriber);
+    }
+
+    /**
+     * @return string
+     */
+    private function retrieveToken()
+    {
+        $tokenRequest = new TokenRequest(
+            $this->clientConfig,
+            $this->serverConfig,
+            $this->httpClient
+        );
+
+        $tokenResponse = $tokenRequest->send();
+        $this->tokenStore->updateFromTokenResponse($tokenResponse);
     }
 }

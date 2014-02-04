@@ -17,6 +17,7 @@ class ClientConfigTest extends \PHPUnit_Framework_TestCase
                 [
                     'client_id' => 'ABC123',
                     'client_secret' => 'XYZ987',
+                    'subject' => 'MNO456',
                 ],
             ],
         ];
