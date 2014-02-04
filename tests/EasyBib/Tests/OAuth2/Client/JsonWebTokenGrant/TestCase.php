@@ -12,6 +12,9 @@ use Guzzle\Plugin\History\HistoryPlugin;
 use Guzzle\Plugin\Mock\MockPlugin;
 use JWT;
 
+/**
+ * @SuppressWarnings(PHPMD.CouplingBetweenObjects)
+ */
 abstract class TestCase extends \PHPUnit_Framework_TestCase
 {
     /**
