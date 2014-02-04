@@ -35,9 +35,21 @@ class Given
         $session->set('token', $token);
     }
 
+    /**
+     * @param Session $session
+     */
     public function myTokenIsExpired(Session $session)
     {
         $session->set('expires_at', time() - 100);
+    }
+
+    /**
+     * @param Session $session
+     * @param int $after
+     */
+    public function myTokenExpiresLater(Session $session, $after = 100)
+    {
+        $session->set('expires_at', time() + $after);
     }
 
     /**

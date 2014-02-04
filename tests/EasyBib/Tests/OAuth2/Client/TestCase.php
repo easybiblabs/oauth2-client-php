@@ -67,16 +67,11 @@ abstract class TestCase extends \PHPUnit_Framework_TestCase
      */
     protected $authorization;
 
-    public function __construct()
-    {
-        parent::__construct();
-
-        $this->given = new Given();
-    }
-
     public function setUp()
     {
         parent::setUp();
+
+        $this->given = new Given();
 
         $this->clientConfig = new ClientConfig([
             'client_id' => 'client_123',
