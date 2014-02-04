@@ -46,7 +46,7 @@ class AuthorizationCodeSessionTest extends TestCase
         $this->given->iHaveATokenInSession($oldToken, $this->tokenSession);
         $this->given->iHaveARefreshToken($refreshToken, $this->tokenSession);
         $this->given->myTokenIsExpired($this->tokenSession);
-        $this->given->iAmReadyToRespondToATokenRequest($newToken, $this->mockResponses);
+        $this->given->iAmReadyToRespondToATokenRequest($newToken, $this->scope, $this->mockResponses);
 
         $this->makeResourceRequest();
 
@@ -68,7 +68,7 @@ class AuthorizationCodeSessionTest extends TestCase
     public function testHandleAuthorizationResponse()
     {
         $token = 'token_ABC123';
-        $this->given->iAmReadyToRespondToATokenRequest($token, $this->mockResponses);
+        $this->given->iAmReadyToRespondToATokenRequest($token, $this->scope, $this->mockResponses);
 
         $this->session->handleAuthorizationResponse($this->authorization);
 
@@ -148,9 +148,7 @@ class AuthorizationCodeSessionTest extends TestCase
         );
 
         $session->setTokenStore($this->tokenStore);
-
-        $scope = new Scope(['USER_READ', 'DATA_READ_WRITE']);
-        $session->setScope($scope);
+        $session->setScope($this->scope);
 
         return $session;
     }

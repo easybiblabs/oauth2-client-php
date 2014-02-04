@@ -2,6 +2,7 @@
 
 namespace EasyBib\Tests\OAuth2\Client;
 
+use EasyBib\OAuth2\Client\Scope;
 use EasyBib\OAuth2\Client\TokenStore;
 use Guzzle\Http\Message\Response;
 use Guzzle\Plugin\Mock\MockPlugin;
@@ -11,17 +12,19 @@ class Given
 {
     /**
      * @param string $token
+     * @param Scope $scope
      * @param \Guzzle\Plugin\Mock\MockPlugin $mockResponses
      */
-    public function iAmReadyToRespondToATokenRequest($token, MockPlugin $mockResponses)
+    public function iAmReadyToRespondToATokenRequest($token, Scope $scope, MockPlugin $mockResponses)
     {
-        $tokenData = json_encode([
+        $params = [
             'access_token' => $token,
             'expires_in' => 3600,
             'token_type' => 'bearer',
-            'scope' => 'USER_READ',
             'refresh_token' => 'refresh_XYZ987',
-        ]);
+        ] + $scope->getQuerystringParams();
+
+        $tokenData = json_encode($params);
 
         $rawTokenResponse = new Response(200, [], $tokenData);
         $mockResponses->addResponse($rawTokenResponse);

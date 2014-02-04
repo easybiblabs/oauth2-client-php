@@ -38,7 +38,7 @@ class JsonWebTokenSessionTest extends TestCase
     public function testGetTokenWhenNotSet()
     {
         $token = 'ABC123';
-        $this->given->iAmReadyToRespondToATokenRequest($token, $this->mockResponses);
+        $this->given->iAmReadyToRespondToATokenRequest($token, $this->scope, $this->mockResponses);
 
         $this->session->getToken();
 
@@ -61,7 +61,7 @@ class JsonWebTokenSessionTest extends TestCase
 
         $this->given->iHaveATokenInSession($oldToken, $this->tokenSession);
         $this->given->myTokenIsExpired($this->tokenSession);
-        $this->given->iAmReadyToRespondToATokenRequest($newToken, $this->mockResponses);
+        $this->given->iAmReadyToRespondToATokenRequest($newToken, $this->scope, $this->mockResponses);
 
         $this->makeResourceRequest();
 
@@ -109,10 +109,7 @@ class JsonWebTokenSessionTest extends TestCase
         );
 
         $session->setTokenStore($this->tokenStore);
-
-        // TODO capture scope as dependency
-        $scope = new Scope(['USER_READ', 'DATA_READ_WRITE']);
-        $session->setScope($scope);
+        $session->setScope($this->scope);
 
         return $session;
     }

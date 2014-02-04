@@ -2,6 +2,7 @@
 
 namespace EasyBib\OAuth2\Client\JsonWebTokenGrant;
 
+use EasyBib\OAuth2\Client\Scope;
 use EasyBib\OAuth2\Client\ServerConfig;
 use EasyBib\OAuth2\Client\TokenRequestInterface;
 use EasyBib\OAuth2\Client\TokenResponse\TokenResponse;
@@ -30,18 +31,26 @@ class TokenRequest implements TokenRequestInterface
     private $httpClient;
 
     /**
+     * @var Scope
+     */
+    private $scope;
+
+    /**
      * @param ClientConfig $clientConfig
      * @param ServerConfig $serverConfig
      * @param ClientInterface $httpClient
+     * @param Scope $scope
      */
     public function __construct(
         ClientConfig $clientConfig,
         ServerConfig $serverConfig,
-        ClientInterface $httpClient
+        ClientInterface $httpClient,
+        Scope $scope
     ) {
         $this->clientConfig = $clientConfig;
         $this->serverConfig = $serverConfig;
         $this->httpClient = $httpClient;
+        $this->scope = $scope;
     }
 
     /**
@@ -62,7 +71,7 @@ class TokenRequest implements TokenRequestInterface
     private function getParams()
     {
         $payload = [
-            'scope' => ['USER_READ'],
+            'scope' => $this->scope->getQuerystringParams()['scope'],
             'iss' => $this->clientConfig->getParams()['client_id'],
             'sub' => $this->clientConfig->getParams()['subject'],
             'aud' => $this->getTokenEndpoint(),

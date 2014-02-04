@@ -4,6 +4,7 @@ namespace EasyBib\Tests\OAuth2\Client\JsonWebTokenGrant;
 
 use EasyBib\OAuth2\Client\JsonWebTokenGrant\ClientConfig;
 use EasyBib\OAuth2\Client\JsonWebTokenGrant\TokenRequest;
+use EasyBib\OAuth2\Client\Scope;
 use EasyBib\OAuth2\Client\ServerConfig;
 use EasyBib\Tests\OAuth2\Client\Given;
 use Guzzle\Http\Client;
@@ -33,6 +34,8 @@ abstract class TestCase extends \PHPUnit_Framework_TestCase
 
     protected $mockResponses;
 
+    protected $scope;
+
     public function setUp()
     {
         parent::setUp();
@@ -55,6 +58,8 @@ abstract class TestCase extends \PHPUnit_Framework_TestCase
         $this->history = new HistoryPlugin();
         $this->httpClient->addSubscriber($this->mockResponses);
         $this->httpClient->addSubscriber($this->history);
+
+        $this->scope = new Scope(['USER_READ', 'DATA_READ_WRITE']);
     }
 
     public function shouldHaveMadeATokenRequest()
@@ -74,7 +79,7 @@ abstract class TestCase extends \PHPUnit_Framework_TestCase
     {
         // TODO capture time as an injectable dependency
         $payload = [
-            'scope' => ['USER_READ'],
+            'scope' => $this->scope->getQuerystringParams()['scope'],
             'iss' => $this->clientConfig->getParams()['client_id'],
             'sub' => $this->clientConfig->getParams()['subject'],
             'aud' => $this->getTokenEndpoint(),

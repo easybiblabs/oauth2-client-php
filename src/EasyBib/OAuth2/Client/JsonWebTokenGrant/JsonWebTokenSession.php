@@ -94,7 +94,8 @@ class JsonWebTokenSession extends AbstractSession
         $tokenRequest = new TokenRequest(
             $this->clientConfig,
             $this->serverConfig,
-            $this->httpClient
+            $this->httpClient,
+            $this->scope
         );
 
         $tokenResponse = $tokenRequest->send();
