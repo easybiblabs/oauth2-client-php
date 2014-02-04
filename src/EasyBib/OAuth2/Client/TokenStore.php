@@ -95,7 +95,7 @@ class TokenStore
     }
 
     /**
-     * @param $name
+     * @param string $name
      * @return mixed
      */
     private function get($name)
