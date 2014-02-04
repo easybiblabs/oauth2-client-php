@@ -10,7 +10,6 @@ class TokenRequestTest extends TestCase
     public function testSend()
     {
         $token = 'token_ABC123';
-        $scope = 'USER_READ';
 
         $this->given->iAmReadyToRespondToATokenRequest($token, $this->scope, $this->mockResponses);
 
