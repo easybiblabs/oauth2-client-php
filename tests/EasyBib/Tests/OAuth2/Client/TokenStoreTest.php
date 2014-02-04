@@ -2,6 +2,8 @@
 
 namespace EasyBib\Tests\OAuth2\Client;
 
+use EasyBib\OAuth2\Client\TokenStore;
+
 class TokenStoreTest extends TestCase
 {
     public function dataForIsRefreshable()
@@ -10,8 +12,8 @@ class TokenStoreTest extends TestCase
         $refreshToken = 'XYZ987';
 
         return [
-            [['token' => $token], false],
-            [['token' => $token, 'refresh_token' => $refreshToken], true],
+            [[TokenStore::KEY_ACCESS_TOKEN => $token], false],
+            [[TokenStore::KEY_ACCESS_TOKEN => $token, TokenStore::KEY_REFRESH_TOKEN => $refreshToken], true],
         ];
     }
 

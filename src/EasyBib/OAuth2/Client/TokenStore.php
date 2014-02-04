@@ -7,6 +7,12 @@ use Symfony\Component\HttpFoundation\Session\Session;
 
 class TokenStore
 {
+    const KEY_ACCESS_TOKEN = 'oauth/access_token';
+
+    const KEY_REFRESH_TOKEN = 'oauth/refresh_token';
+
+    const KEY_EXPIRES_AT = 'oauth/expires_at';
+
     /**
      * treat token as expired if fewer than this number of seconds remains
      * until the expires_in point is reached
@@ -38,7 +44,7 @@ class TokenStore
             return null;
         }
 
-        return $this->get('token');
+        return $this->get(self::KEY_ACCESS_TOKEN);
     }
 
     /**
@@ -46,7 +52,7 @@ class TokenStore
      */
     public function getRefreshToken()
     {
-        return $this->get('refresh_token');
+        return $this->get(self::KEY_REFRESH_TOKEN);
     }
 
     /**
@@ -54,7 +60,7 @@ class TokenStore
      */
     public function isRefreshable()
     {
-        return $this->get('token') && $this->get('refresh_token');
+        return $this->get(self::KEY_ACCESS_TOKEN) && $this->get(self::KEY_REFRESH_TOKEN);
     }
 
     /**
@@ -63,9 +69,9 @@ class TokenStore
     public function updateFromTokenResponse(TokenResponse $tokenResponse)
     {
         $this->session->replace([
-            'token' => $tokenResponse->getToken(),
-            'refresh_token' => $tokenResponse->getRefreshToken(),
-            'expires_at' => $this->expirationTimeFor($tokenResponse),
+            self::KEY_ACCESS_TOKEN  => $tokenResponse->getToken(),
+            self::KEY_REFRESH_TOKEN => $tokenResponse->getRefreshToken(),
+            self::KEY_EXPIRES_AT    => $this->expirationTimeFor($tokenResponse),
         ]);
     }
 
@@ -83,7 +89,7 @@ class TokenStore
      */
     private function isExpired()
     {
-        $expiresAt = $this->get('expires_at');
+        $expiresAt = $this->get(self::KEY_EXPIRES_AT);
 
         return $expiresAt && $expiresAt < time() + self::EXPIRATION_WIGGLE_ROOM;
     }

@@ -2,6 +2,7 @@
 
 namespace EasyBib\Tests\OAuth2\Client;
 
+use EasyBib\OAuth2\Client\TokenStore;
 use Guzzle\Http\Message\Response;
 use Guzzle\Plugin\Mock\MockPlugin;
 use Symfony\Component\HttpFoundation\Session\Session;
@@ -32,7 +33,7 @@ class Given
      */
     public function iHaveATokenInSession($token, Session $session)
     {
-        $session->set('token', $token);
+        $session->set(TokenStore::KEY_ACCESS_TOKEN, $token);
     }
 
     /**
@@ -40,7 +41,7 @@ class Given
      */
     public function myTokenIsExpired(Session $session)
     {
-        $session->set('expires_at', time() - 100);
+        $session->set(TokenStore::KEY_EXPIRES_AT, time() - 100);
     }
 
     /**
@@ -49,7 +50,7 @@ class Given
      */
     public function myTokenExpiresLater(Session $session, $after = 100)
     {
-        $session->set('expires_at', time() + $after);
+        $session->set(TokenStore::KEY_EXPIRES_AT, time() + $after);
     }
 
     /**
@@ -58,6 +59,6 @@ class Given
      */
     public function iHaveARefreshToken($refreshToken, Session $session)
     {
-        $session->set('refresh_token', $refreshToken);
+        $session->set(TokenStore::KEY_REFRESH_TOKEN, $refreshToken);
     }
 }
