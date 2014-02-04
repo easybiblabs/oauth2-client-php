@@ -176,6 +176,10 @@ again:
 $this->oauthSession->authorize();
 ```
 
+## How to contribute
+
+See [Contributing](CONTRIBUTING.md)
+
 ## License
 
 This library is licensed under the BSD 2-Clause License. Enjoy!
