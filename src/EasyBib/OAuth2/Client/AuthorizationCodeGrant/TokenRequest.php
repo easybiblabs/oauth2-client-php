@@ -3,10 +3,11 @@
 namespace EasyBib\OAuth2\Client\AuthorizationCodeGrant;
 
 use EasyBib\OAuth2\Client\AuthorizationCodeGrant\Authorization\AuthorizationResponse;
+use EasyBib\OAuth2\Client\TokenRequestInterface;
 use EasyBib\OAuth2\Client\TokenResponse\TokenResponse;
 use Guzzle\Http\ClientInterface;
 
-class TokenRequest
+class TokenRequest implements TokenRequestInterface
 {
     const GRANT_TYPE = 'authorization_code';
 

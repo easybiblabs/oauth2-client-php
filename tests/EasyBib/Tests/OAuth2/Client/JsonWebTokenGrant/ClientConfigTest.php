@@ -1,9 +1,9 @@
 <?php
 
-namespace EasyBib\Tests\OAuth2\Client\AuthorizationCodeGrant;
+namespace EasyBib\Tests\OAuth2\Client\JsonWebTokenGrant;
 
-use EasyBib\OAuth2\Client\AuthorizationCodeGrant\ClientConfig;
 use EasyBib\OAuth2\Client\InvalidClientConfigException;
+use EasyBib\OAuth2\Client\JsonWebTokenGrant\ClientConfig;
 
 class ClientConfigTest extends \PHPUnit_Framework_TestCase
 {
@@ -16,6 +16,7 @@ class ClientConfigTest extends \PHPUnit_Framework_TestCase
             [
                 [
                     'client_id' => 'ABC123',
+                    'client_secret' => 'XYZ987',
                 ],
             ],
         ];

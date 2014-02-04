@@ -1,97 +1,93 @@
 <?php
 
-namespace EasyBib\Tests\OAuth2\Client\AuthorizationCodeGrant;
+namespace EasyBib\Tests\OAuth2\Client\JsonWebTokenGrant;
 
+use EasyBib\OAuth2\Client\JsonWebTokenGrant\ClientConfig;
+use EasyBib\OAuth2\Client\JsonWebTokenGrant\ServerConfig;
 use EasyBib\OAuth2\Client\Scope;
-use EasyBib\OAuth2\Client\AuthorizationCodeGrant\Session;
+use EasyBib\OAuth2\Client\JsonWebTokenGrant\JsonWebTokenSession;
+use EasyBib\OAuth2\Client\TokenStore;
 use EasyBib\Tests\Mocks\OAuth2\Client\ExceptionMockRedirector;
 use EasyBib\Tests\Mocks\OAuth2\Client\MockRedirectException;
-use EasyBib\Tests\OAuth2\Client\TestCase;
+use EasyBib\Tests\OAuth2\Client\Given;
 use Guzzle\Http\Client;
 use Guzzle\Plugin\History\HistoryPlugin;
+use Symfony\Component\HttpFoundation\Session\Session;
+use Symfony\Component\HttpFoundation\Session\Storage\MockArraySessionStorage;
 
-class SessionTest extends TestCase
+class JsonWebTokenSessionTest extends TestCase
 {
+    private $clientConfig;
+
+    private $serverConfig;
+
     /**
-     * @var Session
+     * @var JsonWebTokenSession
      */
     private $session;
+
+    private $tokenSession;
+
+    private $tokenStore;
 
     public function setUp()
     {
         parent::setUp();
+
+        $this->given = new Given();
+
+        $this->clientConfig = new ClientConfig([
+            'client_id' => 'client_123',
+            'client_secret' => 'client_secret_456',
+        ]);
+
+        $this->serverConfig = new ServerConfig([
+            'authorization_endpoint' => '/oauth/authorize',
+            'token_endpoint' => '/oauth/token',
+        ]);
+
+        $this->tokenSession = new Session(new MockArraySessionStorage());
+        $this->tokenStore = new TokenStore($this->tokenSession);
 
         $this->session = $this->createSession();
     }
 
     public function testGetTokenWhenNotSet()
     {
-        $this->expectRedirectToAuthorizationEndpoint();
+        $this->markTestIncomplete();
+        $token = 'ABC123';
+        $this->given->iAmReadyToRespondToATokenRequest($token, $this->mockResponses);
+
         $this->session->getToken();
+
+        $this->shouldHaveMadeATokenRequest();
+        $this->shouldHaveTokenInHeaderForResourceRequests($token);
     }
 
     public function testResourceRequestWhenSet()
     {
+        $this->markTestIncomplete();
         $token = 'ABC123';
 
         $this->given->iHaveATokenInSession($token, $this->tokenSession);
         $this->shouldHaveTokenInHeaderForResourceRequests($token);
     }
 
-    public function testResourceRequestWhenExpiredHavingRefreshToken()
+    public function testResourceRequestWhenExpired()
     {
+        $this->markTestIncomplete();
         $oldToken = 'ABC123';
         $newToken = 'XYZ987';
         $refreshToken = 'REFRESH_456';
 
         $this->given->iHaveATokenInSession($oldToken, $this->tokenSession);
-        $this->given->iHaveARefreshToken($refreshToken, $this->tokenSession);
         $this->given->myTokenIsExpired($this->tokenSession);
         $this->given->iAmReadyToRespondToATokenRequest($newToken, $this->mockResponses);
 
         $this->makeResourceRequest();
 
-        $this->shouldHaveMadeATokenRefreshRequest($refreshToken);
+        $this->shouldHaveMadeATokenRequest();
         $this->shouldHaveTokenInHeaderForResourceRequests($newToken);
-    }
-
-    public function testResourceRequestWhenExpiredHavingNoRefreshToken()
-    {
-        $oldToken = 'ABC123';
-
-        $this->given->iHaveATokenInSession($oldToken, $this->tokenSession);
-        $this->given->myTokenIsExpired($this->tokenSession);
-
-        $this->expectRedirectToAuthorizationEndpoint();
-        $this->makeResourceRequest();
-    }
-
-    public function testHandleAuthorizationResponse()
-    {
-        $token = 'token_ABC123';
-        $this->given->iAmReadyToRespondToATokenRequest($token, $this->mockResponses);
-
-        $this->session->handleAuthorizationResponse($this->authorization);
-
-        $this->shouldHaveMadeATokenRequest($token);
-        $this->shouldHaveTokenInHeaderForResourceRequests($token);
-    }
-
-    /**
-     * @param string $refreshToken
-     */
-    private function shouldHaveMadeATokenRefreshRequest($refreshToken)
-    {
-        $lastRequest = $this->history->getLastRequest();
-
-        $this->assertEquals(
-            $this->apiBaseUrl . $this->serverConfig->getParams()['token_endpoint'],
-            $lastRequest->getUrl()
-        );
-
-        $this->assertEquals('POST', $lastRequest->getMethod());
-        $this->assertEquals('refresh_token', $lastRequest->getPostFields()['grant_type']);
-        $this->assertEquals($refreshToken, $lastRequest->getPostFields()['refresh_token']);
     }
 
     private function shouldHaveTokenInHeaderForResourceRequests($token)
@@ -103,6 +99,7 @@ class SessionTest extends TestCase
     }
 
     /**
+     * @todo duplicate code?
      * @return \Guzzle\Http\Message\RequestInterface
      */
     private function makeResourceRequest()
@@ -112,7 +109,7 @@ class SessionTest extends TestCase
         $httpClient = new Client();
         $httpClient->addSubscriber($history);
 
-        $this->session->addResourceSubscriber($httpClient);
+        $this->session->addResourceClient($httpClient);
 
         $request = $httpClient->get('http://example.org');
         $request->send();
@@ -137,11 +134,11 @@ class SessionTest extends TestCase
     }
 
     /**
-     * @return Session
+     * @return JsonWebTokenSession[
      */
     private function createSession()
     {
-        $session = new Session(
+        $session = new JsonWebTokenSession(
             $this->httpClient,
             new ExceptionMockRedirector(),
             $this->clientConfig,

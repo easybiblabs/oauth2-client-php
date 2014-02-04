@@ -2,7 +2,6 @@
 
 namespace EasyBib\OAuth2\Client\AuthorizationCodeGrant\Authorization;
 
-
 use EasyBib\OAuth2\Client\ArrayValidator;
 
 class AuthorizationResponse

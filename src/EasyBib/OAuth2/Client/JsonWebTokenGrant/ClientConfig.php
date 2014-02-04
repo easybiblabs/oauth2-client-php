@@ -1,19 +1,20 @@
 <?php
 
-namespace EasyBib\OAuth2\Client\AuthorizationCodeGrant;
+namespace EasyBib\OAuth2\Client\JsonWebTokenGrant;
 
 use EasyBib\OAuth2\Client\ArrayValidator;
+use EasyBib\OAuth2\Client\InvalidClientConfigException;
 
-class ServerConfig
+class ClientConfig
 {
     /**
      * @var array
      */
     private $params;
 
-    private static $validParams = [
-        'authorization_endpoint',
-        'token_endpoint',
+    private static $requiredParams = [
+        'client_id',
+        'client_secret',
     ];
 
     public function __construct(array $params)
@@ -31,7 +32,10 @@ class ServerConfig
 
     private static function validate(array $params)
     {
-        $validator = new ArrayValidator(self::$validParams, self::$validParams);
-        $validator->validate($params);
+        $validator = new ArrayValidator(self::$requiredParams, self::$requiredParams);
+
+        if (!$validator->validate($params)) {
+            throw new InvalidClientConfigException();
+        }
     }
 }

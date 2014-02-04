@@ -3,7 +3,7 @@
 namespace EasyBib\Guzzle\Plugin\BearerAuth;
 
 use EasyBib\Guzzle\Plugin\BearerAuth\Exception\BearerErrorResponseException;
-use EasyBib\OAuth2\Client\AuthorizationCodeGrant\Session;
+use EasyBib\OAuth2\Client\SessionInterface;
 use Guzzle\Common\Event;
 use Guzzle\Http\Exception\BadResponseException;
 use Symfony\Component\EventDispatcher\EventSubscriberInterface;
@@ -16,14 +16,14 @@ use Symfony\Component\EventDispatcher\EventSubscriberInterface;
 class BearerAuth implements EventSubscriberInterface
 {
     /**
-     * @var Session
+     * @var SessionInterface
      */
     private $session;
 
     /**
-     * @param Session $session
+     * @param SessionInterface $session
      */
-    public function __construct(Session $session)
+    public function __construct(SessionInterface $session)
     {
         $this->session = $session;
     }

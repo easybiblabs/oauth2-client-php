@@ -2,8 +2,8 @@
 
 namespace EasyBib\OAuth2\Client\AuthorizationCodeGrant;
 
-
 use EasyBib\OAuth2\Client\ArrayValidator;
+use EasyBib\OAuth2\Client\InvalidClientConfigException;
 
 class ClientConfig
 {

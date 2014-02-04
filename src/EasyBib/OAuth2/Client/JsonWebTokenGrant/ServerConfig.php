@@ -1,6 +1,6 @@
 <?php
 
-namespace EasyBib\OAuth2\Client\AuthorizationCodeGrant;
+namespace EasyBib\OAuth2\Client\JsonWebTokenGrant;
 
 use EasyBib\OAuth2\Client\ArrayValidator;
 
