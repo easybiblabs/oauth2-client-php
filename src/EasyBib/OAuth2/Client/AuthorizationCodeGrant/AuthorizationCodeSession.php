@@ -2,27 +2,21 @@
 
 namespace EasyBib\OAuth2\Client\AuthorizationCodeGrant;
 
-use EasyBib\Guzzle\Plugin\BearerAuth\BearerAuth;
+use EasyBib\OAuth2\Client\AbstractSession;
 use EasyBib\OAuth2\Client\AuthorizationCodeGrant\Authorization\AuthorizationResponse;
 use EasyBib\OAuth2\Client\RedirectorInterface;
 use EasyBib\OAuth2\Client\Scope;
 use EasyBib\OAuth2\Client\ServerConfig;
-use EasyBib\OAuth2\Client\SessionInterface;
 use EasyBib\OAuth2\Client\TokenStore;
 use Guzzle\Http\ClientInterface;
 use Symfony\Component\HttpFoundation\Session\Session;
 
-class AuthorizationCodeSession implements SessionInterface
+class AuthorizationCodeSession extends AbstractSession
 {
     /**
      * @var \EasyBib\OAuth2\Client\TokenStore
      */
     private $tokenStore;
-
-    /**
-     * @var \Guzzle\Http\ClientInterface
-     */
-    private $httpClient;
 
     /**
      * @var RedirectorInterface
@@ -72,15 +66,6 @@ class AuthorizationCodeSession implements SessionInterface
     public function authorize()
     {
         $this->redirector->redirect($this->getAuthorizeUrl());
-    }
-
-    /**
-     * @param ClientInterface $httpClient
-     */
-    public function addResourceClient(ClientInterface $httpClient)
-    {
-        $subscriber = new BearerAuth($this);
-        $httpClient->addSubscriber($subscriber);
     }
 
     /**

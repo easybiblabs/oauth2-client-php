@@ -2,22 +2,16 @@
 
 namespace EasyBib\OAuth2\Client\JsonWebTokenGrant;
 
-use EasyBib\Guzzle\Plugin\BearerAuth\BearerAuth;
+use EasyBib\OAuth2\Client\AbstractSession;
 use EasyBib\OAuth2\Client\RedirectorInterface;
 use EasyBib\OAuth2\Client\Scope;
 use EasyBib\OAuth2\Client\ServerConfig;
-use EasyBib\OAuth2\Client\SessionInterface;
 use EasyBib\OAuth2\Client\TokenStore;
 use Guzzle\Http\ClientInterface;
 use Symfony\Component\HttpFoundation\Session\Session;
 
-class JsonWebTokenSession implements SessionInterface
+class JsonWebTokenSession extends AbstractSession
 {
-    /**
-     * @var ClientInterface
-     */
-    private $httpClient;
-
     /**
      * @var RedirectorInterface
      */
@@ -90,16 +84,6 @@ class JsonWebTokenSession implements SessionInterface
     public function setScope(Scope $scope)
     {
         $this->scope = $scope;
-    }
-
-    /**
-     * @todo this is duplicate code with AuthorizationCodeSession...
-     * @param ClientInterface $httpClient
-     */
-    public function addResourceClient(ClientInterface $httpClient)
-    {
-        $subscriber = new BearerAuth($this);
-        $httpClient->addSubscriber($subscriber);
     }
 
     /**
