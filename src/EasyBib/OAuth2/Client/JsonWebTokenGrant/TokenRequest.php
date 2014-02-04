@@ -2,6 +2,7 @@
 
 namespace EasyBib\OAuth2\Client\JsonWebTokenGrant;
 
+use EasyBib\OAuth2\Client\ServerConfig;
 use EasyBib\OAuth2\Client\TokenRequestInterface;
 use EasyBib\OAuth2\Client\TokenResponse\TokenResponse;
 use Guzzle\Http\ClientInterface;

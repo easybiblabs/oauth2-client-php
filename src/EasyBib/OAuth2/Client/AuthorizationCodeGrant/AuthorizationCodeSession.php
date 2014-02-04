@@ -6,6 +6,7 @@ use EasyBib\Guzzle\Plugin\BearerAuth\BearerAuth;
 use EasyBib\OAuth2\Client\AuthorizationCodeGrant\Authorization\AuthorizationResponse;
 use EasyBib\OAuth2\Client\RedirectorInterface;
 use EasyBib\OAuth2\Client\Scope;
+use EasyBib\OAuth2\Client\ServerConfig;
 use EasyBib\OAuth2\Client\SessionInterface;
 use EasyBib\OAuth2\Client\TokenStore;
 use Guzzle\Http\ClientInterface;
