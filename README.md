@@ -150,7 +150,7 @@ Authorization: Bearer token_foo_bar_baz
 
 OAuth specifies errors that can be returned from the server. This client
 represents two types in exceptions: `AuthorizationErrorException` and
-`TokenResponseErrorException`. You can find the documentation
+`TokenRequestErrorException`. You can find the documentation
 [here](http://tools.ietf.org/html/rfc6749#section-4.1.2.1) and
 [here](http://tools.ietf.org/html/rfc6749#section-5.2), respectively.
 

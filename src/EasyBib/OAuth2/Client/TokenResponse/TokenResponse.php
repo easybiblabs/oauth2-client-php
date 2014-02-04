@@ -49,13 +49,13 @@ class TokenResponse
     }
 
     /**
-     * @throws TokenResponseErrorException
+     * @throws TokenRequestErrorException
      * @return string
      */
     public function getToken()
     {
         if ($this->isError()) {
-            throw new TokenResponseErrorException($this->params['error']);
+            throw new TokenRequestErrorException($this->params['error']);
         }
 
         return $this->params['access_token'];
