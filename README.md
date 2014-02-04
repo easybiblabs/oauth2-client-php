@@ -17,10 +17,11 @@ dependencies.
 
 In order to keep your user logged in, you will need a persistent token store.
 This is implemented using the Session component of the Symfony HTTP Foundation
-package. You can use
+package. By default, this uses native PHP sessions, but you can use
 [that framework](http://symfony.com/doc/current/components/http_foundation/sessions.html)
 to implement whatever backend makes sense in the context of your
-application.
+application. Just use `setTokenStore()` on the client's `Session` object to
+swap in your customized class.
 
 ## Implementing this client in your app
 
@@ -74,9 +75,6 @@ class MyWebController
 
     private function setUpOAuth()
     {
-        // Symfony uses native PHP sessions as the default backend
-        tokenStore = new TokenStore(new SymfonySession());
-
         $httpClient = new Client('http://myoauth2provider.example.com');
         $redirector = new MyRedirector($this);
 
@@ -93,7 +91,6 @@ class MyWebController
         ]);
 
         $this->oauthSession = new Session(
-            $tokenStore,
             $httpClient,
             $redirector,
             $clientConfig,

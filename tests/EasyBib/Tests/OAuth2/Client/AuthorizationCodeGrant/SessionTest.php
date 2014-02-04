@@ -142,12 +142,13 @@ class SessionTest extends TestCase
     private function createSession()
     {
         $session = new Session(
-            $this->tokenStore,
             $this->httpClient,
             new ExceptionMockRedirector(),
             $this->clientConfig,
             $this->serverConfig
         );
+
+        $session->setTokenStore($this->tokenStore);
 
         $scope = new Scope(['USER_READ', 'DATA_READ_WRITE']);
         $session->setScope($scope);

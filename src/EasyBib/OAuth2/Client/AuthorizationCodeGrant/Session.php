@@ -8,9 +8,13 @@ use EasyBib\OAuth2\Client\RedirectorInterface;
 use EasyBib\OAuth2\Client\Scope;
 use EasyBib\OAuth2\Client\TokenStore;
 use Guzzle\Http\ClientInterface;
+use Symfony\Component\HttpFoundation\Session\Session as SymfonySession;
 
 class Session
 {
+    /**
+     * @var \EasyBib\OAuth2\Client\TokenStore
+     */
     private $tokenStore;
 
     /**
@@ -39,24 +43,23 @@ class Session
     private $scope;
 
     /**
-     * @param TokenStore $tokenStore
      * @param ClientInterface $httpClient
      * @param RedirectorInterface $redirector
      * @param ClientConfig $clientConfig
      * @param ServerConfig $serverConfig
      */
     public function __construct(
-        TokenStore $tokenStore,
         ClientInterface $httpClient,
         RedirectorInterface $redirector,
         ClientConfig $clientConfig,
         ServerConfig $serverConfig
     ) {
-        $this->tokenStore = $tokenStore;
         $this->httpClient = $httpClient;
         $this->redirector = $redirector;
         $this->clientConfig = $clientConfig;
         $this->serverConfig = $serverConfig;
+
+        $this->tokenStore = new TokenStore(new SymfonySession());
     }
 
     public function setScope(Scope $scope)
@@ -112,6 +115,14 @@ class Session
 
         // redirects browser
         $this->authorize();
+    }
+
+    /**
+     * @param TokenStore $tokenStore
+     */
+    public function setTokenStore(TokenStore $tokenStore)
+    {
+        $this->tokenStore = $tokenStore;
     }
 
     /**
