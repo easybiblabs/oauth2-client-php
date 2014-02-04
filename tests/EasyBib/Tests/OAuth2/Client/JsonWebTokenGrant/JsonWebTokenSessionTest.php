@@ -21,8 +21,14 @@ class JsonWebTokenSessionTest extends TestCase
      */
     private $session;
 
+    /**
+     * @var Session
+     */
     private $tokenSession;
 
+    /**
+     * @var TokenStore
+     */
     private $tokenStore;
 
     public function setUp()
@@ -97,7 +103,7 @@ class JsonWebTokenSessionTest extends TestCase
     }
 
     /**
-     * @return JsonWebTokenSession[
+     * @return JsonWebTokenSession
      */
     private function createSession()
     {

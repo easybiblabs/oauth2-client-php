@@ -24,18 +24,39 @@ abstract class TestCase extends \PHPUnit_Framework_TestCase
      */
     protected $given;
 
+    /**
+     * @var ClientConfig
+     */
     protected $clientConfig;
 
+    /**
+     * @var ServerConfig
+     */
     protected $serverConfig;
 
+    /**
+     * @var Client
+     */
     protected $httpClient;
 
+    /**
+     * @var HistoryPlugin
+     */
     protected $history;
 
+    /**
+     * @var MockPlugin
+     */
     protected $mockResponses;
 
+    /**
+     * @var Scope
+     */
     protected $scope;
 
+    /**
+     * @var int
+     */
     protected $baseTime;
 
     public function setUp()
@@ -101,6 +122,9 @@ abstract class TestCase extends \PHPUnit_Framework_TestCase
         ];
     }
 
+    /**
+     * @return string
+     */
     private function getTokenEndpoint()
     {
         return vsprintf('%s%s', [
