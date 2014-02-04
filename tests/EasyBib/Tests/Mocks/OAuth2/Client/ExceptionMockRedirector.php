@@ -16,7 +16,6 @@ class ExceptionMockRedirector implements RedirectorInterface
     /**
      * @param string $url
      * @throws MockRedirectException
-     * @return void
      */
     public function redirect($url)
     {
