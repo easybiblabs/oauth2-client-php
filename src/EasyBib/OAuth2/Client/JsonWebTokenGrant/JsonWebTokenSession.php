@@ -3,7 +3,6 @@
 namespace EasyBib\OAuth2\Client\JsonWebTokenGrant;
 
 use EasyBib\OAuth2\Client\AbstractSession;
-use EasyBib\OAuth2\Client\RedirectorInterface;
 use EasyBib\OAuth2\Client\Scope;
 use EasyBib\OAuth2\Client\ServerConfig;
 use EasyBib\OAuth2\Client\TokenStore;
@@ -12,11 +11,6 @@ use Symfony\Component\HttpFoundation\Session\Session;
 
 class JsonWebTokenSession extends AbstractSession
 {
-    /**
-     * @var RedirectorInterface
-     */
-    private $redirector;
-
     /**
      * @var ClientConfig
      */
@@ -48,18 +42,15 @@ class JsonWebTokenSession extends AbstractSession
 
     /**
      * @param ClientInterface $httpClient
-     * @param RedirectorInterface $redirector
      * @param ClientConfig $clientConfig
      * @param ServerConfig $serverConfig
      */
     public function __construct(
         ClientInterface $httpClient,
-        RedirectorInterface $redirector,
         ClientConfig $clientConfig,
         ServerConfig $serverConfig
     ) {
         $this->httpClient = $httpClient;
-        $this->redirector = $redirector;
         $this->clientConfig = $clientConfig;
         $this->serverConfig = $serverConfig;
 
