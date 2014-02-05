@@ -2,13 +2,9 @@
 
 namespace EasyBib\Tests\OAuth2\Client\JsonWebTokenGrant;
 
-use EasyBib\OAuth2\Client\JsonWebTokenGrant\ClientConfig;
 use EasyBib\OAuth2\Client\JsonWebTokenGrant\ServerConfig;
-use EasyBib\OAuth2\Client\Scope;
 use EasyBib\OAuth2\Client\JsonWebTokenGrant\JsonWebTokenSession;
 use EasyBib\OAuth2\Client\TokenStore;
-use EasyBib\Tests\Mocks\OAuth2\Client\ExceptionMockRedirector;
-use EasyBib\Tests\OAuth2\Client\Given;
 use Guzzle\Http\Client;
 use Guzzle\Plugin\History\HistoryPlugin;
 use Symfony\Component\HttpFoundation\Session\Session;
@@ -109,7 +105,6 @@ class JsonWebTokenSessionTest extends TestCase
     {
         $session = new JsonWebTokenSession(
             $this->httpClient,
-            new ExceptionMockRedirector(),
             $this->clientConfig,
             $this->serverConfig
         );
