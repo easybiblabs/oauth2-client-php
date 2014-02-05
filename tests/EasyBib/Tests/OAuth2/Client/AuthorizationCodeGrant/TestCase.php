@@ -1,11 +1,13 @@
 <?php
 
-namespace EasyBib\Tests\OAuth2\Client;
+namespace EasyBib\Tests\OAuth2\Client\AuthorizationCodeGrant;
 
-use EasyBib\OAuth2\Client\AuthorizationCodeGrant\ClientConfig;
 use EasyBib\OAuth2\Client\AuthorizationCodeGrant\Authorization\AuthorizationResponse;
-use EasyBib\OAuth2\Client\AuthorizationCodeGrant\ServerConfig;
+use EasyBib\OAuth2\Client\AuthorizationCodeGrant\ClientConfig;
+use EasyBib\OAuth2\Client\Scope;
+use EasyBib\OAuth2\Client\ServerConfig;
 use EasyBib\OAuth2\Client\TokenStore;
+use EasyBib\Tests\OAuth2\Client\Given;
 use Guzzle\Http\Client;
 use Guzzle\Plugin\History\HistoryPlugin;
 use Guzzle\Plugin\Mock\MockPlugin;
@@ -67,6 +69,11 @@ abstract class TestCase extends \PHPUnit_Framework_TestCase
      */
     protected $authorization;
 
+    /**
+     * @var Scope
+     */
+    protected $scope;
+
     public function setUp()
     {
         parent::setUp();
@@ -93,6 +100,7 @@ abstract class TestCase extends \PHPUnit_Framework_TestCase
         $this->tokenStore = new TokenStore($this->tokenSession);
 
         $this->authorization = new AuthorizationResponse(['code' => 'ABC123']);
+        $this->scope = new Scope(['USER_READ', 'DATA_READ_WRITE']);
     }
 
     protected function shouldHaveMadeATokenRequest()

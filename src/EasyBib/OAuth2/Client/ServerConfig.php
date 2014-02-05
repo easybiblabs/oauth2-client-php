@@ -1,9 +1,7 @@
 <?php
 
-namespace EasyBib\OAuth2\Client\AuthorizationCodeGrant;
+namespace EasyBib\OAuth2\Client;
 
-
-use EasyBib\OAuth2\Client\ArrayValidator;
 
 class ServerConfig
 {

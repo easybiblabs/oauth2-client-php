@@ -1,8 +1,8 @@
 <?php
 
-namespace EasyBib\Tests\OAuth2\Client\AuthorizationCodeGrant;
+namespace EasyBib\Tests\OAuth2\Client\JsonWebTokenGrant;
 
-use EasyBib\OAuth2\Client\AuthorizationCodeGrant\TokenRequest;
+use EasyBib\OAuth2\Client\JsonWebTokenGrant\TokenRequest;
 use EasyBib\OAuth2\Client\TokenResponse\TokenResponse;
 
 class TokenRequestTest extends TestCase
@@ -10,14 +10,14 @@ class TokenRequestTest extends TestCase
     public function testSend()
     {
         $token = 'token_ABC123';
-
         $this->given->iAmReadyToRespondToATokenRequest($token, $this->scope, $this->mockResponses);
 
         $tokenRequest = new TokenRequest(
             $this->clientConfig,
             $this->serverConfig,
             $this->httpClient,
-            $this->authorization
+            $this->scope,
+            $this->baseTime
         );
 
         $tokenResponse = $tokenRequest->send();

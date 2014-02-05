@@ -2,18 +2,17 @@
 
 namespace EasyBib\Tests\OAuth2\Client\AuthorizationCodeGrant;
 
+use EasyBib\OAuth2\Client\AuthorizationCodeGrant\AuthorizationCodeSession;
 use EasyBib\OAuth2\Client\Scope;
-use EasyBib\OAuth2\Client\AuthorizationCodeGrant\Session;
 use EasyBib\Tests\Mocks\OAuth2\Client\ExceptionMockRedirector;
 use EasyBib\Tests\Mocks\OAuth2\Client\MockRedirectException;
-use EasyBib\Tests\OAuth2\Client\TestCase;
 use Guzzle\Http\Client;
 use Guzzle\Plugin\History\HistoryPlugin;
 
-class SessionTest extends TestCase
+class AuthorizationCodeSessionTest extends TestCase
 {
     /**
-     * @var Session
+     * @var AuthorizationCodeSession
      */
     private $session;
 
@@ -47,7 +46,7 @@ class SessionTest extends TestCase
         $this->given->iHaveATokenInSession($oldToken, $this->tokenSession);
         $this->given->iHaveARefreshToken($refreshToken, $this->tokenSession);
         $this->given->myTokenIsExpired($this->tokenSession);
-        $this->given->iAmReadyToRespondToATokenRequest($newToken, $this->mockResponses);
+        $this->given->iAmReadyToRespondToATokenRequest($newToken, $this->scope, $this->mockResponses);
 
         $this->makeResourceRequest();
 
@@ -69,7 +68,7 @@ class SessionTest extends TestCase
     public function testHandleAuthorizationResponse()
     {
         $token = 'token_ABC123';
-        $this->given->iAmReadyToRespondToATokenRequest($token, $this->mockResponses);
+        $this->given->iAmReadyToRespondToATokenRequest($token, $this->scope, $this->mockResponses);
 
         $this->session->handleAuthorizationResponse($this->authorization);
 
@@ -112,7 +111,7 @@ class SessionTest extends TestCase
         $httpClient = new Client();
         $httpClient->addSubscriber($history);
 
-        $this->session->addResourceSubscriber($httpClient);
+        $this->session->addResourceClient($httpClient);
 
         $request = $httpClient->get('http://example.org');
         $request->send();
@@ -137,11 +136,11 @@ class SessionTest extends TestCase
     }
 
     /**
-     * @return Session
+     * @return AuthorizationCodeSession
      */
     private function createSession()
     {
-        $session = new Session(
+        $session = new AuthorizationCodeSession(
             $this->httpClient,
             new ExceptionMockRedirector(),
             $this->clientConfig,
@@ -149,9 +148,7 @@ class SessionTest extends TestCase
         );
 
         $session->setTokenStore($this->tokenStore);
-
-        $scope = new Scope(['USER_READ', 'DATA_READ_WRITE']);
-        $session->setScope($scope);
+        $session->setScope($this->scope);
 
         return $session;
     }

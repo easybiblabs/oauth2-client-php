@@ -3,9 +3,33 @@
 namespace EasyBib\Tests\OAuth2\Client;
 
 use EasyBib\OAuth2\Client\TokenStore;
+use Symfony\Component\HttpFoundation\Session\Session;
+use Symfony\Component\HttpFoundation\Session\Storage\MockArraySessionStorage;
 
-class TokenStoreTest extends TestCase
+class TokenStoreTest extends \PHPUnit_Framework_TestCase
 {
+    /**
+     * @var Given
+     */
+    private $given;
+
+    /**
+     * @var Session
+     */
+    private $tokenSession;
+
+    /**
+     * @var TokenStore
+     */
+    private $tokenStore;
+
+    public function setUp()
+    {
+        $this->given = new Given();
+        $this->tokenSession = new Session(new MockArraySessionStorage());
+        $this->tokenStore = new TokenStore($this->tokenSession);
+    }
+
     public function dataForIsRefreshable()
     {
         $token = 'ABC123';

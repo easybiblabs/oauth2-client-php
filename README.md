@@ -4,6 +4,7 @@ You can read all about OAuth at the
 [standard](http://tools.ietf.org/html/rfc6749).
 
 Currently, only [Authorization Code Grants](http://tools.ietf.org/html/rfc6749#section-4.1)
+and [JSON Web Token Grants](http://tools.ietf.org/html/draft-ietf-oauth-json-web-token-15)
 are supported.
 
 ## Installation
@@ -25,10 +26,13 @@ swap in your customized class.
 
 ## Implementing this client in your app
 
-The `Session` class is the heart of this library. It wraps a Guzzle `Client`,
-which it uses to communicate with the OAuth server. It also allows you to
-attach any number of Guzzle clients as token subscribers, which you will then
-use to make requests against resource servers secured with OAuth.
+The implementations of `AbstractSession` class are the heart of this library.
+They wraps a Guzzle `Client`, which communicates with the OAuth server. They
+also allows you to attach any number of Guzzle clients to the session, which
+will thereafter carry the token necessary to make requests against resource
+servers secured with OAuth.
+
+### Authorization Code Grant
 
 During the initial authorization step of the OAuth transaction, your app will
 need to redirect the user to the OAuth server. After authorization, the OAuth
@@ -145,6 +149,15 @@ will add the necessary header to subsequent requests:
 GET /some/resource HTTP/1.1
 Authorization: Bearer token_foo_bar_baz
 ```
+
+### JSON Web Token Grant
+
+JSON Web Token Grants are done very similarly to Authorization Code Grants,
+except that the browser redirect step is not needed. The client requests an
+access token directly from the OAuth server without the intervention of the
+user, by means of a secret shared between the client and the OAuth server.
+Please refer to [the tests](tests/EasyBib/Tests/OAuth2/Client/JsonWebTokenGrant/JsonWebTokenSessionTest.php)
+in order to implement this grant type.
 
 ## Error handling
 
