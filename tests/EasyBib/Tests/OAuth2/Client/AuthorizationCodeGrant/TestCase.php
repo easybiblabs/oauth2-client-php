@@ -6,13 +6,10 @@ use EasyBib\OAuth2\Client\AuthorizationCodeGrant\Authorization\AuthorizationResp
 use EasyBib\OAuth2\Client\AuthorizationCodeGrant\ClientConfig;
 use EasyBib\OAuth2\Client\Scope;
 use EasyBib\OAuth2\Client\ServerConfig;
-use EasyBib\OAuth2\Client\TokenStore;
 use EasyBib\Tests\OAuth2\Client\Given;
 use Guzzle\Http\Client;
 use Guzzle\Plugin\History\HistoryPlugin;
 use Guzzle\Plugin\Mock\MockPlugin;
-use Symfony\Component\HttpFoundation\Session\Session;
-use Symfony\Component\HttpFoundation\Session\Storage\MockArraySessionStorage;
 
 /**
  * @SuppressWarnings(PHPMD.CouplingBetweenObjects)
@@ -43,16 +40,6 @@ abstract class TestCase extends \PHPUnit_Framework_TestCase
      * @var MockPlugin
      */
     protected $mockResponses;
-
-    /**
-     * @var Session
-     */
-    protected $tokenSession;
-
-    /**
-     * @var TokenStore
-     */
-    protected $tokenStore;
 
     /**
      * @var ClientConfig
@@ -95,9 +82,6 @@ abstract class TestCase extends \PHPUnit_Framework_TestCase
         $this->history = new HistoryPlugin();
         $this->httpClient->addSubscriber($this->mockResponses);
         $this->httpClient->addSubscriber($this->history);
-
-        $this->tokenSession = new Session(new MockArraySessionStorage());
-        $this->tokenStore = new TokenStore($this->tokenSession);
 
         $this->authorization = new AuthorizationResponse(['code' => 'ABC123']);
         $this->scope = new Scope(['USER_READ', 'DATA_READ_WRITE']);
