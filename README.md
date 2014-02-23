@@ -3,9 +3,13 @@
 You can read all about OAuth at the
 [standard](http://tools.ietf.org/html/rfc6749).
 
-Currently, only [Authorization Code Grants](http://tools.ietf.org/html/rfc6749#section-4.1)
+Currently, [Authorization Code Grants](http://tools.ietf.org/html/rfc6749#section-4.1),
+[Client Credentials Grants](http://tools.ietf.org/html/rfc6749#section-4.4) with
+[request body parameter client authentication](http://tools.ietf.org/html/rfc6749#section-2.3.1),
 and [JSON Web Token Grants](http://tools.ietf.org/html/draft-ietf-oauth-json-web-token-15)
 are supported.
+
+Client Credentials Grants with HTTP Basic authentication are not currently supported.
 
 ## Installation
 
@@ -67,15 +71,14 @@ First, instantiate the basic objects and use them to create an OAuth Session.
 
 ```php
 use EasyBib\OAuth2\Client\AuthorizationCodeGrant\ClientConfig;
-use EasyBib\OAuth2\Client\AuthorizationCodeGrant\ServerConfig;
 use EasyBib\OAuth2\Client\AuthorizationCodeGrant\Session;
+use EasyBib\OAuth2\Client\ServerConfig;
 use EasyBib\OAuth2\Client\Scope;
-use EasyBib\OAuth2\Client\TokenStore;
-use Symfony\Component\HttpFoundation\Session\Session as SymfonySession;
+use Guzzle\Http\Client;
 
 class MyWebController
 {
-    private oauthSession;
+    protected $oauthSession;
 
     private function setUpOAuth()
     {
@@ -148,6 +151,49 @@ will add the necessary header to subsequent requests:
 ```
 GET /some/resource HTTP/1.1
 Authorization: Bearer token_foo_bar_baz
+```
+### Client Credentials Grant
+
+In this grant type, your client has a privileged ID and secret arranged with the
+OAuth provider. There is no input required by the user in this grant type.
+
+```php
+use EasyBib\OAuth2\Client\ClientCredentialsGrant\ClientConfig;
+use EasyBib\OAuth2\Client\ClientCredentialsGrant\Session;
+use EasyBib\OAuth2\Client\ServerConfig;
+use Guzzle\Http\Client;
+
+class MyWebController
+{
+    protected $resourceClient;
+
+    private function setUpOAuth()
+    {
+        $oauthHttpClient = new Client('http://myoauth2provider.example.com');
+
+        // your application's settings for the OAuth provider
+        $clientConfig = new ClientConfig([
+            'client_id' => 'client_123',
+            'client_secret' => 'secret_456',
+        ]);
+
+        // the OAuth provider's settings
+        $serverConfig = new ServerConfig([
+            'authorization_endpoint' => '/oauth/authorize',
+            'token_endpoint' => '/oauth/token',
+        ]);
+
+        $oauthSession = new ClientCredentialsSession(
+            $oauthHttpClient,
+            $clientConfig,
+            $serverConfig
+        );
+
+        $this->resourceHttpClient = new Client('http://coolresources.example.com');
+        $oauthSession->addResourceHttpClient($this->resourceHttpClient);
+        $request = $this->resourceHttpClient->get('/some/resource');
+    }
+}
 ```
 
 ### JSON Web Token Grant
