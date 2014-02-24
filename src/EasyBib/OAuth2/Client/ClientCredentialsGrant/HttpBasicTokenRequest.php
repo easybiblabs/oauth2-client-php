@@ -56,7 +56,7 @@ class HttpBasicTokenRequest implements TokenRequestInterface
     public function send()
     {
         $url = $this->serverConfig->getParams()['token_endpoint'];
-        $request = $this->httpClient->post($url);
+        $request = $this->httpClient->post($url, [], $this->getParams());
 
         $request->setAuth(
             $this->clientConfig->getParams()['client_id'],
@@ -66,5 +66,15 @@ class HttpBasicTokenRequest implements TokenRequestInterface
         $responseBody = $request->send()->getBody(true);
 
         return new TokenResponse(json_decode($responseBody, true));
+    }
+
+    /**
+     * @return array
+     */
+    private function getParams()
+    {
+        return [
+            'grant_type' => self::GRANT_TYPE,
+        ];
     }
 }

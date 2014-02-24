@@ -30,17 +30,22 @@ class HttpBasicTokenRequestTest extends TestCase
     {
         $lastRequest = $this->history->getLastRequest();
 
+        $configParams = $this->httpBasicClientConfig->getParams();
+
         $expectedUrl = sprintf(
             '%s%s',
             $this->apiBaseUrl,
             $this->serverConfig->getParams()['token_endpoint']
         );
 
-        $configParams = $this->httpBasicClientConfig->getParams();
+        $expectedPostParams = [
+            'grant_type' => HttpBasicTokenRequest::GRANT_TYPE,
+        ];
 
         $this->assertEquals('POST', $lastRequest->getMethod());
         $this->assertEquals($configParams['client_id'], $lastRequest->getUsername());
         $this->assertEquals($configParams['client_password'], $lastRequest->getPassword());
+        $this->assertEquals($expectedPostParams, $lastRequest->getPostFields()->toArray());
         $this->assertEquals($expectedUrl, $lastRequest->getUrl());
     }
 }
