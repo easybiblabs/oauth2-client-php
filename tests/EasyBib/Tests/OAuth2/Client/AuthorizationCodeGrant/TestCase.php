@@ -4,8 +4,8 @@ namespace EasyBib\Tests\OAuth2\Client\AuthorizationCodeGrant;
 
 use EasyBib\OAuth2\Client\AuthorizationCodeGrant\Authorization\AuthorizationResponse;
 use EasyBib\OAuth2\Client\AuthorizationCodeGrant\ClientConfig;
+use EasyBib\OAuth2\Client\AuthorizationCodeGrant\ServerConfig;
 use EasyBib\OAuth2\Client\Scope;
-use EasyBib\OAuth2\Client\ServerConfig;
 use EasyBib\Tests\OAuth2\Client\Given;
 use Guzzle\Http\Client;
 use Guzzle\Plugin\History\HistoryPlugin;

@@ -72,7 +72,7 @@ First, instantiate the basic objects and use them to create an OAuth Session.
 ```php
 use EasyBib\OAuth2\Client\AuthorizationCodeGrant\ClientConfig;
 use EasyBib\OAuth2\Client\AuthorizationCodeGrant\Session;
-use EasyBib\OAuth2\Client\ServerConfig;
+use EasyBib\OAuth2\Client\AuthorizationCodeGrant\ServerConfig;
 use EasyBib\OAuth2\Client\Scope;
 use Guzzle\Http\Client;
 

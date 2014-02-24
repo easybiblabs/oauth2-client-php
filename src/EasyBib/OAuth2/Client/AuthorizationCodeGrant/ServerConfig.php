@@ -1,6 +1,9 @@
 <?php
 
-namespace EasyBib\OAuth2\Client;
+namespace EasyBib\OAuth2\Client\AuthorizationCodeGrant;
+
+use EasyBib\OAuth2\Client\ArrayValidator;
+use EasyBib\OAuth2\Client\InvalidServerConfigException;
 
 class ServerConfig
 {
@@ -10,6 +13,7 @@ class ServerConfig
     private $params;
 
     private static $validParams = [
+        'authorization_endpoint',
         'token_endpoint',
     ];
 

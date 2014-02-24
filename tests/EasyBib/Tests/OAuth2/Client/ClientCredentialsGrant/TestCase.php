@@ -68,7 +68,6 @@ abstract class TestCase extends \PHPUnit_Framework_TestCase
         ]);
 
         $this->serverConfig = new ServerConfig([
-            'authorization_endpoint' => '/oauth/authorize',
             'token_endpoint' => '/oauth/token',
         ]);
 
