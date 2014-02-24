@@ -13,6 +13,9 @@ class ResourceRequest
      */
     private $session;
 
+    /**
+     * @param AbstractSession $session
+     */
     public function __construct(AbstractSession $session)
     {
         $this->session = $session;
