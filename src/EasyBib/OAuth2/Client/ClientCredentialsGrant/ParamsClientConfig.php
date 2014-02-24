@@ -34,9 +34,7 @@ class ParamsClientConfig
      */
     public function getParams()
     {
-        $params = $this->params;
-
-        return $params;
+        return $this->params;
     }
 
     /**
