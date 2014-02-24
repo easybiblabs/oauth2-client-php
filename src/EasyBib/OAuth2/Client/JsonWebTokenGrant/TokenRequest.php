@@ -98,6 +98,9 @@ class TokenRequest implements TokenRequestInterface
         ];
     }
 
+    /**
+     * @return string
+     */
     private function getTokenEndpoint()
     {
         return vsprintf('%s%s', [

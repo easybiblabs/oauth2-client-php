@@ -21,7 +21,7 @@ class BearerAuth implements EventSubscriberInterface
     private $session;
 
     /**
-     * @param SessionInterface $session
+     * @param AbstractSession $session
      */
     public function __construct(AbstractSession $session)
     {

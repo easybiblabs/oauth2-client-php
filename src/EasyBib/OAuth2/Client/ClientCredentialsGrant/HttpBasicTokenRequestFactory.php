@@ -9,11 +9,32 @@ use Guzzle\Http\ClientInterface;
 
 class HttpBasicTokenRequestFactory implements TokenRequestFactoryInterface
 {
+    /**
+     * @var HttpBasicClientConfig
+     */
     private $clientConfig;
+
+    /**
+     * @var \EasyBib\OAuth2\Client\ServerConfig
+     */
     private $serverConfig;
+
+    /**
+     * @var \Guzzle\Http\ClientInterface
+     */
     private $httpClient;
+
+    /**
+     * @var \EasyBib\OAuth2\Client\Scope
+     */
     private $scope;
 
+    /**
+     * @param HttpBasicClientConfig $clientConfig
+     * @param ServerConfig $serverConfig
+     * @param ClientInterface $httpClient
+     * @param Scope $scope
+     */
     public function __construct(
         HttpBasicClientConfig $clientConfig,
         ServerConfig $serverConfig,
@@ -26,6 +47,9 @@ class HttpBasicTokenRequestFactory implements TokenRequestFactoryInterface
         $this->scope = $scope;
     }
 
+    /**
+     * @return HttpBasicTokenRequest
+     */
     public function create()
     {
         return new HttpBasicTokenRequest(

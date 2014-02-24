@@ -24,13 +24,18 @@ class ClientConfig
         $this->params = $params;
     }
 
+    /**
+     * @return array
+     */
     public function getParams()
     {
-        $params = $this->params;
-
-        return $params;
+        return $this->params;
     }
 
+    /**
+     * @param array $params
+     * @throws \EasyBib\OAuth2\Client\InvalidClientConfigException
+     */
     private static function validate(array $params)
     {
         $validator = new ArrayValidator(self::$requiredParams, self::$requiredParams);

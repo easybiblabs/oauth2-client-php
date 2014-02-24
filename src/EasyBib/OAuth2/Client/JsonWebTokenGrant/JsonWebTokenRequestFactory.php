@@ -9,12 +9,38 @@ use Guzzle\Http\ClientInterface;
 
 class JsonWebTokenRequestFactory implements TokenRequestFactoryInterface
 {
+    /**
+     * @var ClientConfig
+     */
     private $clientConfig;
+
+    /**
+     * @var \EasyBib\OAuth2\Client\ServerConfig
+     */
     private $serverConfig;
+
+    /**
+     * @var \Guzzle\Http\ClientInterface
+     */
     private $httpClient;
+
+    /**
+     * @var \EasyBib\OAuth2\Client\Scope
+     */
     private $scope;
+
+    /**
+     * @var int
+     */
     private $baseTime;
 
+    /**
+     * @param ClientConfig $clientConfig
+     * @param ServerConfig $serverConfig
+     * @param ClientInterface $httpClient
+     * @param Scope $scope
+     * @param int $baseTime
+     */
     public function __construct(
         ClientConfig $clientConfig,
         ServerConfig $serverConfig,
@@ -29,6 +55,9 @@ class JsonWebTokenRequestFactory implements TokenRequestFactoryInterface
         $this->baseTime = $baseTime ?: time();
     }
 
+    /**
+     * @return TokenRequest
+     */
     public function create()
     {
         return new TokenRequest(

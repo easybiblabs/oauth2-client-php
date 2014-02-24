@@ -6,8 +6,14 @@ use Symfony\Component\HttpFoundation\Session\Session;
 
 class BasicSession extends AbstractSession
 {
+    /**
+     * @var TokenRequestFactoryInterface
+     */
     private $tokenRequestFactory;
 
+    /**
+     * @param TokenRequestFactoryInterface $tokenRequestFactory
+     */
     public function __construct(TokenRequestFactoryInterface $tokenRequestFactory)
     {
         $this->tokenRequestFactory = $tokenRequestFactory;
