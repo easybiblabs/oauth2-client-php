@@ -7,8 +7,8 @@ use EasyBib\OAuth2\Client\Scope;
 use EasyBib\OAuth2\Client\TokenStore;
 use EasyBib\Tests\Mocks\OAuth2\Client\ExceptionMockRedirector;
 use EasyBib\Tests\Mocks\OAuth2\Client\MockRedirectException;
+use EasyBib\Tests\Mocks\OAuth2\Client\ResourceRequest;
 use Guzzle\Http\Client;
-use Guzzle\Plugin\History\HistoryPlugin;
 use Symfony\Component\HttpFoundation\Session\Session;
 use Symfony\Component\HttpFoundation\Session\Storage\MockArraySessionStorage;
 
@@ -63,7 +63,7 @@ class AuthorizationCodeSessionTest extends TestCase
         $this->given->myTokenIsExpired($this->tokenSession);
         $this->given->iAmReadyToRespondToATokenRequest($newToken, $this->scope, $this->mockResponses);
 
-        $this->makeResourceRequest();
+        (new ResourceRequest($this->session))->execute();
 
         $this->shouldHaveMadeATokenRefreshRequest($refreshToken);
         $this->shouldHaveTokenInHeaderForResourceRequests($newToken);
@@ -77,7 +77,7 @@ class AuthorizationCodeSessionTest extends TestCase
         $this->given->myTokenIsExpired($this->tokenSession);
 
         $this->expectRedirectToAuthorizationEndpoint();
-        $this->makeResourceRequest();
+        (new ResourceRequest($this->session))->execute();
     }
 
     public function testHandleAuthorizationResponse()
@@ -110,28 +110,10 @@ class AuthorizationCodeSessionTest extends TestCase
 
     private function shouldHaveTokenInHeaderForResourceRequests($token)
     {
-        $lastRequest = $this->makeResourceRequest();
+        $lastRequest = (new ResourceRequest($this->session))->execute();
 
         $this->assertEquals($token, $this->tokenStore->getToken());
         $this->assertEquals('Bearer ' . $token, $lastRequest->getHeader('Authorization'));
-    }
-
-    /**
-     * @return \Guzzle\Http\Message\RequestInterface
-     */
-    private function makeResourceRequest()
-    {
-        $history = new HistoryPlugin();
-
-        $httpClient = new Client();
-        $httpClient->addSubscriber($history);
-
-        $this->session->addResourceClient($httpClient);
-
-        $request = $httpClient->get('http://example.org');
-        $request->send();
-
-        return $history->getLastRequest();
     }
 
     private function expectRedirectToAuthorizationEndpoint()

@@ -5,8 +5,8 @@ namespace EasyBib\Tests\OAuth2\Client\JsonWebTokenGrant;
 use EasyBib\OAuth2\Client\JsonWebTokenGrant\ServerConfig;
 use EasyBib\OAuth2\Client\JsonWebTokenGrant\JsonWebTokenSession;
 use EasyBib\OAuth2\Client\TokenStore;
+use EasyBib\Tests\Mocks\OAuth2\Client\ResourceRequest;
 use Guzzle\Http\Client;
-use Guzzle\Plugin\History\HistoryPlugin;
 use Symfony\Component\HttpFoundation\Session\Session;
 use Symfony\Component\HttpFoundation\Session\Storage\MockArraySessionStorage;
 
@@ -65,7 +65,7 @@ class JsonWebTokenSessionTest extends TestCase
         $this->given->myTokenIsExpired($this->tokenSession);
         $this->given->iAmReadyToRespondToATokenRequest($newToken, $this->scope, $this->mockResponses);
 
-        $this->makeResourceRequest();
+        (new ResourceRequest($this->session))->execute();
 
         $this->shouldHaveMadeATokenRequest();
         $this->shouldHaveTokenInHeaderForResourceRequests($newToken);
@@ -73,29 +73,10 @@ class JsonWebTokenSessionTest extends TestCase
 
     private function shouldHaveTokenInHeaderForResourceRequests($token)
     {
-        $lastRequest = $this->makeResourceRequest();
+        $lastRequest = (new ResourceRequest($this->session))->execute();
 
         $this->assertEquals($token, $this->tokenStore->getToken());
         $this->assertEquals('Bearer ' . $token, $lastRequest->getHeader('Authorization'));
-    }
-
-    /**
-     * @todo duplicate code?
-     * @return \Guzzle\Http\Message\RequestInterface
-     */
-    private function makeResourceRequest()
-    {
-        $history = new HistoryPlugin();
-
-        $httpClient = new Client();
-        $httpClient->addSubscriber($history);
-
-        $this->session->addResourceClient($httpClient);
-
-        $request = $httpClient->get('http://example.org');
-        $request->send();
-
-        return $history->getLastRequest();
     }
 
     /**
