@@ -83,8 +83,8 @@ class TokenRequest implements TokenRequestInterface
             'iss' => $this->clientConfig->getParams()['client_id'],
             'sub' => $this->clientConfig->getParams()['subject'],
             'aud' => $this->getTokenEndpoint(),
-            'exp' => $this->baseTime + TokenRequest::EXPIRES_IN_TIME,
-            'nbf' => $this->baseTime - TokenRequest::NOT_BEFORE_TIME,
+            'exp' => $this->baseTime + self::EXPIRES_IN_TIME,
+            'nbf' => $this->baseTime - self::NOT_BEFORE_TIME,
             'iat' => $this->baseTime,
             'jti' => '',
             'typ' => '',
@@ -93,7 +93,7 @@ class TokenRequest implements TokenRequestInterface
         $assertion = JWT::encode($payload, $this->clientConfig->getParams()['client_secret']);
 
         return [
-            'grant_type' => TokenRequest::GRANT_TYPE,
+            'grant_type' => self::GRANT_TYPE,
             'assertion' => $assertion,
         ];
     }

@@ -68,7 +68,7 @@ class ParamsTokenRequest implements TokenRequestInterface
     private function getParams()
     {
         return [
-            'grant_type' => ParamsTokenRequest::GRANT_TYPE,
+            'grant_type' => self::GRANT_TYPE,
             'client_id' => $this->clientConfig->getParams()['client_id'],
             'client_secret' => $this->clientConfig->getParams()['client_secret'],
         ];
