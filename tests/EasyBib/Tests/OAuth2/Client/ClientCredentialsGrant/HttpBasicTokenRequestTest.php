@@ -25,4 +25,22 @@ class HttpBasicTokenRequestTest extends TestCase
         $this->assertInstanceOf(TokenResponse::class, $tokenResponse);
         $this->assertEquals($token, $tokenResponse->getToken());
     }
+
+    private function shouldHaveMadeAnHttpBasicTokenRequest()
+    {
+        $lastRequest = $this->history->getLastRequest();
+
+        $expectedUrl = sprintf(
+            '%s%s',
+            $this->apiBaseUrl,
+            $this->serverConfig->getParams()['token_endpoint']
+        );
+
+        $configParams = $this->httpBasicClientConfig->getParams();
+
+        $this->assertEquals('POST', $lastRequest->getMethod());
+        $this->assertEquals($configParams['client_id'], $lastRequest->getUsername());
+        $this->assertEquals($configParams['client_password'], $lastRequest->getPassword());
+        $this->assertEquals($expectedUrl, $lastRequest->getUrl());
+    }
 }

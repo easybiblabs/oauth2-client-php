@@ -4,7 +4,6 @@ namespace EasyBib\Tests\OAuth2\Client\ClientCredentialsGrant;
 
 use EasyBib\OAuth2\Client\ClientCredentialsGrant\HttpBasicClientConfig;
 use EasyBib\OAuth2\Client\ClientCredentialsGrant\ParamsClientConfig;
-use EasyBib\OAuth2\Client\ClientCredentialsGrant\ParamsTokenRequest;
 use EasyBib\OAuth2\Client\Scope;
 use EasyBib\OAuth2\Client\ServerConfig;
 use EasyBib\Tests\OAuth2\Client\Given;
@@ -14,6 +13,7 @@ use Guzzle\Plugin\Mock\MockPlugin;
 
 /**
  * @SuppressWarnings(PHPMD.CouplingBetweenObjects)
+ * @SuppressWarnings(PHPMD.LongVariable)
  */
 abstract class TestCase extends \PHPUnit_Framework_TestCase
 {
@@ -89,44 +89,5 @@ abstract class TestCase extends \PHPUnit_Framework_TestCase
         $this->httpClient->addSubscriber($this->history);
 
         $this->scope = new Scope(['USER_READ', 'DATA_READ_WRITE']);
-    }
-
-    protected function shouldHaveMadeAParamsTokenRequest()
-    {
-        $lastRequest = $this->history->getLastRequest();
-
-        $expectedParams = [
-            'grant_type' => ParamsTokenRequest::GRANT_TYPE,
-            'client_id' => $this->paramsClientConfig->getParams()['client_id'],
-            'client_secret' => $this->paramsClientConfig->getParams()['client_secret'],
-        ];
-
-        $expectedUrl = sprintf(
-            '%s%s',
-            $this->apiBaseUrl,
-            $this->serverConfig->getParams()['token_endpoint']
-        );
-
-        $this->assertEquals('POST', $lastRequest->getMethod());
-        $this->assertEquals($expectedParams, $lastRequest->getPostFields()->toArray());
-        $this->assertEquals($expectedUrl, $lastRequest->getUrl());
-    }
-
-    protected function shouldHaveMadeAnHttpBasicTokenRequest()
-    {
-        $lastRequest = $this->history->getLastRequest();
-
-        $expectedUrl = sprintf(
-            '%s%s',
-            $this->apiBaseUrl,
-            $this->serverConfig->getParams()['token_endpoint']
-        );
-
-        $configParams = $this->httpBasicClientConfig->getParams();
-
-        $this->assertEquals('POST', $lastRequest->getMethod());
-        $this->assertEquals($configParams['client_id'], $lastRequest->getUsername());
-        $this->assertEquals($configParams['client_password'], $lastRequest->getPassword());
-        $this->assertEquals($expectedUrl, $lastRequest->getUrl());
     }
 }

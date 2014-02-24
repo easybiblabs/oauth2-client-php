@@ -3,6 +3,7 @@
 namespace EasyBib\Tests\OAuth2\Client;
 
 use EasyBib\OAuth2\Client\BasicSession;
+use EasyBib\OAuth2\Client\ClientCredentialsGrant\ParamsTokenRequest;
 use EasyBib\OAuth2\Client\ClientCredentialsGrant\ParamsTokenRequestFactory;
 use EasyBib\OAuth2\Client\TokenStore;
 use EasyBib\Tests\Mocks\OAuth2\Client\ResourceRequest;
@@ -44,7 +45,7 @@ class BasicSessionTest extends TestCase
 
         $this->session->getToken();
 
-        $this->shouldHaveMadeAParamsTokenRequest();
+        $this->shouldHaveMadeATokenRequest();
         $this->shouldHaveTokenInHeaderForResourceRequests($token);
     }
 
@@ -67,7 +68,7 @@ class BasicSessionTest extends TestCase
 
         (new ResourceRequest($this->session))->execute();
 
-        $this->shouldHaveMadeAParamsTokenRequest();
+        $this->shouldHaveMadeATokenRequest();
         $this->shouldHaveTokenInHeaderForResourceRequests($newToken);
     }
 
@@ -77,6 +78,27 @@ class BasicSessionTest extends TestCase
 
         $this->assertEquals($token, $this->tokenStore->getToken());
         $this->assertEquals('Bearer ' . $token, $lastRequest->getHeader('Authorization'));
+    }
+
+    private function shouldHaveMadeATokenRequest()
+    {
+        $lastRequest = $this->history->getLastRequest();
+
+        $expectedParams = [
+            'grant_type' => ParamsTokenRequest::GRANT_TYPE,
+            'client_id' => $this->paramsClientConfig->getParams()['client_id'],
+            'client_secret' => $this->paramsClientConfig->getParams()['client_secret'],
+        ];
+
+        $expectedUrl = sprintf(
+            '%s%s',
+            $this->apiBaseUrl,
+            $this->serverConfig->getParams()['token_endpoint']
+        );
+
+        $this->assertEquals('POST', $lastRequest->getMethod());
+        $this->assertEquals($expectedParams, $lastRequest->getPostFields()->toArray());
+        $this->assertEquals($expectedUrl, $lastRequest->getUrl());
     }
 
     /**

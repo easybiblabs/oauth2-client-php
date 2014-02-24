@@ -5,7 +5,7 @@ namespace EasyBib\Tests\OAuth2\Client\ClientCredentialsGrant;
 use EasyBib\OAuth2\Client\InvalidClientConfigException;
 use EasyBib\OAuth2\Client\ClientCredentialsGrant\ParamsClientConfig;
 
-class ClientConfigTest extends \PHPUnit_Framework_TestCase
+class ParamsClientConfigTest extends \PHPUnit_Framework_TestCase
 {
     /**
      * @return array
