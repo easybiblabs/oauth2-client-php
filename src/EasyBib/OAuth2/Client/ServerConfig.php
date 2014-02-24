@@ -2,7 +2,6 @@
 
 namespace EasyBib\OAuth2\Client;
 
-
 class ServerConfig
 {
     /**

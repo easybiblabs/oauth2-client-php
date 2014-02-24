@@ -48,7 +48,7 @@ may be as simple as calling `header()` to send the Location, or it may involve
 a call to your web framework.
 
 ```php
-use EasyBib\OAuth2\Client\RedirectorInterface;
+use EasyBib\OAuth2\Client\AuthorizationCodeGrant\RedirectorInterface;
 
 class MyRedirector implements RedirectorInterface
 {

@@ -7,14 +7,12 @@ use Symfony\Component\HttpFoundation\Session\Session;
 
 class TokenStore
 {
-    const KEY_ACCESS_TOKEN = 'oauth/access_token';
-
+    const KEY_ACCESS_TOKEN  = 'oauth/access_token';
     const KEY_REFRESH_TOKEN = 'oauth/refresh_token';
-
-    const KEY_EXPIRES_AT = 'oauth/expires_at';
+    const KEY_EXPIRES_AT    = 'oauth/expires_at';
 
     /**
-     * treat token as expired if fewer than this number of seconds remains
+     * Treat token as expired if fewer than this number of seconds remains
      * until the expires_in point is reached
      */
     const EXPIRATION_WIGGLE_ROOM = 10;

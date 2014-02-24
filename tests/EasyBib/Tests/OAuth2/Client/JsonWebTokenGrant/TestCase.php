@@ -104,7 +104,6 @@ abstract class TestCase extends \PHPUnit_Framework_TestCase
      */
     private function getRequestParams()
     {
-        // TODO capture time as an injectable dependency
         $payload = [
             'scope' => $this->scope->getQuerystringParams()['scope'],
             'iss' => $this->clientConfig->getParams()['client_id'],

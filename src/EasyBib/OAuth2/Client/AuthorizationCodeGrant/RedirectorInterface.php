@@ -1,6 +1,6 @@
 <?php
 
-namespace EasyBib\OAuth2\Client;
+namespace EasyBib\OAuth2\Client\AuthorizationCodeGrant;
 
 interface RedirectorInterface
 {
