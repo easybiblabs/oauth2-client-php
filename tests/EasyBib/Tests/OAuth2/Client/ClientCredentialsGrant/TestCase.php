@@ -1,11 +1,11 @@
 <?php
 
-namespace EasyBib\Tests\OAuth2\Client\AuthorizationCodeGrant;
+namespace EasyBib\Tests\OAuth2\Client\ClientCredentialsGrant;
 
-use EasyBib\OAuth2\Client\AuthorizationCodeGrant\Authorization\AuthorizationResponse;
-use EasyBib\OAuth2\Client\AuthorizationCodeGrant\ClientConfig;
-use EasyBib\OAuth2\Client\AuthorizationCodeGrant\ServerConfig;
+use EasyBib\OAuth2\Client\ClientCredentialsGrant\ClientConfig;
+use EasyBib\OAuth2\Client\ClientCredentialsGrant\TokenRequest;
 use EasyBib\OAuth2\Client\Scope;
+use EasyBib\OAuth2\Client\ServerConfig;
 use EasyBib\Tests\OAuth2\Client\Given;
 use Guzzle\Http\Client;
 use Guzzle\Plugin\History\HistoryPlugin;
@@ -52,11 +52,6 @@ abstract class TestCase extends \PHPUnit_Framework_TestCase
     protected $serverConfig;
 
     /**
-     * @var AuthorizationResponse
-     */
-    protected $authorization;
-
-    /**
      * @var Scope
      */
     protected $scope;
@@ -69,11 +64,10 @@ abstract class TestCase extends \PHPUnit_Framework_TestCase
 
         $this->clientConfig = new ClientConfig([
             'client_id' => 'client_123',
-            'redirect_url' => 'http://myapp.example.com/',
+            'client_secret' => 'secret_456',
         ]);
 
         $this->serverConfig = new ServerConfig([
-            'authorization_endpoint' => '/oauth/authorize',
             'token_endpoint' => '/oauth/token',
         ]);
 
@@ -83,7 +77,6 @@ abstract class TestCase extends \PHPUnit_Framework_TestCase
         $this->httpClient->addSubscriber($this->mockResponses);
         $this->httpClient->addSubscriber($this->history);
 
-        $this->authorization = new AuthorizationResponse(['code' => 'ABC123']);
         $this->scope = new Scope(['USER_READ', 'DATA_READ_WRITE']);
     }
 
@@ -92,14 +85,19 @@ abstract class TestCase extends \PHPUnit_Framework_TestCase
         $lastRequest = $this->history->getLastRequest();
 
         $expectedParams = [
-            'grant_type' => 'authorization_code',
-            'code' => $this->authorization->getCode(),
-            'redirect_uri' => $this->clientConfig->getParams()['redirect_url'],
+            'grant_type' => TokenRequest::GRANT_TYPE,
             'client_id' => $this->clientConfig->getParams()['client_id'],
+            'client_secret' => $this->clientConfig->getParams()['client_secret'],
         ];
+
+        $expectedUrl = sprintf(
+            '%s%s',
+            $this->apiBaseUrl,
+            $this->serverConfig->getParams()['token_endpoint']
+        );
 
         $this->assertEquals('POST', $lastRequest->getMethod());
         $this->assertEquals($expectedParams, $lastRequest->getPostFields()->toArray());
-        $this->assertEquals($this->apiBaseUrl . '/oauth/token', $lastRequest->getUrl());
+        $this->assertEquals($expectedUrl, $lastRequest->getUrl());
     }
 }

@@ -1,15 +1,16 @@
 <?php
 
-namespace EasyBib\OAuth2\Client\AuthorizationCodeGrant;
+namespace EasyBib\OAuth2\Client\ClientCredentialsGrant;
 
-use EasyBib\OAuth2\Client\AuthorizationCodeGrant\Authorization\AuthorizationResponse;
+use EasyBib\OAuth2\Client\Scope;
+use EasyBib\OAuth2\Client\ServerConfig;
 use EasyBib\OAuth2\Client\TokenRequestInterface;
 use EasyBib\OAuth2\Client\TokenResponse\TokenResponse;
 use Guzzle\Http\ClientInterface;
 
 class TokenRequest implements TokenRequestInterface
 {
-    const GRANT_TYPE = 'authorization_code';
+    const GRANT_TYPE = 'client_credentials';
 
     /**
      * @var ClientConfig
@@ -22,31 +23,31 @@ class TokenRequest implements TokenRequestInterface
     private $serverConfig;
 
     /**
-     * @var \Guzzle\Http\ClientInterface
+     * @var ClientInterface
      */
     private $httpClient;
 
     /**
-     * @var AuthorizationResponse
+     * @var Scope
      */
-    private $authorizationResponse;
+    private $scope;
 
     /**
      * @param ClientConfig $clientConfig
      * @param ServerConfig $serverConfig
      * @param ClientInterface $httpClient
-     * @param AuthorizationResponse $authorization
+     * @param Scope $scope
      */
     public function __construct(
         ClientConfig $clientConfig,
         ServerConfig $serverConfig,
         ClientInterface $httpClient,
-        AuthorizationResponse $authorization
+        Scope $scope
     ) {
         $this->clientConfig = $clientConfig;
         $this->serverConfig = $serverConfig;
         $this->httpClient = $httpClient;
-        $this->authorizationResponse = $authorization;
+        $this->scope = $scope;
     }
 
     /**
@@ -67,10 +68,9 @@ class TokenRequest implements TokenRequestInterface
     private function getParams()
     {
         return [
-            'grant_type' => self::GRANT_TYPE,
-            'code' => $this->authorizationResponse->getCode(),
-            'redirect_uri' => $this->clientConfig->getParams()['redirect_url'],
+            'grant_type' => TokenRequest::GRANT_TYPE,
             'client_id' => $this->clientConfig->getParams()['client_id'],
+            'client_secret' => $this->clientConfig->getParams()['client_secret'],
         ];
     }
 }

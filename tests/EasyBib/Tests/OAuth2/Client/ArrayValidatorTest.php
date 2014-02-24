@@ -1,6 +1,6 @@
 <?php
 
-namespace EasyBib\Tests\Api\Client\Mocks\Session;
+namespace EasyBib\Tests\Api\Client;
 
 use EasyBib\OAuth2\Client\ArrayValidator;
 

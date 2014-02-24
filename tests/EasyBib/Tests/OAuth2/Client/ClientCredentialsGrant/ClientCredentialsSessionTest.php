@@ -1,19 +1,19 @@
 <?php
 
-namespace EasyBib\Tests\OAuth2\Client\JsonWebTokenGrant;
+namespace EasyBib\Tests\OAuth2\Client\ClientCredentialsGrant;
 
-use EasyBib\OAuth2\Client\JsonWebTokenGrant\ServerConfig;
-use EasyBib\OAuth2\Client\JsonWebTokenGrant\JsonWebTokenSession;
+use EasyBib\OAuth2\Client\ClientCredentialsGrant\ServerConfig;
+use EasyBib\OAuth2\Client\ClientCredentialsGrant\ClientCredentialsSession;
 use EasyBib\OAuth2\Client\TokenStore;
 use EasyBib\Tests\Mocks\OAuth2\Client\ResourceRequest;
 use Guzzle\Http\Client;
 use Symfony\Component\HttpFoundation\Session\Session;
 use Symfony\Component\HttpFoundation\Session\Storage\MockArraySessionStorage;
 
-class JsonWebTokenSessionTest extends TestCase
+class ClientCredentialsSessionTest extends TestCase
 {
     /**
-     * @var JsonWebTokenSession
+     * @var ClientCredentialsSession
      */
     private $session;
 
@@ -80,11 +80,11 @@ class JsonWebTokenSessionTest extends TestCase
     }
 
     /**
-     * @return JsonWebTokenSession
+     * @return ClientCredentialsSession
      */
     private function createSession()
     {
-        $session = new JsonWebTokenSession(
+        $session = new ClientCredentialsSession(
             $this->httpClient,
             $this->clientConfig,
             $this->serverConfig
@@ -92,7 +92,6 @@ class JsonWebTokenSessionTest extends TestCase
 
         $session->setTokenStore($this->tokenStore);
         $session->setScope($this->scope);
-        $session->setBaseTime($this->baseTime);
 
         return $session;
     }

@@ -5,12 +5,12 @@ namespace EasyBib\OAuth2\Client;
 class Scope
 {
     /**
-     * @var array
+     * @var string[]
      */
     private $scopes;
 
     /**
-     * @param array $scopes
+     * @param string[] $scopes
      */
     public function __construct(array $scopes)
     {
