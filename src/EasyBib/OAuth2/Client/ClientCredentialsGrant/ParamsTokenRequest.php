@@ -8,12 +8,12 @@ use EasyBib\OAuth2\Client\TokenRequestInterface;
 use EasyBib\OAuth2\Client\TokenResponse\TokenResponse;
 use Guzzle\Http\ClientInterface;
 
-class TokenRequest implements TokenRequestInterface
+class ParamsTokenRequest implements TokenRequestInterface
 {
     const GRANT_TYPE = 'client_credentials';
 
     /**
-     * @var ClientConfig
+     * @var ParamsClientConfig
      */
     private $clientConfig;
 
@@ -33,13 +33,13 @@ class TokenRequest implements TokenRequestInterface
     private $scope;
 
     /**
-     * @param ClientConfig $clientConfig
+     * @param ParamsClientConfig $clientConfig
      * @param ServerConfig $serverConfig
      * @param ClientInterface $httpClient
      * @param Scope $scope
      */
     public function __construct(
-        ClientConfig $clientConfig,
+        ParamsClientConfig $clientConfig,
         ServerConfig $serverConfig,
         ClientInterface $httpClient,
         Scope $scope
@@ -68,7 +68,7 @@ class TokenRequest implements TokenRequestInterface
     private function getParams()
     {
         return [
-            'grant_type' => TokenRequest::GRANT_TYPE,
+            'grant_type' => ParamsTokenRequest::GRANT_TYPE,
             'client_id' => $this->clientConfig->getParams()['client_id'],
             'client_secret' => $this->clientConfig->getParams()['client_secret'],
         ];

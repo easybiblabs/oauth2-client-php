@@ -22,11 +22,6 @@ class JsonWebTokenSession extends AbstractSession
     private $serverConfig;
 
     /**
-     * @var TokenStore
-     */
-    private $tokenStore;
-
-    /**
      * @var Scope
      */
     private $scope;
@@ -72,14 +67,6 @@ class JsonWebTokenSession extends AbstractSession
         $this->retrieveToken();
 
         return $this->tokenStore->getToken();
-    }
-
-    /**
-     * @param TokenStore $tokenStore
-     */
-    public function setTokenStore(TokenStore $tokenStore)
-    {
-        $this->tokenStore = $tokenStore;
     }
 
     /**

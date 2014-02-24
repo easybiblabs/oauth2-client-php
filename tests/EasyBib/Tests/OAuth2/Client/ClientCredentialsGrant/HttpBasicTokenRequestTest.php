@@ -2,18 +2,18 @@
 
 namespace EasyBib\Tests\OAuth2\Client\ClientCredentialsGrant;
 
-use EasyBib\OAuth2\Client\ClientCredentialsGrant\TokenRequest;
+use EasyBib\OAuth2\Client\ClientCredentialsGrant\HttpBasicTokenRequest;
 use EasyBib\OAuth2\Client\TokenResponse\TokenResponse;
 
-class TokenRequestTest extends TestCase
+class HttpBasicTokenRequestTest extends TestCase
 {
     public function testSend()
     {
         $token = 'token_ABC123';
         $this->given->iAmReadyToRespondToATokenRequest($token, $this->scope, $this->mockResponses);
 
-        $tokenRequest = new TokenRequest(
-            $this->clientConfig,
+        $tokenRequest = new HttpBasicTokenRequest(
+            $this->httpBasicClientConfig,
             $this->serverConfig,
             $this->httpClient,
             $this->scope
@@ -21,7 +21,7 @@ class TokenRequestTest extends TestCase
 
         $tokenResponse = $tokenRequest->send();
 
-        $this->shouldHaveMadeATokenRequest();
+        $this->shouldHaveMadeAnHttpBasicTokenRequest();
         $this->assertInstanceOf(TokenResponse::class, $tokenResponse);
         $this->assertEquals($token, $tokenResponse->getToken());
     }

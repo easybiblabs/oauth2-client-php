@@ -2,8 +2,9 @@
 
 namespace EasyBib\Tests\OAuth2\Client\ClientCredentialsGrant;
 
-use EasyBib\OAuth2\Client\ClientCredentialsGrant\ClientConfig;
-use EasyBib\OAuth2\Client\ClientCredentialsGrant\TokenRequest;
+use EasyBib\OAuth2\Client\ClientCredentialsGrant\HttpBasicClientConfig;
+use EasyBib\OAuth2\Client\ClientCredentialsGrant\ParamsClientConfig;
+use EasyBib\OAuth2\Client\ClientCredentialsGrant\ParamsTokenRequest;
 use EasyBib\OAuth2\Client\Scope;
 use EasyBib\OAuth2\Client\ServerConfig;
 use EasyBib\Tests\OAuth2\Client\Given;
@@ -42,9 +43,14 @@ abstract class TestCase extends \PHPUnit_Framework_TestCase
     protected $mockResponses;
 
     /**
-     * @var ClientConfig
+     * @var ParamsClientConfig
      */
-    protected $clientConfig;
+    protected $paramsClientConfig;
+
+    /**
+     * @var HttpBasicClientConfig
+     */
+    protected $httpBasicClientConfig;
 
     /**
      * @var ServerConfig
@@ -62,9 +68,14 @@ abstract class TestCase extends \PHPUnit_Framework_TestCase
 
         $this->given = new Given();
 
-        $this->clientConfig = new ClientConfig([
+        $this->paramsClientConfig = new ParamsClientConfig([
             'client_id' => 'client_123',
             'client_secret' => 'secret_456',
+        ]);
+
+        $this->httpBasicClientConfig = new HttpBasicClientConfig([
+            'client_id' => 'client_123',
+            'client_password' => 'secret_456',
         ]);
 
         $this->serverConfig = new ServerConfig([
@@ -80,14 +91,14 @@ abstract class TestCase extends \PHPUnit_Framework_TestCase
         $this->scope = new Scope(['USER_READ', 'DATA_READ_WRITE']);
     }
 
-    protected function shouldHaveMadeATokenRequest()
+    protected function shouldHaveMadeAParamsTokenRequest()
     {
         $lastRequest = $this->history->getLastRequest();
 
         $expectedParams = [
-            'grant_type' => TokenRequest::GRANT_TYPE,
-            'client_id' => $this->clientConfig->getParams()['client_id'],
-            'client_secret' => $this->clientConfig->getParams()['client_secret'],
+            'grant_type' => ParamsTokenRequest::GRANT_TYPE,
+            'client_id' => $this->paramsClientConfig->getParams()['client_id'],
+            'client_secret' => $this->paramsClientConfig->getParams()['client_secret'],
         ];
 
         $expectedUrl = sprintf(
@@ -98,6 +109,24 @@ abstract class TestCase extends \PHPUnit_Framework_TestCase
 
         $this->assertEquals('POST', $lastRequest->getMethod());
         $this->assertEquals($expectedParams, $lastRequest->getPostFields()->toArray());
+        $this->assertEquals($expectedUrl, $lastRequest->getUrl());
+    }
+
+    protected function shouldHaveMadeAnHttpBasicTokenRequest()
+    {
+        $lastRequest = $this->history->getLastRequest();
+
+        $expectedUrl = sprintf(
+            '%s%s',
+            $this->apiBaseUrl,
+            $this->serverConfig->getParams()['token_endpoint']
+        );
+
+        $configParams = $this->httpBasicClientConfig->getParams();
+
+        $this->assertEquals('POST', $lastRequest->getMethod());
+        $this->assertEquals($configParams['client_id'], $lastRequest->getUsername());
+        $this->assertEquals($configParams['client_password'], $lastRequest->getPassword());
         $this->assertEquals($expectedUrl, $lastRequest->getUrl());
     }
 }

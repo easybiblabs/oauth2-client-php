@@ -1,22 +1,18 @@
 <?php
 
-namespace EasyBib\Tests\OAuth2\Client\ClientCredentialsGrant;
+namespace EasyBib\Tests\OAuth2\Client;
 
-use EasyBib\OAuth2\Client\ClientCredentialsGrant\ServerConfig;
-use EasyBib\OAuth2\Client\ClientCredentialsGrant\ClientCredentialsSession;
+use EasyBib\OAuth2\Client\BasicSession;
+use EasyBib\OAuth2\Client\ClientCredentialsGrant\ParamsTokenRequestFactory;
 use EasyBib\OAuth2\Client\TokenStore;
 use EasyBib\Tests\Mocks\OAuth2\Client\ResourceRequest;
+use EasyBib\Tests\OAuth2\Client\ClientCredentialsGrant\TestCase;
 use Guzzle\Http\Client;
 use Symfony\Component\HttpFoundation\Session\Session;
 use Symfony\Component\HttpFoundation\Session\Storage\MockArraySessionStorage;
 
-class ClientCredentialsSessionTest extends TestCase
+class BasicSessionTest extends TestCase
 {
-    /**
-     * @var ClientCredentialsSession
-     */
-    private $session;
-
     /**
      * @var Session
      */
@@ -27,14 +23,18 @@ class ClientCredentialsSessionTest extends TestCase
      */
     private $tokenStore;
 
+    /**
+     * @var BasicSession
+     */
+    private $session;
+
     public function setUp()
     {
         parent::setUp();
 
         $this->tokenSession = new Session(new MockArraySessionStorage());
         $this->tokenStore = new TokenStore($this->tokenSession);
-
-        $this->session = $this->createSession();
+        $this->session = $this->createParamsSession();
     }
 
     public function testGetTokenWhenNotSet()
@@ -44,7 +44,7 @@ class ClientCredentialsSessionTest extends TestCase
 
         $this->session->getToken();
 
-        $this->shouldHaveMadeATokenRequest();
+        $this->shouldHaveMadeAParamsTokenRequest();
         $this->shouldHaveTokenInHeaderForResourceRequests($token);
     }
 
@@ -67,7 +67,7 @@ class ClientCredentialsSessionTest extends TestCase
 
         (new ResourceRequest($this->session))->execute();
 
-        $this->shouldHaveMadeATokenRequest();
+        $this->shouldHaveMadeAParamsTokenRequest();
         $this->shouldHaveTokenInHeaderForResourceRequests($newToken);
     }
 
@@ -80,18 +80,19 @@ class ClientCredentialsSessionTest extends TestCase
     }
 
     /**
-     * @return ClientCredentialsSession
+     * @return BasicSession
      */
-    private function createSession()
+    private function createParamsSession()
     {
-        $session = new ClientCredentialsSession(
+        $tokenRequestFactory = new ParamsTokenRequestFactory(
+            $this->paramsClientConfig,
+            $this->serverConfig,
             $this->httpClient,
-            $this->clientConfig,
-            $this->serverConfig
+            $this->scope
         );
 
+        $session = new BasicSession($tokenRequestFactory);
         $session->setTokenStore($this->tokenStore);
-        $session->setScope($this->scope);
 
         return $session;
     }

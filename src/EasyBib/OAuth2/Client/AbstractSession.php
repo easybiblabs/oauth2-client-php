@@ -8,9 +8,9 @@ use Guzzle\Http\ClientInterface;
 abstract class AbstractSession
 {
     /**
-     * @var ClientInterface
+     * @var \EasyBib\OAuth2\Client\TokenStore
      */
-    protected $httpClient;
+    protected $tokenStore;
 
     /**
      * @return string
@@ -18,14 +18,12 @@ abstract class AbstractSession
     abstract public function getToken();
 
     /**
-     * @param TokenStore $tokenStore
+     * @param \EasyBib\OAuth2\Client\TokenStore $tokenStore
      */
-    abstract public function setTokenStore(TokenStore $tokenStore);
-
-    /**
-     * @param Scope $scope
-     */
-    abstract public function setScope(Scope $scope);
+    public function setTokenStore(TokenStore $tokenStore)
+    {
+        $this->tokenStore = $tokenStore;
+    }
 
     /**
      * @param ClientInterface $httpClient

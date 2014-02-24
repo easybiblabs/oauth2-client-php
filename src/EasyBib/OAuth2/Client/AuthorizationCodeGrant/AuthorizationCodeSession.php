@@ -12,11 +12,6 @@ use Symfony\Component\HttpFoundation\Session\Session;
 class AuthorizationCodeSession extends AbstractSession
 {
     /**
-     * @var \EasyBib\OAuth2\Client\TokenStore
-     */
-    private $tokenStore;
-
-    /**
      * @var RedirectorInterface
      */
     private $redirector;
@@ -100,14 +95,6 @@ class AuthorizationCodeSession extends AbstractSession
 
         // redirects browser
         $this->authorize();
-    }
-
-    /**
-     * @param TokenStore $tokenStore
-     */
-    public function setTokenStore(TokenStore $tokenStore)
-    {
-        $this->tokenStore = $tokenStore;
     }
 
     /**
