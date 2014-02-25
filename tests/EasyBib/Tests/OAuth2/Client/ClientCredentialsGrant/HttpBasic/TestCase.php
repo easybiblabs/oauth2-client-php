@@ -1,9 +1,8 @@
 <?php
 
-namespace EasyBib\Tests\OAuth2\Client\ClientCredentialsGrant;
+namespace EasyBib\Tests\OAuth2\Client\ClientCredentialsGrant\HttpBasic;
 
-use EasyBib\OAuth2\Client\ClientCredentialsGrant\HttpBasicClientConfig;
-use EasyBib\OAuth2\Client\ClientCredentialsGrant\ParamsClientConfig;
+use EasyBib\OAuth2\Client\ClientCredentialsGrant\HttpBasic\ClientConfig;
 use EasyBib\OAuth2\Client\Scope;
 use EasyBib\OAuth2\Client\ServerConfig;
 use EasyBib\Tests\OAuth2\Client\Given;
@@ -43,14 +42,9 @@ abstract class TestCase extends \PHPUnit_Framework_TestCase
     protected $mockResponses;
 
     /**
-     * @var ParamsClientConfig
+     * @var ClientConfig
      */
-    protected $paramsClientConfig;
-
-    /**
-     * @var HttpBasicClientConfig
-     */
-    protected $httpBasicClientConfig;
+    protected $clientConfig;
 
     /**
      * @var ServerConfig
@@ -68,12 +62,7 @@ abstract class TestCase extends \PHPUnit_Framework_TestCase
 
         $this->given = new Given();
 
-        $this->paramsClientConfig = new ParamsClientConfig([
-            'client_id' => 'client_123',
-            'client_secret' => 'secret_456',
-        ]);
-
-        $this->httpBasicClientConfig = new HttpBasicClientConfig([
+        $this->clientConfig = new ClientConfig([
             'client_id' => 'client_123',
             'client_password' => 'secret_456',
         ]);

@@ -2,17 +2,17 @@
 
 namespace EasyBib\Tests\OAuth2\Client;
 
-use EasyBib\OAuth2\Client\BasicSession;
-use EasyBib\OAuth2\Client\ClientCredentialsGrant\ParamsTokenRequest;
-use EasyBib\OAuth2\Client\ClientCredentialsGrant\ParamsTokenRequestFactory;
+use EasyBib\OAuth2\Client\SimpleSession;
+use EasyBib\OAuth2\Client\ClientCredentialsGrant\RequestParams\TokenRequest;
+use EasyBib\OAuth2\Client\ClientCredentialsGrant\RequestParams\TokenRequestFactory;
 use EasyBib\OAuth2\Client\TokenStore;
 use EasyBib\Tests\Mocks\OAuth2\Client\ResourceRequest;
-use EasyBib\Tests\OAuth2\Client\ClientCredentialsGrant\TestCase;
+use EasyBib\Tests\OAuth2\Client\ClientCredentialsGrant\RequestParams\TestCase;
 use Guzzle\Http\Client;
 use Symfony\Component\HttpFoundation\Session\Session;
 use Symfony\Component\HttpFoundation\Session\Storage\MockArraySessionStorage;
 
-class BasicSessionTest extends TestCase
+class SimpleSessionTest extends TestCase
 {
     /**
      * @var Session
@@ -25,7 +25,7 @@ class BasicSessionTest extends TestCase
     private $tokenStore;
 
     /**
-     * @var BasicSession
+     * @var SimpleSession
      */
     private $session;
 
@@ -85,9 +85,9 @@ class BasicSessionTest extends TestCase
         $lastRequest = $this->history->getLastRequest();
 
         $expectedParams = [
-            'grant_type' => ParamsTokenRequest::GRANT_TYPE,
-            'client_id' => $this->paramsClientConfig->getParams()['client_id'],
-            'client_secret' => $this->paramsClientConfig->getParams()['client_secret'],
+            'grant_type' => TokenRequest::GRANT_TYPE,
+            'client_id' => $this->clientConfig->getParams()['client_id'],
+            'client_secret' => $this->clientConfig->getParams()['client_secret'],
         ];
 
         $expectedUrl = sprintf(
@@ -102,18 +102,18 @@ class BasicSessionTest extends TestCase
     }
 
     /**
-     * @return BasicSession
+     * @return SimpleSession
      */
     private function createParamsSession()
     {
-        $tokenRequestFactory = new ParamsTokenRequestFactory(
-            $this->paramsClientConfig,
+        $tokenRequestFactory = new TokenRequestFactory(
+            $this->clientConfig,
             $this->serverConfig,
             $this->httpClient,
             $this->scope
         );
 
-        $session = new BasicSession($tokenRequestFactory);
+        $session = new SimpleSession($tokenRequestFactory);
         $session->setTokenStore($this->tokenStore);
 
         return $session;

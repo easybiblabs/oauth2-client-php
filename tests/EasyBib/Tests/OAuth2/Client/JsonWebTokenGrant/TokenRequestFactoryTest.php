@@ -2,14 +2,14 @@
 
 namespace EasyBib\Tests\OAuth2\Client\JsonWebTokenGrant;
 
-use EasyBib\OAuth2\Client\JsonWebTokenGrant\JsonWebTokenRequestFactory;
+use EasyBib\OAuth2\Client\JsonWebTokenGrant\TokenRequestFactory;
 use EasyBib\OAuth2\Client\JsonWebTokenGrant\TokenRequest;
 
-class JsonWebTokenRequestFactoryTest extends TestCase
+class TokenRequestFactoryTest extends TestCase
 {
     public function testCreate()
     {
-        $tokenRequestFactory = new JsonWebTokenRequestFactory(
+        $tokenRequestFactory = new TokenRequestFactory(
             $this->clientConfig,
             $this->serverConfig,
             $this->httpClient,

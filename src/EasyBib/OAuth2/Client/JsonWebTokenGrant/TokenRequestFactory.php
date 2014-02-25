@@ -7,7 +7,7 @@ use EasyBib\OAuth2\Client\ServerConfig;
 use EasyBib\OAuth2\Client\TokenRequestFactoryInterface;
 use Guzzle\Http\ClientInterface;
 
-class JsonWebTokenRequestFactory implements TokenRequestFactoryInterface
+class TokenRequestFactory implements TokenRequestFactoryInterface
 {
     /**
      * @var ClientConfig

@@ -1,6 +1,6 @@
 <?php
 
-namespace EasyBib\OAuth2\Client\ClientCredentialsGrant;
+namespace EasyBib\OAuth2\Client\ClientCredentialsGrant\RequestParams;
 
 use EasyBib\OAuth2\Client\Scope;
 use EasyBib\OAuth2\Client\ServerConfig;
@@ -8,12 +8,12 @@ use EasyBib\OAuth2\Client\TokenRequestInterface;
 use EasyBib\OAuth2\Client\TokenResponse\TokenResponse;
 use Guzzle\Http\ClientInterface;
 
-class HttpBasicTokenRequest implements TokenRequestInterface
+class TokenRequest implements TokenRequestInterface
 {
     const GRANT_TYPE = 'client_credentials';
 
     /**
-     * @var ParamsClientConfig
+     * @var ClientConfig
      */
     private $clientConfig;
 
@@ -33,13 +33,13 @@ class HttpBasicTokenRequest implements TokenRequestInterface
     private $scope;
 
     /**
-     * @param HttpBasicClientConfig $clientConfig
+     * @param ClientConfig $clientConfig
      * @param ServerConfig $serverConfig
      * @param ClientInterface $httpClient
      * @param Scope $scope
      */
     public function __construct(
-        HttpBasicClientConfig $clientConfig,
+        ClientConfig $clientConfig,
         ServerConfig $serverConfig,
         ClientInterface $httpClient,
         Scope $scope
@@ -57,12 +57,6 @@ class HttpBasicTokenRequest implements TokenRequestInterface
     {
         $url = $this->serverConfig->getParams()['token_endpoint'];
         $request = $this->httpClient->post($url, [], $this->getParams());
-
-        $request->setAuth(
-            $this->clientConfig->getParams()['client_id'],
-            $this->clientConfig->getParams()['client_password']
-        );
-
         $responseBody = $request->send()->getBody(true);
 
         return new TokenResponse(json_decode($responseBody, true));
@@ -75,6 +69,8 @@ class HttpBasicTokenRequest implements TokenRequestInterface
     {
         return [
             'grant_type' => self::GRANT_TYPE,
+            'client_id' => $this->clientConfig->getParams()['client_id'],
+            'client_secret' => $this->clientConfig->getParams()['client_secret'],
         ];
     }
 }

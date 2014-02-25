@@ -1,16 +1,16 @@
 <?php
 
-namespace EasyBib\OAuth2\Client\ClientCredentialsGrant;
+namespace EasyBib\OAuth2\Client\ClientCredentialsGrant\HttpBasic;
 
 use EasyBib\OAuth2\Client\Scope;
 use EasyBib\OAuth2\Client\ServerConfig;
 use EasyBib\OAuth2\Client\TokenRequestFactoryInterface;
 use Guzzle\Http\ClientInterface;
 
-class ParamsTokenRequestFactory implements TokenRequestFactoryInterface
+class TokenRequestFactory implements TokenRequestFactoryInterface
 {
     /**
-     * @var ParamsClientConfig
+     * @var ClientConfig
      */
     private $clientConfig;
 
@@ -30,13 +30,13 @@ class ParamsTokenRequestFactory implements TokenRequestFactoryInterface
     private $scope;
 
     /**
-     * @param ParamsClientConfig $clientConfig
+     * @param ClientConfig $clientConfig
      * @param ServerConfig $serverConfig
      * @param ClientInterface $httpClient
      * @param Scope $scope
      */
     public function __construct(
-        ParamsClientConfig $clientConfig,
+        ClientConfig $clientConfig,
         ServerConfig $serverConfig,
         ClientInterface $httpClient,
         Scope $scope
@@ -48,11 +48,11 @@ class ParamsTokenRequestFactory implements TokenRequestFactoryInterface
     }
 
     /**
-     * @return ParamsTokenRequest
+     * @return TokenRequest
      */
     public function create()
     {
-        return new ParamsTokenRequest(
+        return new TokenRequest(
             $this->clientConfig,
             $this->serverConfig,
             $this->httpClient,

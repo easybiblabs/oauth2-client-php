@@ -1,11 +1,11 @@
 <?php
 
-namespace EasyBib\OAuth2\Client\ClientCredentialsGrant;
+namespace EasyBib\OAuth2\Client\ClientCredentialsGrant\RequestParams;
 
 use EasyBib\OAuth2\Client\ArrayValidator;
 use EasyBib\OAuth2\Client\InvalidClientConfigException;
 
-class HttpBasicClientConfig
+class ClientConfig
 {
     /**
      * @var array
@@ -17,7 +17,7 @@ class HttpBasicClientConfig
      */
     private static $requiredParams = [
         'client_id',
-        'client_password',
+        'client_secret',
     ];
 
     /**

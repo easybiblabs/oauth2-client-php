@@ -1,19 +1,19 @@
 <?php
 
-namespace EasyBib\Tests\OAuth2\Client\ClientCredentialsGrant;
+namespace EasyBib\Tests\OAuth2\Client\ClientCredentialsGrant\HttpBasic;
 
-use EasyBib\OAuth2\Client\ClientCredentialsGrant\ParamsTokenRequest;
+use EasyBib\OAuth2\Client\ClientCredentialsGrant\HttpBasic\TokenRequest;
 use EasyBib\OAuth2\Client\TokenResponse\TokenResponse;
 
-class ParamsTokenRequestTest extends TestCase
+class TokenRequestTest extends TestCase
 {
     public function testSend()
     {
         $token = 'token_ABC123';
         $this->given->iAmReadyToRespondToATokenRequest($token, $this->scope, $this->mockResponses);
 
-        $tokenRequest = new ParamsTokenRequest(
-            $this->paramsClientConfig,
+        $tokenRequest = new TokenRequest(
+            $this->clientConfig,
             $this->serverConfig,
             $this->httpClient,
             $this->scope
@@ -21,20 +21,16 @@ class ParamsTokenRequestTest extends TestCase
 
         $tokenResponse = $tokenRequest->send();
 
-        $this->shouldHaveMadeAParamsTokenRequest();
+        $this->shouldHaveMadeAnHttpBasicTokenRequest();
         $this->assertInstanceOf(TokenResponse::class, $tokenResponse);
         $this->assertEquals($token, $tokenResponse->getToken());
     }
 
-    private function shouldHaveMadeAParamsTokenRequest()
+    private function shouldHaveMadeAnHttpBasicTokenRequest()
     {
         $lastRequest = $this->history->getLastRequest();
 
-        $expectedParams = [
-            'grant_type' => ParamsTokenRequest::GRANT_TYPE,
-            'client_id' => $this->paramsClientConfig->getParams()['client_id'],
-            'client_secret' => $this->paramsClientConfig->getParams()['client_secret'],
-        ];
+        $configParams = $this->clientConfig->getParams();
 
         $expectedUrl = sprintf(
             '%s%s',
@@ -42,8 +38,14 @@ class ParamsTokenRequestTest extends TestCase
             $this->serverConfig->getParams()['token_endpoint']
         );
 
+        $expectedPostParams = [
+            'grant_type' => TokenRequest::GRANT_TYPE,
+        ];
+
         $this->assertEquals('POST', $lastRequest->getMethod());
-        $this->assertEquals($expectedParams, $lastRequest->getPostFields()->toArray());
+        $this->assertEquals($configParams['client_id'], $lastRequest->getUsername());
+        $this->assertEquals($configParams['client_password'], $lastRequest->getPassword());
+        $this->assertEquals($expectedPostParams, $lastRequest->getPostFields()->toArray());
         $this->assertEquals($expectedUrl, $lastRequest->getUrl());
     }
 }

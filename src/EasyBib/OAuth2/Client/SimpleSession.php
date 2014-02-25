@@ -4,7 +4,7 @@ namespace EasyBib\OAuth2\Client;
 
 use Symfony\Component\HttpFoundation\Session\Session;
 
-class BasicSession extends AbstractSession
+class SimpleSession extends AbstractSession
 {
     /**
      * @var TokenRequestFactoryInterface
