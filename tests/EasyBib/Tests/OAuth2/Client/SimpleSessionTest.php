@@ -38,6 +38,17 @@ class SimpleSessionTest extends TestCase
         $this->session = $this->createParamsSession();
     }
 
+    public function testSetTokenStoreWhenRequestsAlreadyMade()
+    {
+        $token = 'ABC123';
+        $this->given->iAmReadyToRespondToATokenRequest($token, $this->scope, $this->mockResponses);
+
+        $this->session->getToken();
+
+        $this->setExpectedException('\LogicException');
+        $this->session->setTokenStore(new TokenStore($this->tokenSession));
+    }
+
     public function testGetTokenWhenNotSet()
     {
         $token = 'ABC123';

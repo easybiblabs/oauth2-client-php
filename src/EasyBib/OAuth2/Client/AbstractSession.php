@@ -13,15 +13,34 @@ abstract class AbstractSession
     protected $tokenStore;
 
     /**
+     * @var bool
+     */
+    private $requestsAlreadyMade = false;
+
+    /**
      * @return string
      */
-    abstract public function getToken();
+    abstract protected function doGetToken();
+
+    /**
+     * @return string
+     */
+    public function getToken()
+    {
+        $this->requestsAlreadyMade = true;
+        return $this->doGetToken();
+    }
 
     /**
      * @param \EasyBib\OAuth2\Client\TokenStore $tokenStore
+     * @throws \LogicException
      */
     public function setTokenStore(TokenStore $tokenStore)
     {
+        if ($this->requestsAlreadyMade) {
+            throw new \LogicException('Cannot set token store after requests already made');
+        }
+
         $this->tokenStore = $tokenStore;
     }
 

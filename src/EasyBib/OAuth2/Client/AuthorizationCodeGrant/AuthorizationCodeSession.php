@@ -81,7 +81,7 @@ class AuthorizationCodeSession extends AbstractSession
     /**
      * @return string
      */
-    public function getToken()
+    protected function doGetToken()
     {
         $token = $this->tokenStore->getToken();
 
