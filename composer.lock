@@ -3,7 +3,7 @@
         "This file locks the dependencies of your project to a known state",
         "Read more about it at http://getcomposer.org/doc/01-basic-usage.md#composer-lock-the-lock-file"
     ],
-    "hash": "902964b357b3eb5c1ec1861092281e19",
+    "hash": "d3df4f180acc127ff96934f0e5a4e3f3",
     "packages": [
         {
             "name": "firebase/php-jwt",
@@ -1054,7 +1054,7 @@
         "fabpot/php-cs-fixer": 20
     },
     "platform": {
-        "php": ">=5.5"
+        "php": ">=5.4"
     },
     "platform-dev": [
 

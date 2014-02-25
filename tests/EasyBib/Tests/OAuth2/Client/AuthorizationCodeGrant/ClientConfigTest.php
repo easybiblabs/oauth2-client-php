@@ -3,7 +3,6 @@
 namespace EasyBib\Tests\OAuth2\Client\AuthorizationCodeGrant;
 
 use EasyBib\OAuth2\Client\AuthorizationCodeGrant\ClientConfig;
-use EasyBib\OAuth2\Client\InvalidClientConfigException;
 
 class ClientConfigTest extends \PHPUnit_Framework_TestCase
 {
@@ -45,7 +44,9 @@ class ClientConfigTest extends \PHPUnit_Framework_TestCase
      */
     public function testConstructorValidates(array $params)
     {
-        $this->setExpectedException(InvalidClientConfigException::class);
+        $exceptionClass = '\EasyBib\OAuth2\Client\InvalidClientConfigException';
+        $this->setExpectedException($exceptionClass);
+
         new ClientConfig($params);
     }
 }

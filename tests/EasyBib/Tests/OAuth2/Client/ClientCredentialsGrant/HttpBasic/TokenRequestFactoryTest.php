@@ -2,7 +2,6 @@
 
 namespace EasyBib\Tests\OAuth2\Client\ClientCredentialsGrant\HttpBasic;
 
-use EasyBib\OAuth2\Client\ClientCredentialsGrant\HttpBasic\TokenRequest;
 use EasyBib\OAuth2\Client\ClientCredentialsGrant\HttpBasic\TokenRequestFactory;
 
 class TokenRequestFactoryTest extends TestCase
@@ -16,6 +15,7 @@ class TokenRequestFactoryTest extends TestCase
             $this->scope
         );
 
-        $this->assertInstanceOf(TokenRequest::class, $tokenRequestFactory->create());
+        $class = '\EasyBib\OAuth2\Client\ClientCredentialsGrant\HttpBasic\TokenRequest';
+        $this->assertInstanceOf($class, $tokenRequestFactory->create());
     }
 }

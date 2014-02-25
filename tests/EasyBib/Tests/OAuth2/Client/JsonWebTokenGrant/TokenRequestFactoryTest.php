@@ -3,7 +3,6 @@
 namespace EasyBib\Tests\OAuth2\Client\JsonWebTokenGrant;
 
 use EasyBib\OAuth2\Client\JsonWebTokenGrant\TokenRequestFactory;
-use EasyBib\OAuth2\Client\JsonWebTokenGrant\TokenRequest;
 
 class TokenRequestFactoryTest extends TestCase
 {
@@ -17,6 +16,7 @@ class TokenRequestFactoryTest extends TestCase
             $this->baseTime
         );
 
-        $this->assertInstanceOf(TokenRequest::class, $tokenRequestFactory->create());
+        $class = '\EasyBib\OAuth2\Client\JsonWebTokenGrant\TokenRequest';
+        $this->assertInstanceOf($class, $tokenRequestFactory->create());
     }
 }

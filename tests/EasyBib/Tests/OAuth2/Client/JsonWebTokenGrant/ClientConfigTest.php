@@ -2,7 +2,6 @@
 
 namespace EasyBib\Tests\OAuth2\Client\JsonWebTokenGrant;
 
-use EasyBib\OAuth2\Client\InvalidClientConfigException;
 use EasyBib\OAuth2\Client\JsonWebTokenGrant\ClientConfig;
 
 class ClientConfigTest extends \PHPUnit_Framework_TestCase
@@ -47,7 +46,9 @@ class ClientConfigTest extends \PHPUnit_Framework_TestCase
      */
     public function testConstructorValidates(array $params)
     {
-        $this->setExpectedException(InvalidClientConfigException::class);
+        $exceptionClass = '\EasyBib\OAuth2\Client\InvalidClientConfigException';
+        $this->setExpectedException($exceptionClass);
+
         new ClientConfig($params);
     }
 }

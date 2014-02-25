@@ -6,7 +6,6 @@ use EasyBib\OAuth2\Client\AuthorizationCodeGrant\AuthorizationCodeSession;
 use EasyBib\OAuth2\Client\Scope;
 use EasyBib\OAuth2\Client\TokenStore;
 use EasyBib\Tests\Mocks\OAuth2\Client\ExceptionMockRedirector;
-use EasyBib\Tests\Mocks\OAuth2\Client\MockRedirectException;
 use EasyBib\Tests\Mocks\OAuth2\Client\ResourceRequest;
 use Guzzle\Http\Client;
 use Symfony\Component\HttpFoundation\Session\Session;
@@ -129,7 +128,8 @@ class AuthorizationCodeSessionTest extends TestCase
             ]
         );
 
-        $this->setExpectedException(MockRedirectException::class, $message);
+        $exceptionClass = '\EasyBib\Tests\Mocks\OAuth2\Client\MockRedirectException';
+        $this->setExpectedException($exceptionClass, $message);
     }
 
     /**

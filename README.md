@@ -13,7 +13,7 @@ Client Credentials Grants with HTTP Basic authentication are not currently suppo
 
 ## Installation
 
-This library requires PHP 5.5 or later.
+This library requires PHP 5.4 or later.
 
 Use [Composer](https://getcomposer.org/) to add this project to your project's
 dependencies.

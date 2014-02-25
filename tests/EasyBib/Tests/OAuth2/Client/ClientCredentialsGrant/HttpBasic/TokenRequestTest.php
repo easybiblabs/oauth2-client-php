@@ -3,7 +3,6 @@
 namespace EasyBib\Tests\OAuth2\Client\ClientCredentialsGrant\HttpBasic;
 
 use EasyBib\OAuth2\Client\ClientCredentialsGrant\HttpBasic\TokenRequest;
-use EasyBib\OAuth2\Client\TokenResponse\TokenResponse;
 
 class TokenRequestTest extends TestCase
 {
@@ -20,9 +19,10 @@ class TokenRequestTest extends TestCase
         );
 
         $tokenResponse = $tokenRequest->send();
+        $class = '\EasyBib\OAuth2\Client\TokenResponse\TokenResponse';
 
         $this->shouldHaveMadeAnHttpBasicTokenRequest();
-        $this->assertInstanceOf(TokenResponse::class, $tokenResponse);
+        $this->assertInstanceOf($class, $tokenResponse);
         $this->assertEquals($token, $tokenResponse->getToken());
     }
 

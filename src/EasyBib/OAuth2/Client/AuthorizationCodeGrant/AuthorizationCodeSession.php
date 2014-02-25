@@ -62,15 +62,15 @@ class AuthorizationCodeSession extends AbstractSession
     }
 
     /**
-     * @param AuthorizationResponse $authorizationResponse
+     * @param AuthorizationResponse $authResponse
      */
-    public function handleAuthorizationResponse(AuthorizationResponse $authorizationResponse)
+    public function handleAuthorizationResponse(AuthorizationResponse $authResponse)
     {
         $tokenRequest = new TokenRequest(
             $this->clientConfig,
             $this->serverConfig,
             $this->httpClient,
-            $authorizationResponse
+            $authResponse
         );
 
         $tokenResponse = $tokenRequest->send();
