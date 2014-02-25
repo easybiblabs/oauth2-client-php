@@ -1,7 +1,7 @@
 # Contributing
 
-If you have bug(fixe)s or implementation for missing features within Authorization
-Code Grant, awesome - open an issue or a PR.
+If you have bug(fixe)s or implementation for missing features, awesome -- open
+an issue or a PR.
 
 If the OAuth server you are attempting to use employs one of the
 [other grant types](http://tools.ietf.org/html/rfc6749#section-4), and you want

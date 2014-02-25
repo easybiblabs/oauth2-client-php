@@ -3,17 +3,18 @@
 You can read all about OAuth at the
 [standard](http://tools.ietf.org/html/rfc6749).
 
-Currently, this client supports:
+## Grant types
+
+### Supported
 
 * [Authorization Code Grant](http://tools.ietf.org/html/rfc6749#section-4.1)
 * [Client Credentials Grant](http://tools.ietf.org/html/rfc6749#section-4.4)
-    * [HTTP Basic client authentication](http://tools.ietf.org/html/rfc6749#section-2.3.1),
-    * [request body parameter client authentication](http://tools.ietf.org/html/rfc6749#section-2.3.1),
+    * [HTTP Basic client authentication](http://tools.ietf.org/html/rfc6749#section-2.3.1)
+    * [request body parameter client authentication](http://tools.ietf.org/html/rfc6749#section-2.3.1)
+* [JSON Web Token Grant](http://tools.ietf.org/html/draft-ietf-oauth-json-web-token-15)
+has minimal support.
 
-[JSON Web Token Grant](http://tools.ietf.org/html/draft-ietf-oauth-json-web-token-15)
-has minimal support
-
-Not currently supported:
+### Not supported
 
 * [Implicit Grant](http://tools.ietf.org/html/rfc6749#section-4.2)
 * [Resource Owner Password Credentials Grant](http://tools.ietf.org/html/rfc6749#section-4.3)

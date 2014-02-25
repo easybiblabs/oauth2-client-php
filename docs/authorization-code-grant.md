@@ -97,8 +97,7 @@ class MyWebController
 ```
 
 At this point you can access the service being provided, via a fresh Guzzle
-client. Do **not** reuse the same client you used in setting up the OAuth
-connection itself.
+client.
 
 ```php
 $resourceHttpClient = new Client('http://coolresources.example.com');
@@ -118,7 +117,7 @@ Authorization: Bearer token_foo_bar_baz
 ## Token expiration and invalidation
 
 This client will automatically handle token renewal when communicating with
-OAuth servers which provide a refresh_token.
+OAuth servers which provide a `refresh_token`.
 
 In the event that the resource server you are communicating with invalidates
 the token, e.g. the user logs out, you will need to handle that condition

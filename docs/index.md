@@ -12,10 +12,10 @@ you start using it, in order to substitute an instance of your custom class.
 
 ## Implementing this client in your app
 
-The implementations of `AbstractSession` and `TokenRequest` are the heart of
-this library. They wrap a Guzzle `Client`, which communicates with the OAuth
-server. They also allows you to attach any number of Guzzle clients to the
-session, which will thereafter carry the token necessary to make requests
+The implementations of `AbstractSession`, together with `TokenRequest`, are the
+heart of this library. They wrap a Guzzle `Client`, which communicates with the
+OAuth server. They also allows you to attach any number of Guzzle clients to the
+session, which will thereafter have access to the token necessary to make requests
 against resource servers.
 
 This is accomplished by creating a second Guzzle `Client` for use with your
@@ -26,18 +26,18 @@ $client = new \Guzzle\Http\Client('http://cool-api.example.org');
 $session->addResourceClient($client);
 ```
 
+## Token grants
+
+* [Authorization Code](authorization-code-grant.md)
+* [Client Credentials](client-credentials-grant.md)
+* [JSON Web Token](json-web-token-grant.md)
+
 ## TokenRequest factories
 
 The [Abstract Factory pattern](http://en.wikipedia.org/wiki/Abstract_factory_pattern)
 is used in conjunction with `SimpleSession` to create tokens for Authorization
 Code and Json Web Token grants, in order to to insulate request-specific
 concerns from the `SimpleSession` implementation.
-
-## Token grants
-
-* [Authorization Code](authorization-code-grant.md)
-* [Client Credentials](client-credentials-grant.md)
-* [JSON Web Token](json-web-token.md)
 
 ## Error handling
 
