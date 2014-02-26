@@ -80,7 +80,10 @@ $this->oauthSession->authorize();
 ```
 
 The OAuth2 server will redirect the user back to your application
-with the user's token. Your application should handle that request as follows:
+with the user's token, at the
+[url specified when the client was registered with the OAuth2 provider](http://tools.ietf.org/html/rfc6749#section-2),
+or at the `redirect_url` optionally specified in the `ClientConfig`. Your
+application should handle that request as follows:
 
 ```php
 use EasyBib\OAuth2\Client\AuthorizationCodeGrant\Authorization\AuthorizationResponse;
