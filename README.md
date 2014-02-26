@@ -1,6 +1,6 @@
 # OAuth 2.0 Client for PHP
 
-You can read all about OAuth at the
+You can read all about OAuth2 at the
 [standard](http://tools.ietf.org/html/rfc6749).
 
 ## Grant types

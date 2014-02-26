@@ -1,10 +1,10 @@
 # Authorization Code Grant
 
-During the initial authorization step of the OAuth transaction, your app will
-need to redirect the user to the OAuth server. After authorization, the OAuth
+During the initial authorization step of the OAuth2 transaction, your app will
+need to redirect the user to the OAuth2 server. After authorization, the OAuth
 server will redirect your user back to you.
 
-In order for this OAuth client to initiate the redirect, you will need to
+In order for this OAuth2 client to initiate the redirect, you will need to
 implement our RedirectorInterface within the context of your application. That
 may be as simple as calling `header()` to send the Location, or it may involve
 a call to your web framework.
@@ -29,7 +29,7 @@ class MyRedirector implements RedirectorInterface
 }
 ```
 
-First, instantiate the basic objects and use them to create an OAuth Session.
+First, instantiate the basic objects and use them to create an OAuth2 Session.
 
 ```php
 use EasyBib\OAuth2\Client\AuthorizationCodeGrant\ClientConfig;
@@ -47,13 +47,13 @@ class MyWebController
         $httpClient = new Client('http://myoauth2provider.example.com');
         $redirector = new MyRedirector($this);
 
-        // your application's settings for the OAuth provider
+        // your application's settings for the OAuth2 provider
         $clientConfig = new ClientConfig([
             'client_id' => 'client_123',
             'redirect_url' => 'http://myapp.example.com/',
         ]);
 
-        // the OAuth provider's settings
+        // the OAuth2 provider's settings
         $serverConfig = new ServerConfig([
             'authorization_endpoint' => '/oauth/authorize',
             'token_endpoint' => '/oauth/token',
@@ -72,14 +72,14 @@ class MyWebController
 }
 ```
 
-When you are ready to connect to the service secured with OAuth, you will need
+When you are ready to connect to the service secured with OAuth2, you will need
 to authorize your user.
 
 ```php
 $this->oauthSession->authorize();
 ```
 
-The OAuth server will redirect the user back to your application
+The OAuth2 server will redirect the user back to your application
 with the user's token. Your application should handle that request as follows:
 
 ```php
@@ -87,7 +87,7 @@ use EasyBib\OAuth2\Client\AuthorizationCodeGrant\Authorization\AuthorizationResp
 
 class MyWebController
 {
-    // this is the action which handles the redirect from the OAuth server
+    // this is the action which handles the redirect from the OAuth2 server
     public function actionReceiveAuthorizationResponseFromOAuth()
     {
         $authorizationResponse = new AuthorizationResponse($_GET);
@@ -117,12 +117,12 @@ Authorization: Bearer token_foo_bar_baz
 ## Token expiration and invalidation
 
 This client will automatically handle token renewal when communicating with
-OAuth servers which provide a `refresh_token`.
+OAuth2 servers which provide a `refresh_token`.
 
 In the event that the resource server you are communicating with invalidates
 the token, e.g. the user logs out, you will need to handle that condition
 within your application, as
-[the OAuth standard does not specify behavior of the resource server in that case](http://tools.ietf.org/html/rfc6749#section-1.5).
+[the OAuth2 standard does not specify behavior of the resource server in that case](http://tools.ietf.org/html/rfc6749#section-1.5).
 
 When that situation is detected within your app, call the `authorize` method
 again:

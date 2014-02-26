@@ -14,7 +14,7 @@ you start using it, in order to substitute an instance of your custom class.
 
 The implementations of `AbstractSession`, together with `TokenRequest`, are the
 heart of this library. They wrap a Guzzle `Client`, which communicates with the
-OAuth server. They also allows you to attach any number of Guzzle clients to the
+OAuth2 server. They also allows you to attach any number of Guzzle clients to the
 session, which will thereafter have access to the token necessary to make requests
 against resource servers.
 
@@ -41,13 +41,13 @@ concerns from the `SimpleSession` implementation.
 
 ## Error handling
 
-OAuth specifies anticipated errors that can be returned from the server. This
+OAuth2 specifies anticipated errors that can be returned from the server. This
 client represents two types in exceptions: `AuthorizationErrorException` and
 `TokenRequestErrorException`. You can find the documentation
 [here](http://tools.ietf.org/html/rfc6749#section-4.1.2.1) and
 [here](http://tools.ietf.org/html/rfc6749#section-5.2), respectively.
 
-In case the OAuth server returns an invalid (i.e. unexpected) response to an
+In case the OAuth2 server returns an invalid (i.e. unexpected) response to an
 authorization or token request, the client will throw an
 `InvalidAuthorizationResponseException` or `InvalidTokenResponseException`,
 respectively.

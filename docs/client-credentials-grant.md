@@ -1,7 +1,7 @@
 # Client Credentials Grant
 
 In this grant type, your client has a privileged ID and password/secret arranged with the
-OAuth provider. There is no input required by the user in this grant type.
+OAuth2 provider. There is no input required by the user in this grant type.
 
 [The spec](http://tools.ietf.org/html/rfc6749#section-4.4) describes two modes
 of authenticating a client.
@@ -21,13 +21,13 @@ class MyWebController
 
     private function setUpOAuth()
     {
-        // your application's settings for the OAuth provider
+        // your application's settings for the OAuth2 provider
         $clientConfig = new ClientConfig([
             'client_id' => 'client_123',
             'client_password' => 'password_456',
         ]);
 
-        // the OAuth provider's settings
+        // the OAuth2 provider's settings
         $serverConfig = new ServerConfig([
             'token_endpoint' => '/oauth/token',
         ]);
@@ -73,13 +73,13 @@ class MyWebController
 
     private function setUpOAuth()
     {
-        // your application's settings for the OAuth provider
+        // your application's settings for the OAuth2 provider
         $clientConfig = new ClientConfig([
             'client_id' => 'client_123',
             'client_secret' => 'secret_456',
         ]);
 
-        // the OAuth provider's settings
+        // the OAuth2 provider's settings
         $serverConfig = new ServerConfig([
             'token_endpoint' => '/oauth/token',
         ]);
