@@ -3,7 +3,6 @@
 namespace EasyBib\Tests\OAuth2\Client\AuthorizationCodeGrant;
 
 use EasyBib\OAuth2\Client\AuthorizationCodeGrant\TokenRequest;
-use EasyBib\OAuth2\Client\TokenResponse\TokenResponse;
 
 class TokenRequestTest extends TestCase
 {
@@ -23,7 +22,9 @@ class TokenRequestTest extends TestCase
         $tokenResponse = $tokenRequest->send();
 
         $this->shouldHaveMadeATokenRequest();
-        $this->assertInstanceOf(TokenResponse::class, $tokenResponse);
+
+        $class = '\EasyBib\OAuth2\Client\TokenResponse\TokenResponse';
+        $this->assertInstanceOf($class, $tokenResponse);
         $this->assertEquals($token, $tokenResponse->getToken());
     }
 }

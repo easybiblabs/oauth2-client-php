@@ -2,7 +2,6 @@
 
 namespace EasyBib\Tests\OAuth2\Client;
 
-use EasyBib\OAuth2\Client\InvalidServerConfigException;
 use EasyBib\OAuth2\Client\ServerConfig;
 
 class ServerConfigTest extends \PHPUnit_Framework_TestCase
@@ -45,7 +44,7 @@ class ServerConfigTest extends \PHPUnit_Framework_TestCase
      */
     public function testInvalidParams(array $params)
     {
-        $this->setExpectedException(InvalidServerConfigException::class);
+        $this->setExpectedException('\EasyBib\OAuth2\Client\InvalidServerConfigException');
         new ServerConfig($params);
     }
 }

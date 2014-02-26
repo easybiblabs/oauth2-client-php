@@ -2,9 +2,7 @@
 
 namespace EasyBib\Tests\OAuth2\Client\AuthorizationCodeGrant\Authorization;
 
-use EasyBib\OAuth2\Client\AuthorizationCodeGrant\Authorization\AuthorizationErrorException;
 use EasyBib\OAuth2\Client\AuthorizationCodeGrant\Authorization\AuthorizationResponse;
-use EasyBib\OAuth2\Client\AuthorizationCodeGrant\Authorization\InvalidAuthorizationResponseException;
 
 class AuthorizationResponseTest extends \PHPUnit_Framework_TestCase
 {
@@ -14,7 +12,11 @@ class AuthorizationResponseTest extends \PHPUnit_Framework_TestCase
             'jim' => 'bob',
         ];
 
-        $this->setExpectedException(InvalidAuthorizationResponseException::class);
+        $exceptionClass = '\EasyBib\OAuth2\Client\AuthorizationCodeGrant\Authorization'
+            . '\InvalidAuthorizationResponseException';
+
+        $this->setExpectedException($exceptionClass);
+
         new AuthorizationResponse($params);
     }
 
@@ -35,9 +37,10 @@ class AuthorizationResponseTest extends \PHPUnit_Framework_TestCase
         ];
 
         $response = new AuthorizationResponse($params);
+        $exceptionClass = '\EasyBib\OAuth2\Client\AuthorizationCodeGrant\Authorization\AuthorizationErrorException';
 
         $this->setExpectedException(
-            AuthorizationErrorException::class,
+            $exceptionClass,
             'access_denied'
         );
 

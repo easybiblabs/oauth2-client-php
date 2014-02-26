@@ -1,10 +1,10 @@
 <?php
 
-namespace EasyBib\Tests\OAuth2\Client\AuthorizationCodeGrant;
+namespace EasyBib\Tests\OAuth2\Client\ClientCredentialsGrant\HttpBasic;
 
-use EasyBib\OAuth2\Client\AuthorizationCodeGrant\ClientConfig;
+use EasyBib\OAuth2\Client\ClientCredentialsGrant\HttpBasic\ClientConfig;
 
-class ClientConfigTest extends \PHPUnit_Framework_TestCase
+class ConfigTest extends \PHPUnit_Framework_TestCase
 {
     /**
      * @return array
@@ -15,6 +15,7 @@ class ClientConfigTest extends \PHPUnit_Framework_TestCase
             [
                 [
                     'client_id' => 'ABC123',
+                    'client_password' => 'XYZ987',
                 ],
             ],
         ];

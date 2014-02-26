@@ -8,24 +8,41 @@ use Guzzle\Http\ClientInterface;
 abstract class AbstractSession
 {
     /**
-     * @var ClientInterface
+     * @var \EasyBib\OAuth2\Client\TokenStore
      */
-    protected $httpClient;
+    protected $tokenStore;
+
+    /**
+     * @var bool
+     */
+    private $requestsAlreadyMade = false;
 
     /**
      * @return string
      */
-    abstract public function getToken();
+    abstract protected function doGetToken();
 
     /**
-     * @param TokenStore $tokenStore
+     * @return string
      */
-    abstract public function setTokenStore(TokenStore $tokenStore);
+    public function getToken()
+    {
+        $this->requestsAlreadyMade = true;
+        return $this->doGetToken();
+    }
 
     /**
-     * @param Scope $scope
+     * @param \EasyBib\OAuth2\Client\TokenStore $tokenStore
+     * @throws \LogicException
      */
-    abstract public function setScope(Scope $scope);
+    public function setTokenStore(TokenStore $tokenStore)
+    {
+        if ($this->requestsAlreadyMade) {
+            throw new \LogicException('Cannot set token store after requests already made');
+        }
+
+        $this->tokenStore = $tokenStore;
+    }
 
     /**
      * @param ClientInterface $httpClient

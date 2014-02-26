@@ -1,9 +1,8 @@
 <?php
 
-namespace EasyBib\Tests\OAuth2\Client\ClientCredentialsGrant;
+namespace EasyBib\Tests\OAuth2\Client\ClientCredentialsGrant\HttpBasic;
 
-use EasyBib\OAuth2\Client\ClientCredentialsGrant\ClientConfig;
-use EasyBib\OAuth2\Client\ClientCredentialsGrant\TokenRequest;
+use EasyBib\OAuth2\Client\ClientCredentialsGrant\HttpBasic\ClientConfig;
 use EasyBib\OAuth2\Client\Scope;
 use EasyBib\OAuth2\Client\ServerConfig;
 use EasyBib\Tests\OAuth2\Client\Given;
@@ -13,6 +12,7 @@ use Guzzle\Plugin\Mock\MockPlugin;
 
 /**
  * @SuppressWarnings(PHPMD.CouplingBetweenObjects)
+ * @SuppressWarnings(PHPMD.LongVariable)
  */
 abstract class TestCase extends \PHPUnit_Framework_TestCase
 {
@@ -64,7 +64,7 @@ abstract class TestCase extends \PHPUnit_Framework_TestCase
 
         $this->clientConfig = new ClientConfig([
             'client_id' => 'client_123',
-            'client_secret' => 'secret_456',
+            'client_password' => 'secret_456',
         ]);
 
         $this->serverConfig = new ServerConfig([
@@ -78,26 +78,5 @@ abstract class TestCase extends \PHPUnit_Framework_TestCase
         $this->httpClient->addSubscriber($this->history);
 
         $this->scope = new Scope(['USER_READ', 'DATA_READ_WRITE']);
-    }
-
-    protected function shouldHaveMadeATokenRequest()
-    {
-        $lastRequest = $this->history->getLastRequest();
-
-        $expectedParams = [
-            'grant_type' => TokenRequest::GRANT_TYPE,
-            'client_id' => $this->clientConfig->getParams()['client_id'],
-            'client_secret' => $this->clientConfig->getParams()['client_secret'],
-        ];
-
-        $expectedUrl = sprintf(
-            '%s%s',
-            $this->apiBaseUrl,
-            $this->serverConfig->getParams()['token_endpoint']
-        );
-
-        $this->assertEquals('POST', $lastRequest->getMethod());
-        $this->assertEquals($expectedParams, $lastRequest->getPostFields()->toArray());
-        $this->assertEquals($expectedUrl, $lastRequest->getUrl());
     }
 }

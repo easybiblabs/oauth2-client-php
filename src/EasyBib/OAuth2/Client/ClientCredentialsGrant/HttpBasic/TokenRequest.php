@@ -1,6 +1,6 @@
 <?php
 
-namespace EasyBib\OAuth2\Client\ClientCredentialsGrant;
+namespace EasyBib\OAuth2\Client\ClientCredentialsGrant\HttpBasic;
 
 use EasyBib\OAuth2\Client\Scope;
 use EasyBib\OAuth2\Client\ServerConfig;
@@ -13,7 +13,7 @@ class TokenRequest implements TokenRequestInterface
     const GRANT_TYPE = 'client_credentials';
 
     /**
-     * @var ClientConfig
+     * @var \EasyBib\OAuth2\Client\ClientCredentialsGrant\RequestParams\ClientConfig
      */
     private $clientConfig;
 
@@ -57,6 +57,12 @@ class TokenRequest implements TokenRequestInterface
     {
         $url = $this->serverConfig->getParams()['token_endpoint'];
         $request = $this->httpClient->post($url, [], $this->getParams());
+
+        $request->setAuth(
+            $this->clientConfig->getParams()['client_id'],
+            $this->clientConfig->getParams()['client_password']
+        );
+
         $responseBody = $request->send()->getBody(true);
 
         return new TokenResponse(json_decode($responseBody, true));
@@ -68,9 +74,7 @@ class TokenRequest implements TokenRequestInterface
     private function getParams()
     {
         return [
-            'grant_type' => TokenRequest::GRANT_TYPE,
-            'client_id' => $this->clientConfig->getParams()['client_id'],
-            'client_secret' => $this->clientConfig->getParams()['client_secret'],
+            'grant_type' => self::GRANT_TYPE,
         ];
     }
 }

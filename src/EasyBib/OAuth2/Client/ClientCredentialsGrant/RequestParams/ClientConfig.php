@@ -1,6 +1,6 @@
 <?php
 
-namespace EasyBib\OAuth2\Client\AuthorizationCodeGrant;
+namespace EasyBib\OAuth2\Client\ClientCredentialsGrant\RequestParams;
 
 use EasyBib\OAuth2\Client\ArrayValidator;
 use EasyBib\OAuth2\Client\InvalidClientConfigException;
@@ -17,15 +17,7 @@ class ClientConfig
      */
     private static $requiredParams = [
         'client_id',
-    ];
-
-    /**
-     * @var array
-     */
-    private static $permittedParams = [
-        'client_id',
-        'redirect_url',
-        // 'state',  // not yet supported
+        'client_secret',
     ];
 
     /**
@@ -51,7 +43,7 @@ class ClientConfig
      */
     private static function validate(array $params)
     {
-        $validator = new ArrayValidator(self::$requiredParams, self::$permittedParams);
+        $validator = new ArrayValidator(self::$requiredParams, self::$requiredParams);
 
         if (!$validator->validate($params)) {
             throw new InvalidClientConfigException();

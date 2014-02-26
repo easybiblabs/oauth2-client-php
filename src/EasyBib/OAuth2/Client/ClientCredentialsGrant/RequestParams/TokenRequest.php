@@ -1,19 +1,16 @@
 <?php
 
-namespace EasyBib\OAuth2\Client\JsonWebTokenGrant;
+namespace EasyBib\OAuth2\Client\ClientCredentialsGrant\RequestParams;
 
 use EasyBib\OAuth2\Client\Scope;
 use EasyBib\OAuth2\Client\ServerConfig;
 use EasyBib\OAuth2\Client\TokenRequestInterface;
 use EasyBib\OAuth2\Client\TokenResponse\TokenResponse;
 use Guzzle\Http\ClientInterface;
-use JWT;
 
 class TokenRequest implements TokenRequestInterface
 {
-    const GRANT_TYPE = 'urn:ietf:params:oauth:grant-type:jwt-bearer';
-    const EXPIRES_IN_TIME = 36000;
-    const NOT_BEFORE_TIME = 96000;
+    const GRANT_TYPE = 'client_credentials';
 
     /**
      * @var ClientConfig
@@ -36,29 +33,21 @@ class TokenRequest implements TokenRequestInterface
     private $scope;
 
     /**
-     * @var int
-     */
-    private $baseTime;
-
-    /**
      * @param ClientConfig $clientConfig
      * @param ServerConfig $serverConfig
      * @param ClientInterface $httpClient
      * @param Scope $scope
-     * @param int $baseTime
      */
     public function __construct(
         ClientConfig $clientConfig,
         ServerConfig $serverConfig,
         ClientInterface $httpClient,
-        Scope $scope,
-        $baseTime
+        Scope $scope
     ) {
         $this->clientConfig = $clientConfig;
         $this->serverConfig = $serverConfig;
         $this->httpClient = $httpClient;
         $this->scope = $scope;
-        $this->baseTime = $baseTime;
     }
 
     /**
@@ -78,34 +67,10 @@ class TokenRequest implements TokenRequestInterface
      */
     private function getParams()
     {
-        $payload = [
-            'scope' => $this->scope->getQuerystringParams()['scope'],
-            'iss' => $this->clientConfig->getParams()['client_id'],
-            'sub' => $this->clientConfig->getParams()['subject'],
-            'aud' => $this->getTokenEndpoint(),
-            'exp' => $this->baseTime + self::EXPIRES_IN_TIME,
-            'nbf' => $this->baseTime - self::NOT_BEFORE_TIME,
-            'iat' => $this->baseTime,
-            'jti' => '',
-            'typ' => '',
-        ];
-
-        $assertion = JWT::encode($payload, $this->clientConfig->getParams()['client_secret']);
-
         return [
             'grant_type' => self::GRANT_TYPE,
-            'assertion' => $assertion,
+            'client_id' => $this->clientConfig->getParams()['client_id'],
+            'client_secret' => $this->clientConfig->getParams()['client_secret'],
         ];
-    }
-
-    /**
-     * @return string
-     */
-    private function getTokenEndpoint()
-    {
-        return vsprintf('%s%s', [
-            $this->httpClient->getBaseUrl(),
-            $this->serverConfig->getParams()['token_endpoint'],
-        ]);
     }
 }

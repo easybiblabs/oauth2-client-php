@@ -1,22 +1,19 @@
 <?php
 
-namespace EasyBib\Tests\OAuth2\Client\JsonWebTokenGrant;
+namespace EasyBib\Tests\OAuth2\Client;
 
-use EasyBib\OAuth2\Client\JsonWebTokenGrant\ServerConfig;
-use EasyBib\OAuth2\Client\JsonWebTokenGrant\JsonWebTokenSession;
+use EasyBib\OAuth2\Client\SimpleSession;
+use EasyBib\OAuth2\Client\ClientCredentialsGrant\RequestParams\TokenRequest;
+use EasyBib\OAuth2\Client\ClientCredentialsGrant\RequestParams\TokenRequestFactory;
 use EasyBib\OAuth2\Client\TokenStore;
 use EasyBib\Tests\Mocks\OAuth2\Client\ResourceRequest;
+use EasyBib\Tests\OAuth2\Client\ClientCredentialsGrant\RequestParams\TestCase;
 use Guzzle\Http\Client;
 use Symfony\Component\HttpFoundation\Session\Session;
 use Symfony\Component\HttpFoundation\Session\Storage\MockArraySessionStorage;
 
-class JsonWebTokenSessionTest extends TestCase
+class SimpleSessionTest extends TestCase
 {
-    /**
-     * @var JsonWebTokenSession
-     */
-    private $session;
-
     /**
      * @var Session
      */
@@ -27,14 +24,29 @@ class JsonWebTokenSessionTest extends TestCase
      */
     private $tokenStore;
 
+    /**
+     * @var SimpleSession
+     */
+    private $session;
+
     public function setUp()
     {
         parent::setUp();
 
         $this->tokenSession = new Session(new MockArraySessionStorage());
         $this->tokenStore = new TokenStore($this->tokenSession);
+        $this->session = $this->createParamsSession();
+    }
 
-        $this->session = $this->createSession();
+    public function testSetTokenStoreWhenRequestsAlreadyMade()
+    {
+        $token = 'ABC123';
+        $this->given->iAmReadyToRespondToATokenRequest($token, $this->scope, $this->mockResponses);
+
+        $this->session->getToken();
+
+        $this->setExpectedException('\LogicException');
+        $this->session->setTokenStore(new TokenStore($this->tokenSession));
     }
 
     public function testGetTokenWhenNotSet()
@@ -79,20 +91,41 @@ class JsonWebTokenSessionTest extends TestCase
         $this->assertEquals('Bearer ' . $token, $lastRequest->getHeader('Authorization'));
     }
 
-    /**
-     * @return JsonWebTokenSession
-     */
-    private function createSession()
+    private function shouldHaveMadeATokenRequest()
     {
-        $session = new JsonWebTokenSession(
-            $this->httpClient,
-            $this->clientConfig,
-            $this->serverConfig
+        $lastRequest = $this->history->getLastRequest();
+
+        $expectedParams = [
+            'grant_type' => TokenRequest::GRANT_TYPE,
+            'client_id' => $this->clientConfig->getParams()['client_id'],
+            'client_secret' => $this->clientConfig->getParams()['client_secret'],
+        ];
+
+        $expectedUrl = sprintf(
+            '%s%s',
+            $this->apiBaseUrl,
+            $this->serverConfig->getParams()['token_endpoint']
         );
 
+        $this->assertEquals('POST', $lastRequest->getMethod());
+        $this->assertEquals($expectedParams, $lastRequest->getPostFields()->toArray());
+        $this->assertEquals($expectedUrl, $lastRequest->getUrl());
+    }
+
+    /**
+     * @return SimpleSession
+     */
+    private function createParamsSession()
+    {
+        $tokenRequestFactory = new TokenRequestFactory(
+            $this->clientConfig,
+            $this->serverConfig,
+            $this->httpClient,
+            $this->scope
+        );
+
+        $session = new SimpleSession($tokenRequestFactory);
         $session->setTokenStore($this->tokenStore);
-        $session->setScope($this->scope);
-        $session->setBaseTime($this->baseTime);
 
         return $session;
     }
