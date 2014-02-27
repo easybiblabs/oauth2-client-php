@@ -8,6 +8,7 @@ use Symfony\Component\HttpFoundation\Session\Session;
 class StateStore
 {
     const KEY_STATE = 'oauth/state';
+    const STATE_STRING_LENGTH = 30;
 
     /**
      * This is a persistent store for state data, which does not necessarily
@@ -73,7 +74,7 @@ class StateStore
 
         $string = '';
 
-        for ($i = 0; $i < 30; $i++) {
+        for ($i = 0; $i < self::STATE_STRING_LENGTH; $i++) {
             $string .= $chars[rand(0, $numChars-1)];
         }
 
