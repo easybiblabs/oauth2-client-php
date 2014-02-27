@@ -2,7 +2,6 @@
 
 namespace EasyBib\OAuth2\Client\AuthorizationCodeGrant;
 
-use EasyBib\OAuth2\Client\AbstractSession;
 use EasyBib\OAuth2\Client\AuthorizationCodeGrant\Authorization\AuthorizationResponse;
 use EasyBib\OAuth2\Client\Scope;
 use EasyBib\OAuth2\Client\TokenStore;
@@ -11,26 +10,6 @@ use Symfony\Component\HttpFoundation\Session\Session;
 
 class StatefulSession extends AbstractSession
 {
-    /**
-     * @var RedirectorInterface
-     */
-    private $redirector;
-
-    /**
-     * @var ClientConfig
-     */
-    private $clientConfig;
-
-    /**
-     * @var ServerConfig
-     */
-    private $serverConfig;
-
-    /**
-     * @var Scope
-     */
-    private $scope;
-
     /**
      * @var StateStore
      */
@@ -57,22 +36,9 @@ class StatefulSession extends AbstractSession
         $this->stateStore = new StateStore(new Session());
     }
 
-    /**
-     * @param Scope $scope
-     */
-    public function setScope(Scope $scope)
-    {
-        $this->scope = $scope;
-    }
-
     public function setStateStore(StateStore $stateStore)
     {
         $this->stateStore = $stateStore;
-    }
-
-    public function authorize()
-    {
-        $this->redirector->redirect($this->getAuthorizeUrl());
     }
 
     /**
@@ -96,47 +62,10 @@ class StatefulSession extends AbstractSession
         $this->tokenStore->updateFromTokenResponse($tokenResponse);
     }
 
-
     /**
      * @return string
      */
-    protected function doGetToken()
-    {
-        $token = $this->tokenStore->getToken();
-
-        if ($token) {
-            return $token;
-        }
-
-        if ($this->tokenStore->isRefreshable()) {
-            return $this->getRefreshedToken();
-        }
-
-        // redirects browser
-        $this->authorize();
-    }
-
-    /**
-     * @return string
-     */
-    private function getRefreshedToken()
-    {
-        $refreshRequest = new TokenRefreshRequest(
-            $this->tokenStore->getRefreshToken(),
-            $this->serverConfig,
-            $this->httpClient
-        );
-
-        $tokenResponse = $refreshRequest->send();
-        $this->tokenStore->updateFromTokenResponse($tokenResponse);
-
-        return $tokenResponse->getToken();
-    }
-
-    /**
-     * @return string
-     */
-    private function getAuthorizeUrl()
+    protected function getAuthorizeUrl()
     {
         $params = [
             'response_type' => 'code',
