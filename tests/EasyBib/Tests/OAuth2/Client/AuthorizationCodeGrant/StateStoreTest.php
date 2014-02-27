@@ -39,6 +39,7 @@ class StateStoreTest extends \PHPUnit_Framework_TestCase
     {
         $state = $this->stateStore->getState();
 
+        $this->assertEquals(StateStore::STATE_STRING_LENGTH, strlen($state));
         $this->assertEquals($state, $this->session->get(StateStore::KEY_STATE));
         $this->assertEquals($state, $this->stateStore->getState());
     }
