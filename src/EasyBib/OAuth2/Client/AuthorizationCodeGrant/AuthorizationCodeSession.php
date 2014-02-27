@@ -3,6 +3,8 @@
 namespace EasyBib\OAuth2\Client\AuthorizationCodeGrant;
 
 use EasyBib\OAuth2\Client\AuthorizationCodeGrant\Authorization\AuthorizationResponse;
+use EasyBib\OAuth2\Client\AuthorizationCodeGrant\State\StateException;
+use EasyBib\OAuth2\Client\AuthorizationCodeGrant\State\StateStore;
 use EasyBib\OAuth2\Client\TokenStore;
 use Guzzle\Http\ClientInterface;
 use Symfony\Component\HttpFoundation\Session\Session;

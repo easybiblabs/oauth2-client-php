@@ -4,7 +4,7 @@ namespace EasyBib\Tests\OAuth2\Client\AuthorizationCodeGrant;
 
 use EasyBib\OAuth2\Client\AuthorizationCodeGrant\Authorization\AuthorizationResponse;
 use EasyBib\OAuth2\Client\AuthorizationCodeGrant\AuthorizationCodeSession;
-use EasyBib\OAuth2\Client\AuthorizationCodeGrant\StateStore;
+use EasyBib\OAuth2\Client\AuthorizationCodeGrant\State\StateStore;
 use EasyBib\OAuth2\Client\Scope;
 use EasyBib\OAuth2\Client\TokenStore;
 use EasyBib\Tests\Mocks\OAuth2\Client\ExceptionMockRedirector;
@@ -189,7 +189,7 @@ class AuthorizationCodeSessionTest extends TestCase
     private function expectStateException()
     {
         $this->setExpectedException(
-            '\EasyBib\OAuth2\Client\AuthorizationCodeGrant\StateException'
+            '\EasyBib\OAuth2\Client\AuthorizationCodeGrant\State\StateException'
         );
     }
 }

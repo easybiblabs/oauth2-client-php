@@ -1,9 +1,10 @@
 <?php
 
-namespace EasyBib\Tests\OAuth2\Client\AuthorizationCodeGrant;
+namespace EasyBib\Tests\OAuth2\Client\AuthorizationCodeGrant\State;
 
 use EasyBib\OAuth2\Client\AuthorizationCodeGrant\Authorization\AuthorizationResponse;
-use EasyBib\OAuth2\Client\AuthorizationCodeGrant\StateStore;
+use EasyBib\OAuth2\Client\AuthorizationCodeGrant\State\StateStore;
+use PHPUnit_Framework_TestCase;
 use Symfony\Component\HttpFoundation\Session\Session;
 use Symfony\Component\HttpFoundation\Session\Storage\MockArraySessionStorage;
 
@@ -39,7 +40,8 @@ class StateStoreTest extends \PHPUnit_Framework_TestCase
     {
         $state = $this->stateStore->getState();
 
-        $this->assertEquals(StateStore::STATE_STRING_LENGTH, strlen($state));
+        $this->assertInternalType('string', $state);
+        $this->assertNotEmpty($state);
         $this->assertEquals($state, $this->session->get(StateStore::KEY_STATE));
         $this->assertEquals($state, $this->stateStore->getState());
     }

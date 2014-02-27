@@ -1,6 +1,6 @@
 <?php
 
-namespace EasyBib\OAuth2\Client\AuthorizationCodeGrant;
+namespace EasyBib\OAuth2\Client\AuthorizationCodeGrant\State;
 
 use EasyBib\OAuth2\Client\AuthorizationCodeGrant\Authorization\AuthorizationResponse;
 use Symfony\Component\HttpFoundation\Session\Session;
@@ -8,7 +8,6 @@ use Symfony\Component\HttpFoundation\Session\Session;
 class StateStore
 {
     const KEY_STATE = 'oauth/state';
-    const STATE_STRING_LENGTH = 30;
 
     /**
      * This is a persistent store for state data, which does not necessarily
@@ -19,11 +18,17 @@ class StateStore
     private $session;
 
     /**
+     * @var StateGeneratorInterface
+     */
+    private $stateGenerator;
+
+    /**
      * @param Session $session
      */
     public function __construct(Session $session)
     {
         $this->session = $session;
+        $this->stateGenerator = new SimpleStateGenerator();
     }
 
     /**
@@ -35,7 +40,7 @@ class StateStore
             return $state;
         }
 
-        $state = $this->generateState();
+        $state = $this->stateGenerator->generate();
         $this->session->set(self::KEY_STATE, $state);
 
         return $state;
@@ -60,25 +65,19 @@ class StateStore
     }
 
     /**
+     * @param StateGeneratorInterface $stateGenerator
+     */
+    public function setStateGenerator(StateGeneratorInterface $stateGenerator)
+    {
+        $this->stateGenerator = $stateGenerator;
+    }
+
+    /**
      * @return bool
      */
     private function isInitiated()
     {
         return (bool) $this->get(self::KEY_STATE);
-    }
-
-    private function generateState()
-    {
-        $chars = array_merge(range('A', 'Z'), range('a', 'z'), range('0', '9'));
-        $numChars = count($chars);
-
-        $string = '';
-
-        for ($i = 0; $i < self::STATE_STRING_LENGTH; $i++) {
-            $string .= $chars[rand(0, $numChars-1)];
-        }
-
-        return $string;
     }
 
     /**
