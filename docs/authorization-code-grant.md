@@ -138,9 +138,12 @@ $this->oauthSession->authorize();
 
 For protection against cross-site request forgeries, the OAuth2 standard
 [recommends using a random `state` parameter](http://tools.ietf.org/html/rfc6749#section-4.1.1)
-with authorization code requests. `StatefulAuthorizationCodeSession` uses state.
+with authorization code requests.
+Google Developers has
+[more information about this](https://developers.google.com/accounts/docs/OAuth2Login#createxsrftoken).
 
-To omit state, use `AuthorizationCodeSession`:
+`StatefulAuthorizationCodeSession` uses state. To omit state, use
+`AuthorizationCodeSession`:
 
 ```php
 use EasyBib\OAuth2\Client\AuthorizationCodeGrant\AuthorizationCodeSession;
