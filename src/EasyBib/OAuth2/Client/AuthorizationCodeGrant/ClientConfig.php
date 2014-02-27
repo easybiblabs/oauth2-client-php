@@ -25,7 +25,6 @@ class ClientConfig
     private static $permittedParams = [
         'client_id',
         'redirect_url',
-        // 'state',  // not yet supported
     ];
 
     /**
