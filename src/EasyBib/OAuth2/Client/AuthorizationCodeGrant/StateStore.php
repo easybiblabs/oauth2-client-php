@@ -68,13 +68,13 @@ class StateStore
 
     private function generateState()
     {
-        $chars = range('A', 'Z') + range('a', 'z') + range('0', '9');
-        $numChars = strlen($chars);
+        $chars = array_merge(range('A', 'Z'), range('a', 'z'), range('0', '9'));
+        $numChars = count($chars);
 
         $string = '';
 
         for ($i = 0; $i < 30; $i++) {
-            $string .= $chars[rand(0, $numChars)];
+            $string .= $chars[rand(0, $numChars-1)];
         }
 
         return $string;

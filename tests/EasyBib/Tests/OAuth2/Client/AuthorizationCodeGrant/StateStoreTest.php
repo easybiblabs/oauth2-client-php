@@ -35,6 +35,14 @@ class StateStoreTest extends \PHPUnit_Framework_TestCase
         $this->assertEquals($stateValue, $this->stateStore->getState());
     }
 
+    public function testGetStateWithGeneration()
+    {
+        $state = $this->stateStore->getState();
+
+        $this->assertEquals($state, $this->session->get(StateStore::KEY_STATE));
+        $this->assertEquals($state, $this->stateStore->getState());
+    }
+
     public function testValidateResponseWhereMatches()
     {
         $stateValue = 'ABC123';
