@@ -7,13 +7,8 @@ use EasyBib\OAuth2\Client\TokenStore;
 use Guzzle\Http\ClientInterface;
 use Symfony\Component\HttpFoundation\Session\Session;
 
-class StatefulSession extends AbstractSession
+class AuthorizationCodeSession extends AbstractSession
 {
-    /**
-     * @var StateStore
-     */
-    private $stateStore;
-
     /**
      * @param ClientInterface $httpClient
      * @param RedirectorInterface $redirector
@@ -32,24 +27,13 @@ class StatefulSession extends AbstractSession
         $this->serverConfig = $serverConfig;
 
         $this->tokenStore = new TokenStore(new Session());
-        $this->stateStore = new StateStore(new Session());
-    }
-
-    public function setStateStore(StateStore $stateStore)
-    {
-        $this->stateStore = $stateStore;
     }
 
     /**
      * @param AuthorizationResponse $authResponse
-     * @throws StateException
      */
     public function handleAuthorizationResponse(AuthorizationResponse $authResponse)
     {
-        if (!$this->stateStore->validateResponse($authResponse)) {
-            throw new StateException('State does not match');
-        }
-
         $tokenRequest = new TokenRequest(
             $this->clientConfig,
             $this->serverConfig,
@@ -66,10 +50,7 @@ class StatefulSession extends AbstractSession
      */
     protected function getAuthorizeUrl()
     {
-        $params = [
-            'response_type' => 'code',
-            'state' => $this->stateStore->getState(),
-        ] + $this->clientConfig->getParams();
+        $params = ['response_type' => 'code'] + $this->clientConfig->getParams();
 
         if ($this->scope) {
             $params += $this->scope->getQuerystringParams();

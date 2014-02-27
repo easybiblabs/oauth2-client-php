@@ -34,7 +34,7 @@ First, instantiate the basic objects and use them to create an OAuth2 Session.
 ```php
 use EasyBib\OAuth2\Client\AuthorizationCodeGrant\ClientConfig;
 use EasyBib\OAuth2\Client\AuthorizationCodeGrant\ServerConfig;
-use EasyBib\OAuth2\Client\AuthorizationCodeGrant\StatefulSession;
+use EasyBib\OAuth2\Client\AuthorizationCodeGrant\StatefulAuthorizationCodeSession;
 use EasyBib\OAuth2\Client\Scope;
 use Guzzle\Http\Client;
 
@@ -59,7 +59,7 @@ class MyWebController
             'token_endpoint' => '/oauth/token',
         ]);
 
-        $this->oauthSession = new StatefulSession(
+        $this->oauthSession = new StatefulAuthorizationCodeSession(
             $httpClient,
             $redirector,
             $clientConfig,
@@ -138,14 +138,14 @@ $this->oauthSession->authorize();
 
 For protection against cross-site request forgeries, the OAuth2 standard
 [recommends using a random `state` parameter](http://tools.ietf.org/html/rfc6749#section-4.1.1)
-with authorization code requests. `StatefulSession` uses state.
+with authorization code requests. `StatefulAuthorizationCodeSession` uses state.
 
-To omit state, use `StatelessSession`:
+To omit state, use `AuthorizationCodeSession`:
 
 ```php
-use EasyBib\OAuth2\Client\AuthorizationCodeGrant\StatelessSession;
+use EasyBib\OAuth2\Client\AuthorizationCodeGrant\AuthorizationCodeSession;
 
-$this->oauthSession = new StatelessSession(
+$this->oauthSession = new AuthorizationCodeSession(
     $httpClient,
     $redirector,
     $clientConfig,
