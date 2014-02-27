@@ -34,7 +34,7 @@ class AuthorizationResponse
         'error',
         'error_description',
         'error_uri',
-        // 'state'  // not yet supported
+        'state',
     ];
 
     /**
