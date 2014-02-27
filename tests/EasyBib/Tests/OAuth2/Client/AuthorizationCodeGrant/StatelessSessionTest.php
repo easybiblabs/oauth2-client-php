@@ -2,7 +2,7 @@
 
 namespace EasyBib\Tests\OAuth2\Client\AuthorizationCodeGrant;
 
-use EasyBib\OAuth2\Client\AuthorizationCodeGrant\AuthorizationCodeSession;
+use EasyBib\OAuth2\Client\AuthorizationCodeGrant\StatelessSession;
 use EasyBib\OAuth2\Client\Scope;
 use EasyBib\OAuth2\Client\TokenStore;
 use EasyBib\Tests\Mocks\OAuth2\Client\ExceptionMockRedirector;
@@ -11,7 +11,7 @@ use Guzzle\Http\Client;
 use Symfony\Component\HttpFoundation\Session\Session;
 use Symfony\Component\HttpFoundation\Session\Storage\MockArraySessionStorage;
 
-class AuthorizationCodeSessionTest extends TestCase
+class StatelessSessionTest extends TestCase
 {
     /**
      * @var Session
@@ -24,7 +24,7 @@ class AuthorizationCodeSessionTest extends TestCase
     private $tokenStore;
 
     /**
-     * @var AuthorizationCodeSession
+     * @var StatefulSession
      */
     private $session;
 
@@ -133,11 +133,11 @@ class AuthorizationCodeSessionTest extends TestCase
     }
 
     /**
-     * @return AuthorizationCodeSession
+     * @return StatelessSession
      */
     private function createSession()
     {
-        $session = new AuthorizationCodeSession(
+        $session = new StatelessSession(
             $this->httpClient,
             new ExceptionMockRedirector(),
             $this->clientConfig,
