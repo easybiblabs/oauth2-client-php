@@ -4,6 +4,7 @@ namespace EasyBib\Tests\OAuth2\Client\AuthorizationCodeGrant\State;
 
 use EasyBib\OAuth2\Client\AuthorizationCodeGrant\Authorization\AuthorizationResponse;
 use EasyBib\OAuth2\Client\AuthorizationCodeGrant\State\StateStore;
+use EasyBib\Tests\OAuth2\Client\Mock\AuthorizationCodeGrant\State\MockStateGenerator;
 use PHPUnit_Framework_TestCase;
 use Symfony\Component\HttpFoundation\Session\Session;
 use Symfony\Component\HttpFoundation\Session\Storage\MockArraySessionStorage;
@@ -69,6 +70,13 @@ class StateStoreTest extends \PHPUnit_Framework_TestCase
 
         $this->setExpectedException('\LogicException');
         $this->stateStore->validateResponse($response);
+    }
+
+    public function testSetStateGenerator()
+    {
+        $value = 'hooha';
+        $this->stateStore->setStateGenerator(new MockStateGenerator($value));
+        $this->assertEquals($value, $this->stateStore->getState());
     }
 
     /**
