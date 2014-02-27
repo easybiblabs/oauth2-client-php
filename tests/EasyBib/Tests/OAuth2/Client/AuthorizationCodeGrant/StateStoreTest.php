@@ -46,12 +46,18 @@ class StateStoreTest extends \PHPUnit_Framework_TestCase
 
     public function testValidateResponseWhereDoesNotMatch()
     {
+        $this->session->set(StateStore::KEY_STATE, 'ABC123');
+        $response = $this->getAuthorizationResponse('DEF456');
 
+        $this->assertFalse($this->stateStore->validateResponse($response));
     }
 
     public function testValidateResponseWhereNotInitialized()
     {
+        $response = $this->getAuthorizationResponse('ABC123');
 
+        $this->setExpectedException('\LogicException');
+        $this->stateStore->validateResponse($response);
     }
 
     /**
