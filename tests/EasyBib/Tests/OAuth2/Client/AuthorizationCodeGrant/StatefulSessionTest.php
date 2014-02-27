@@ -90,12 +90,46 @@ class StatefulSessionTest extends TestCase
         );
     }
 
+    public function testResourceRequestWhenExpiredHavingRefreshToken()
+    {
+        $oldToken = 'ABC123';
+        $newToken = 'XYZ987';
+        $refreshToken = 'REFRESH_456';
+
+        $this->given->iHaveATokenInSession($oldToken, $this->session);
+        $this->given->iHaveARefreshToken($refreshToken, $this->session);
+        $this->given->myTokenIsExpired($this->session);
+        $this->given->iAmReadyToRespondToATokenRequest($newToken, $this->scope, $this->mockResponses);
+
+        (new ResourceRequest($this->oauthSession))->execute();
+
+        $this->shouldHaveMadeATokenRefreshRequest($refreshToken);
+        $this->shouldHaveTokenInHeaderForResourceRequests($newToken);
+    }
+
     private function shouldHaveTokenInHeaderForResourceRequests($token)
     {
         $lastRequest = (new ResourceRequest($this->oauthSession))->execute();
 
         $this->assertEquals($token, $this->tokenStore->getToken());
         $this->assertEquals('Bearer ' . $token, $lastRequest->getHeader('Authorization'));
+    }
+
+    /**
+     * @param string $refreshToken
+     */
+    private function shouldHaveMadeATokenRefreshRequest($refreshToken)
+    {
+        $lastRequest = $this->history->getLastRequest();
+
+        $this->assertEquals(
+            $this->apiBaseUrl . $this->serverConfig->getParams()['token_endpoint'],
+            $lastRequest->getUrl()
+        );
+
+        $this->assertEquals('POST', $lastRequest->getMethod());
+        $this->assertEquals('refresh_token', $lastRequest->getPostFields()['grant_type']);
+        $this->assertEquals($refreshToken, $lastRequest->getPostFields()['refresh_token']);
     }
 
     private function expectRedirectToAuthorizationEndpoint()
