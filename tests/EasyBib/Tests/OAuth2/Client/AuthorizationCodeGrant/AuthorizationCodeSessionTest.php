@@ -189,7 +189,7 @@ class AuthorizationCodeSessionTest extends TestCase
     private function expectStateException()
     {
         $this->setExpectedException(
-            '\EasyBib\OAuth2\Client\AuthorizationCodeGrant\State\StateException'
+            '\EasyBib\OAuth2\Client\AuthorizationCodeGrant\State\StateMismatchException'
         );
     }
 }

@@ -3,7 +3,7 @@
 namespace EasyBib\OAuth2\Client\AuthorizationCodeGrant;
 
 use EasyBib\OAuth2\Client\AuthorizationCodeGrant\Authorization\AuthorizationResponse;
-use EasyBib\OAuth2\Client\AuthorizationCodeGrant\State\StateException;
+use EasyBib\OAuth2\Client\AuthorizationCodeGrant\State\StateMismatchException;
 use EasyBib\OAuth2\Client\AuthorizationCodeGrant\State\StateStore;
 use EasyBib\OAuth2\Client\TokenStore;
 use Guzzle\Http\ClientInterface;
@@ -44,12 +44,12 @@ class AuthorizationCodeSession extends AbstractSession
 
     /**
      * @param AuthorizationResponse $authResponse
-     * @throws StateException
+     * @throws StateMismatchException
      */
     public function handleAuthorizationResponse(AuthorizationResponse $authResponse)
     {
         if (!$this->stateStore->validateResponse($authResponse)) {
-            throw new StateException('State does not match');
+            throw new StateMismatchException('State does not match');
         }
 
         $tokenRequest = new TokenRequest(
