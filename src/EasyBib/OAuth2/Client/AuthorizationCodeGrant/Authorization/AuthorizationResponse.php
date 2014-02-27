@@ -61,7 +61,6 @@ class AuthorizationResponse
      */
     public function getCode()
     {
-        // TODO this not taking into account validation error vs error repsonse
         if ($this->isError()) {
             throw new AuthorizationErrorException($this->params['error']);
         }
