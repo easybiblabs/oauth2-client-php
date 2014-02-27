@@ -22,6 +22,8 @@ class SimpleStateGeneratorTest extends \PHPUnit_Framework_TestCase
 
     public function testGenerate()
     {
+        $this->assertInternalType('string', $this->generator->generate());
+
         $this->assertEquals(
             SimpleStateGenerator::DEFAULT_STRING_LENGTH,
             strlen($this->generator->generate())
