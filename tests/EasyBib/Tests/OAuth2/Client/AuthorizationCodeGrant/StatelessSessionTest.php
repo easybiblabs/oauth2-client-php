@@ -24,7 +24,7 @@ class StatelessSessionTest extends TestCase
     private $tokenStore;
 
     /**
-     * @var StatefulSession
+     * @var StatelessSession
      */
     private $session;
 

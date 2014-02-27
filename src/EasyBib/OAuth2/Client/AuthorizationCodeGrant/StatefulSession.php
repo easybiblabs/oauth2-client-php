@@ -2,13 +2,14 @@
 
 namespace EasyBib\OAuth2\Client\AuthorizationCodeGrant;
 
+use EasyBib\OAuth2\Client\AbstractSession;
 use EasyBib\OAuth2\Client\AuthorizationCodeGrant\Authorization\AuthorizationResponse;
 use EasyBib\OAuth2\Client\Scope;
 use EasyBib\OAuth2\Client\TokenStore;
 use Guzzle\Http\ClientInterface;
 use Symfony\Component\HttpFoundation\Session\Session;
 
-class StatefulSession extends StatelessSession
+class StatefulSession extends AbstractSession
 {
     /**
      * @var RedirectorInterface
@@ -47,23 +48,43 @@ class StatefulSession extends StatelessSession
         ClientConfig $clientConfig,
         ServerConfig $serverConfig
     ) {
-        parent::__construct($httpClient, $redirector, $clientConfig, $serverConfig);
+        $this->httpClient = $httpClient;
+        $this->redirector = $redirector;
+        $this->clientConfig = $clientConfig;
+        $this->serverConfig = $serverConfig;
+
+        $this->tokenStore = new TokenStore(new Session());
         $this->stateStore = new StateStore(new Session());
     }
 
     /**
-     * @param StateStore $stateStore
+     * @param Scope $scope
      */
+    public function setScope(Scope $scope)
+    {
+        $this->scope = $scope;
+    }
+
     public function setStateStore(StateStore $stateStore)
     {
         $this->stateStore = $stateStore;
     }
 
+    public function authorize()
+    {
+        $this->redirector->redirect($this->getAuthorizeUrl());
+    }
+
     /**
      * @param AuthorizationResponse $authResponse
+     * @throws StateException
      */
     public function handleAuthorizationResponse(AuthorizationResponse $authResponse)
     {
+        if (!$this->stateStore->validateResponse($authResponse)) {
+            throw new StateException('State does not match');
+        }
+
         $tokenRequest = new TokenRequest(
             $this->clientConfig,
             $this->serverConfig,
@@ -75,9 +96,41 @@ class StatefulSession extends StatelessSession
         $this->tokenStore->updateFromTokenResponse($tokenResponse);
     }
 
-    public function authorize()
+
+    /**
+     * @return string
+     */
+    protected function doGetToken()
     {
-        $this->redirector->redirect($this->getAuthorizeUrl());
+        $token = $this->tokenStore->getToken();
+
+        if ($token) {
+            return $token;
+        }
+
+        if ($this->tokenStore->isRefreshable()) {
+            return $this->getRefreshedToken();
+        }
+
+        // redirects browser
+        $this->authorize();
+    }
+
+    /**
+     * @return string
+     */
+    private function getRefreshedToken()
+    {
+        $refreshRequest = new TokenRefreshRequest(
+            $this->tokenStore->getRefreshToken(),
+            $this->serverConfig,
+            $this->httpClient
+        );
+
+        $tokenResponse = $refreshRequest->send();
+        $this->tokenStore->updateFromTokenResponse($tokenResponse);
+
+        return $tokenResponse->getToken();
     }
 
     /**
@@ -85,7 +138,10 @@ class StatefulSession extends StatelessSession
      */
     private function getAuthorizeUrl()
     {
-        $params = ['response_type' => 'code'] + $this->clientConfig->getParams();
+        $params = [
+            'response_type' => 'code',
+            'state' => $this->stateStore->getState(),
+        ] + $this->clientConfig->getParams();
 
         if ($this->scope) {
             $params += $this->scope->getQuerystringParams();

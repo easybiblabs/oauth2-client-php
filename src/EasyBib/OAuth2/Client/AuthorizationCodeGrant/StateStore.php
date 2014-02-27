@@ -51,6 +51,10 @@ class StateStore
             throw new \LogicException('State not initiated');
         }
 
+        if (empty($response->getParams()['state'])) {
+            return false;
+        }
+
         return $response->getParams()['state'] == $this->getState();
     }
 
