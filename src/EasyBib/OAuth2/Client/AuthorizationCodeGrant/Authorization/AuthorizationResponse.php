@@ -14,9 +14,13 @@ class AuthorizationResponse
     /**
      * @var array
      */
-    private static $validSuccessParams = [
+    private static $requiredSuccessParams = [
         'code',
-        // 'state'  // not yet supported
+    ];
+
+    private static $permittedSuccessParams = [
+        'code',
+        'state',
     ];
 
     /**
@@ -30,7 +34,7 @@ class AuthorizationResponse
         'error',
         'error_description',
         'error_uri',
-        // 'state'  // not yet supported
+        'state',
     ];
 
     /**
@@ -77,7 +81,11 @@ class AuthorizationResponse
      */
     private function isSuccess()
     {
-        $validator = new ArrayValidator(self::$validSuccessParams, self::$validSuccessParams);
+        $validator = new ArrayValidator(
+            self::$requiredSuccessParams,
+            self::$permittedSuccessParams
+        );
+
         return $validator->validate($this->params);
     }
 

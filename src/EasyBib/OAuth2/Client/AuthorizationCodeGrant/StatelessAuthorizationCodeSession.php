@@ -3,19 +3,12 @@
 namespace EasyBib\OAuth2\Client\AuthorizationCodeGrant;
 
 use EasyBib\OAuth2\Client\AuthorizationCodeGrant\Authorization\AuthorizationResponse;
-use EasyBib\OAuth2\Client\AuthorizationCodeGrant\State\StateMismatchException;
-use EasyBib\OAuth2\Client\AuthorizationCodeGrant\State\StateStore;
 use EasyBib\OAuth2\Client\TokenStore;
 use Guzzle\Http\ClientInterface;
 use Symfony\Component\HttpFoundation\Session\Session;
 
-class AuthorizationCodeSession extends AbstractSession
+class StatelessAuthorizationCodeSession extends AbstractSession
 {
-    /**
-     * @var StateStore
-     */
-    private $stateStore;
-
     /**
      * @param ClientInterface $httpClient
      * @param RedirectorInterface $redirector
@@ -34,24 +27,13 @@ class AuthorizationCodeSession extends AbstractSession
         $this->serverConfig = $serverConfig;
 
         $this->tokenStore = new TokenStore(new Session());
-        $this->stateStore = new StateStore(new Session());
-    }
-
-    public function setStateStore(StateStore $stateStore)
-    {
-        $this->stateStore = $stateStore;
     }
 
     /**
      * @param AuthorizationResponse $authResponse
-     * @throws StateMismatchException
      */
     public function handleAuthorizationResponse(AuthorizationResponse $authResponse)
     {
-        if (!$this->stateStore->validateResponse($authResponse)) {
-            throw new StateMismatchException('State does not match');
-        }
-
         $tokenRequest = new TokenRequest(
             $this->clientConfig,
             $this->serverConfig,
@@ -68,10 +50,7 @@ class AuthorizationCodeSession extends AbstractSession
      */
     protected function getAuthorizeUrl()
     {
-        $params = [
-            'response_type' => 'code',
-            'state' => $this->stateStore->getState(),
-        ] + $this->clientConfig->getParams();
+        $params = ['response_type' => 'code'] + $this->clientConfig->getParams();
 
         if ($this->scope) {
             $params += $this->scope->getQuerystringParams();

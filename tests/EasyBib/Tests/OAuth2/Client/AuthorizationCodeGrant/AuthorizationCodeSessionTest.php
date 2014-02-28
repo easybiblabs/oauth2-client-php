@@ -2,7 +2,9 @@
 
 namespace EasyBib\Tests\OAuth2\Client\AuthorizationCodeGrant;
 
+use EasyBib\OAuth2\Client\AuthorizationCodeGrant\Authorization\AuthorizationResponse;
 use EasyBib\OAuth2\Client\AuthorizationCodeGrant\AuthorizationCodeSession;
+use EasyBib\OAuth2\Client\AuthorizationCodeGrant\State\StateStore;
 use EasyBib\OAuth2\Client\Scope;
 use EasyBib\OAuth2\Client\TokenStore;
 use EasyBib\Tests\Mocks\OAuth2\Client\ExceptionMockRedirector;
@@ -16,7 +18,7 @@ class AuthorizationCodeSessionTest extends TestCase
     /**
      * @var Session
      */
-    private $tokenSession;
+    private $session;
 
     /**
      * @var TokenStore
@@ -24,31 +26,68 @@ class AuthorizationCodeSessionTest extends TestCase
     private $tokenStore;
 
     /**
+     * @var StateStore
+     */
+    private $stateStore;
+
+    /**
      * @var AuthorizationCodeSession
      */
-    private $session;
+    private $oauthSession;
 
     public function setUp()
     {
         parent::setUp();
 
-        $this->tokenSession = new Session(new MockArraySessionStorage());
-        $this->tokenStore = new TokenStore($this->tokenSession);
-        $this->session = $this->createSession();
+        $this->session = new Session(new MockArraySessionStorage());
+        $this->session->set(StateStore::KEY_STATE, 'ABC123');
+
+        $this->tokenStore = new TokenStore($this->session);
+        $this->stateStore = new StateStore($this->session);
+        $this->oauthSession = $this->createSession();
     }
 
     public function testGetTokenWhenNotSet()
     {
         $this->expectRedirectToAuthorizationEndpoint();
-        $this->session->getToken();
+        $this->oauthSession->getToken();
     }
 
-    public function testResourceRequestWhenSet()
+    public function testHandleAuthorizationResponse()
     {
-        $token = 'ABC123';
+        $token = 'token_ABC123';
+        $this->given->iAmReadyToRespondToATokenRequest($token, $this->scope, $this->mockResponses);
 
-        $this->given->iHaveATokenInSession($token, $this->tokenSession);
+        $this->oauthSession->handleAuthorizationResponse(
+            $this->getAuthorization($this->stateStore->getState())
+        );
+
+        $this->shouldHaveMadeATokenRequest($token);
         $this->shouldHaveTokenInHeaderForResourceRequests($token);
+    }
+
+    public function testHandleAuthorizationResponseMissingState()
+    {
+        $token = 'token_ABC123';
+        $this->given->iAmReadyToRespondToATokenRequest($token, $this->scope, $this->mockResponses);
+
+        $this->expectStateException();
+
+        $this->oauthSession->handleAuthorizationResponse(
+            $this->getAuthorization(null)
+        );
+    }
+
+    public function testHandleAuthorizationResponseWrongState()
+    {
+        $token = 'token_ABC123';
+        $this->given->iAmReadyToRespondToATokenRequest($token, $this->scope, $this->mockResponses);
+
+        $this->expectStateException();
+
+        $this->oauthSession->handleAuthorizationResponse(
+            $this->getAuthorization('some_random_thang')
+        );
     }
 
     public function testResourceRequestWhenExpiredHavingRefreshToken()
@@ -57,37 +96,23 @@ class AuthorizationCodeSessionTest extends TestCase
         $newToken = 'XYZ987';
         $refreshToken = 'REFRESH_456';
 
-        $this->given->iHaveATokenInSession($oldToken, $this->tokenSession);
-        $this->given->iHaveARefreshToken($refreshToken, $this->tokenSession);
-        $this->given->myTokenIsExpired($this->tokenSession);
+        $this->given->iHaveATokenInSession($oldToken, $this->session);
+        $this->given->iHaveARefreshToken($refreshToken, $this->session);
+        $this->given->myTokenIsExpired($this->session);
         $this->given->iAmReadyToRespondToATokenRequest($newToken, $this->scope, $this->mockResponses);
 
-        (new ResourceRequest($this->session))->execute();
+        (new ResourceRequest($this->oauthSession))->execute();
 
         $this->shouldHaveMadeATokenRefreshRequest($refreshToken);
         $this->shouldHaveTokenInHeaderForResourceRequests($newToken);
     }
 
-    public function testResourceRequestWhenExpiredHavingNoRefreshToken()
+    private function shouldHaveTokenInHeaderForResourceRequests($token)
     {
-        $oldToken = 'ABC123';
+        $lastRequest = (new ResourceRequest($this->oauthSession))->execute();
 
-        $this->given->iHaveATokenInSession($oldToken, $this->tokenSession);
-        $this->given->myTokenIsExpired($this->tokenSession);
-
-        $this->expectRedirectToAuthorizationEndpoint();
-        (new ResourceRequest($this->session))->execute();
-    }
-
-    public function testHandleAuthorizationResponse()
-    {
-        $token = 'token_ABC123';
-        $this->given->iAmReadyToRespondToATokenRequest($token, $this->scope, $this->mockResponses);
-
-        $this->session->handleAuthorizationResponse($this->authorization);
-
-        $this->shouldHaveMadeATokenRequest($token);
-        $this->shouldHaveTokenInHeaderForResourceRequests($token);
+        $this->assertEquals($token, $this->tokenStore->getToken());
+        $this->assertEquals('Bearer ' . $token, $lastRequest->getHeader('Authorization'));
     }
 
     /**
@@ -107,24 +132,17 @@ class AuthorizationCodeSessionTest extends TestCase
         $this->assertEquals($refreshToken, $lastRequest->getPostFields()['refresh_token']);
     }
 
-    private function shouldHaveTokenInHeaderForResourceRequests($token)
-    {
-        $lastRequest = (new ResourceRequest($this->session))->execute();
-
-        $this->assertEquals($token, $this->tokenStore->getToken());
-        $this->assertEquals('Bearer ' . $token, $lastRequest->getHeader('Authorization'));
-    }
-
     private function expectRedirectToAuthorizationEndpoint()
     {
         $message = vsprintf(
-            'Redirecting to %s?response_type=%s&client_id=%s&redirect_url=%s&scope=%s',
+            'Redirecting to %s?response_type=%s&state=%s&client_id=%s&redirect_url=%s&scope=%s',
             [
                 $this->apiBaseUrl . $this->serverConfig->getParams()['authorization_endpoint'],
                 'code',
+                $this->session->get(StateStore::KEY_STATE),
                 'client_123',
                 urlencode($this->clientConfig->getParams()['redirect_url']),
-                'USER_READ+DATA_READ_WRITE',
+                'USER_READ+DATA_READ_WRITE'
             ]
         );
 
@@ -145,8 +163,33 @@ class AuthorizationCodeSessionTest extends TestCase
         );
 
         $session->setTokenStore($this->tokenStore);
+        $session->setStateStore($this->stateStore);
         $session->setScope($this->scope);
 
         return $session;
+    }
+
+    /**
+     * @param string $state
+     * @return AuthorizationResponse
+     */
+    private function getAuthorization($state)
+    {
+        $params = [
+            'code' => 'ABC123',
+        ];
+
+        if ($state) {
+            $params['state'] = $state;
+        }
+
+        return new AuthorizationResponse($params);
+    }
+
+    private function expectStateException()
+    {
+        $this->setExpectedException(
+            '\EasyBib\OAuth2\Client\AuthorizationCodeGrant\State\StateMismatchException'
+        );
     }
 }
