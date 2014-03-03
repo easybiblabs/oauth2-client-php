@@ -21,11 +21,6 @@ class BearerAuth implements EventSubscriberInterface
     private $session;
 
     /**
-     * @var bool
-     */
-    private $headerAlreadySet = false;
-
-    /**
      * @param AbstractSession $session
      */
     public function __construct(AbstractSession $session)
@@ -49,7 +44,7 @@ class BearerAuth implements EventSubscriberInterface
      */
     public function onRequestBeforeSend(Event $event)
     {
-        if ($this->headerAlreadySet) {
+        if ($event['request']->getHeader('Authorization') instanceof Guzzle\Http\Message\Header) {
             return;
         }
 
@@ -57,8 +52,6 @@ class BearerAuth implements EventSubscriberInterface
             'Authorization',
             sprintf('Bearer %s', $this->session->getToken())
         );
-
-        $this->headerAlreadySet = true;
     }
 
     /**

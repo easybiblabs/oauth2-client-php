@@ -32,15 +32,27 @@ class BearerAuthTest extends \PHPUnit_Framework_TestCase
     {
         $plugin = new BearerAuth($this->session);
 
-        $request = $this->getMockBuilder('\Guzzle\Http\Message\Request')
-            ->setConstructorArgs(['GET', '/'])
-            ->getMock();
-
-        $request->expects($this->once())
-            ->method('setHeader');
+        $request = new \Guzzle\Http\Message\Request('GET', '/');
 
         $event = new Event(['request' => $request]);
+
         $plugin->onRequestBeforeSend($event);
+        $this->assertSame('Bearer token_123', $request->getHeader('Authorization') . '');
         $plugin->onRequestBeforeSend($event);
+        $this->assertSame('Bearer token_123', $request->getHeader('Authorization') . '');
+    }
+
+    public function testReusedPluginInstanceStillSetsHeader()
+    {
+        $plugin = new BearerAuth($this->session);
+
+        $request1 = new \Guzzle\Http\Message\Request('GET', '/');
+        $request2 = new \Guzzle\Http\Message\Request('GET', '/');
+
+        $plugin->onRequestBeforeSend(new Event(['request' => $request1]));
+        $this->assertSame('Bearer token_123', $request1->getHeader('Authorization') . '');
+
+        $plugin->onRequestBeforeSend(new Event(['request' => $request2]));
+        $this->assertSame('Bearer token_123', $request2->getHeader('Authorization') . '');
     }
 }
