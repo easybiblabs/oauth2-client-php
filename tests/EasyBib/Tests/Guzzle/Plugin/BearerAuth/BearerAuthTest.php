@@ -41,4 +41,20 @@ class BearerAuthTest extends \PHPUnit_Framework_TestCase
         $plugin->onRequestBeforeSend($event);
         $this->assertSame('Bearer token_123', $request->getHeader('Authorization') . '');
     }
+
+    public function testReusedPluginInstanceStillSetsHeader()
+    {
+        $plugin = new BearerAuth($this->session);
+
+        $request1 = new \Guzzle\Http\Message\Request('GET', '/');
+        $request2 = new \Guzzle\Http\Message\Request('GET', '/');
+
+        $event = new Event(['request' => $request1]);
+
+        $plugin->onRequestBeforeSend(new Event(['request' => $request1]));
+        $this->assertSame('Bearer token_123', $request1->getHeader('Authorization') . '');
+
+        $plugin->onRequestBeforeSend(new Event(['request' => $request2]));
+        $this->assertSame('Bearer token_123', $request2->getHeader('Authorization') . '');
+    }
 }
