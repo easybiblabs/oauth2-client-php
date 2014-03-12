@@ -45,6 +45,11 @@ class TokenStore
         return $this->get(self::KEY_ACCESS_TOKEN);
     }
 
+    public function reset()
+    {
+        $this->session->remove(self::KEY_ACCESS_TOKEN);
+    }
+
     /**
      * @return string
      */
