@@ -31,6 +31,11 @@ abstract class AbstractSession
         return $this->doGetToken();
     }
 
+    public function reset()
+    {
+        $this->tokenStore->reset();
+    }
+
     /**
      * @param \EasyBib\OAuth2\Client\TokenStore $tokenStore
      * @throws \LogicException
