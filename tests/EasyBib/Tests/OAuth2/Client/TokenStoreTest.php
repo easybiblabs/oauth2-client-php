@@ -63,10 +63,12 @@ class TokenStoreTest extends \PHPUnit_Framework_TestCase
         $token = 'jimbob';
         $this->given->iHaveATokenInSession($token, $this->tokenSession);
         $this->given->myTokenExpiresLater($this->tokenSession);
+        $this->given->iHaveRandomOtherDataInMySession($this->tokenSession, ['foo' => 'bar']);
 
         $this->tokenStore->reset();
 
         $this->assertNull($this->tokenStore->getToken());
+        $this->assertEquals('bar', $this->tokenSession->get('foo'));
     }
 
     /**

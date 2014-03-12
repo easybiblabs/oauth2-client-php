@@ -39,6 +39,11 @@ class Given
         $session->set(TokenStore::KEY_ACCESS_TOKEN, $token);
     }
 
+    public function iHaveRandomOtherDataInMySession(Session $session, array $data)
+    {
+        $session->replace($data);
+    }
+
     /**
      * @param Session $session
      */

@@ -47,7 +47,7 @@ class TokenStore
 
     public function reset()
     {
-        $this->session->clear();
+        $this->session->remove(self::KEY_ACCESS_TOKEN);
     }
 
     /**
