@@ -58,6 +58,17 @@ class TokenStoreTest extends \PHPUnit_Framework_TestCase
         $this->assertNull($this->tokenStore->getToken());
     }
 
+    public function testReset()
+    {
+        $token = 'jimbob';
+        $this->given->iHaveATokenInSession($token, $this->tokenSession);
+        $this->given->myTokenExpiresLater($this->tokenSession);
+
+        $this->tokenStore->reset();
+
+        $this->assertNull($this->tokenStore->getToken());
+    }
+
     /**
      * @dataProvider dataForIsRefreshable
      * @param array $params
