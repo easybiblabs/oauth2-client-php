@@ -49,6 +49,20 @@ class SimpleSessionTest extends TestCase
         $this->session->setTokenStore(new TokenStore($this->tokenSession));
     }
 
+    public function testReset()
+    {
+        $oldToken = 'ABC123';
+        $this->given->iAmReadyToRespondToATokenRequest($oldToken, $this->scope, $this->mockResponses);
+        $this->session->getToken();
+
+        $this->session->reset();
+
+        $newToken = 'DEF456';
+        $this->given->iAmReadyToRespondToATokenRequest($newToken, $this->scope, $this->mockResponses);
+
+        $this->assertEquals($newToken, $this->session->getToken());
+    }
+
     public function testGetTokenWhenNotSet()
     {
         $token = 'ABC123';
