@@ -69,7 +69,7 @@ abstract class TestCase extends \PHPUnit_Framework_TestCase
 
         $this->clientConfig = new ClientConfig([
             'client_id' => 'client_123',
-            'redirect_url' => 'http://myapp.example.com/',
+            'redirect_uri' => 'http://myapp.example.com/',
         ]);
 
         $this->serverConfig = new ServerConfig([
@@ -94,7 +94,7 @@ abstract class TestCase extends \PHPUnit_Framework_TestCase
         $expectedParams = [
             'grant_type' => 'authorization_code',
             'code' => $this->authorization->getCode(),
-            'redirect_uri' => $this->clientConfig->getParams()['redirect_url'],
+            'redirect_uri' => $this->clientConfig->getParams()['redirect_uri'],
             'client_id' => $this->clientConfig->getParams()['client_id'],
         ];
 

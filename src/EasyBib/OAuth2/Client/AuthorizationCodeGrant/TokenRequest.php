@@ -69,7 +69,7 @@ class TokenRequest implements TokenRequestInterface
         return [
             'grant_type' => self::GRANT_TYPE,
             'code' => $this->authorizationResponse->getCode(),
-            'redirect_uri' => $this->clientConfig->getParams()['redirect_url'],
+            'redirect_uri' => $this->clientConfig->getParams()['redirect_uri'],
             'client_id' => $this->clientConfig->getParams()['client_id'],
         ];
     }
