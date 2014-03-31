@@ -122,8 +122,8 @@ class TokenResponse
     {
         $params = json_decode($httpResponse->getBody(true), true);
 
-        if (!$params) {
-            throw new InvalidTokenResponseException();
+        if (json_last_error() != JSON_ERROR_NONE) {
+            throw new InvalidTokenResponseException(json_last_error_msg());
         }
 
         return $params;

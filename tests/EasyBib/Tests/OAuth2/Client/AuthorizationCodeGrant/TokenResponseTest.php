@@ -112,7 +112,7 @@ class TokenResponseTest extends \PHPUnit_Framework_TestCase
             '<html><head></head><body>Some error message</body></html>'
         );
         $exceptionClass = '\EasyBib\OAuth2\Client\TokenResponse\InvalidTokenResponseException';
-        $this->setExpectedException($exceptionClass);
+        $this->setExpectedException($exceptionClass, 'Syntax');
         new TokenResponse($httpResponse);
     }
 
