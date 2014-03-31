@@ -42,7 +42,7 @@ class TokenResponse
      */
     public function __construct(Response $httpResponse)
     {
-        if (!$this->isValidOAuthResponse($httpResponse)) {
+        if (!$this->isExpectedHttp($httpResponse)) {
             throw new InvalidTokenResponseException();
         }
 
@@ -108,7 +108,7 @@ class TokenResponse
      * @param Response $httpResponse
      * @return bool
      */
-    private function isValidOAuthResponse(Response $httpResponse)
+    private function isExpectedHttp(Response $httpResponse)
     {
         if ($httpResponse->isError()) {
             return false;
