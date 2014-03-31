@@ -123,7 +123,7 @@ class TokenResponse
         $params = json_decode($httpResponse->getBody(true), true);
 
         if (json_last_error() != JSON_ERROR_NONE) {
-            throw new InvalidTokenResponseException(json_last_error_msg());
+            throw new InvalidTokenResponseException(json_last_error());
         }
 
         return $params;
