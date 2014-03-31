@@ -42,9 +42,7 @@ class TokenResponse
      */
     public function __construct(Response $httpResponse)
     {
-        if (!$this->isExpectedHttp($httpResponse)) {
-            throw new InvalidTokenResponseException();
-        }
+        $this->validateHttp($httpResponse);
 
         $this->params = $this->extractParams($httpResponse);
 
@@ -106,15 +104,13 @@ class TokenResponse
 
     /**
      * @param Response $httpResponse
-     * @return bool
+     * @throws UnexpectedHttpErrorException
      */
-    private function isExpectedHttp(Response $httpResponse)
+    private function validateHttp(Response $httpResponse)
     {
         if ($httpResponse->isError()) {
-            return false;
+            throw new UnexpectedHttpErrorException($httpResponse->getStatusCode());
         }
-
-        return true;
     }
 
     /**
