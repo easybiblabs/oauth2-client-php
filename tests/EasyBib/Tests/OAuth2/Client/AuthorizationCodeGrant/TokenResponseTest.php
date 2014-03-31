@@ -92,6 +92,30 @@ class TokenResponseTest extends \PHPUnit_Framework_TestCase
         $incomingToken->getToken();
     }
 
+    public function testConstructorWithHttpError()
+    {
+        $httpResponse = new Response(
+            504,
+            ['Content-Type' => 'text/html'],
+            '<html><head></head><body>Some error message</body></html>'
+        );
+        $exceptionClass = '\EasyBib\OAuth2\Client\TokenResponse\InvalidTokenResponseException';
+        $this->setExpectedException($exceptionClass);
+        new TokenResponse($httpResponse);
+    }
+
+    public function testConstructorWithNonJson()
+    {
+        $httpResponse = new Response(
+            200,
+            [],
+            '<html><head></head><body>Some error message</body></html>'
+        );
+        $exceptionClass = '\EasyBib\OAuth2\Client\TokenResponse\InvalidTokenResponseException';
+        $this->setExpectedException($exceptionClass);
+        new TokenResponse($httpResponse);
+    }
+
     /**
      * @param array $params
      * @return Response

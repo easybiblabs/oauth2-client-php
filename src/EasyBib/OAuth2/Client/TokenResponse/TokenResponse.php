@@ -36,10 +36,17 @@ class TokenResponse
         'error_uri',
     ];
 
+    /**
+     * @param Response $httpResponse
+     * @throws InvalidTokenResponseException
+     */
     public function __construct(Response $httpResponse)
     {
-        $params = json_decode($httpResponse->getBody(true), true);
-        $this->params = $params;
+        if (!$this->isValidOAuthResponse($httpResponse)) {
+            throw new InvalidTokenResponseException();
+        }
+
+        $this->params = $this->extractParams($httpResponse);
 
         if (!$this->isSuccess() && !$this->isError()) {
             throw new InvalidTokenResponseException();
@@ -95,6 +102,35 @@ class TokenResponse
         );
 
         return $validator->validate($this->params);
+    }
+
+    /**
+     * @param Response $httpResponse
+     * @return bool
+     */
+    private function isValidOAuthResponse(Response $httpResponse)
+    {
+        if ($httpResponse->isError()) {
+            return false;
+        }
+
+        return true;
+    }
+
+    /**
+     * @param Response $httpResponse
+     * @return array
+     * @throws InvalidTokenResponseException
+     */
+    private function extractParams(Response $httpResponse)
+    {
+        $params = json_decode($httpResponse->getBody(true), true);
+
+        if (!$params) {
+            throw new InvalidTokenResponseException();
+        }
+
+        return $params;
     }
 
     /**
