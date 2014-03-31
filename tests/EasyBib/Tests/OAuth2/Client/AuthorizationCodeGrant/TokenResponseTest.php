@@ -3,6 +3,7 @@
 namespace EasyBib\Tests\OAuth2\Client\AuthorizationCodeGrant;
 
 use EasyBib\OAuth2\Client\TokenResponse\TokenResponse;
+use Guzzle\Http\Message\Response;
 
 class TokenResponseTest extends \PHPUnit_Framework_TestCase
 {
@@ -63,7 +64,7 @@ class TokenResponseTest extends \PHPUnit_Framework_TestCase
     {
         $exceptionClass = '\EasyBib\OAuth2\Client\TokenResponse\InvalidTokenResponseException';
         $this->setExpectedException($exceptionClass);
-        new TokenResponse($params);
+        new TokenResponse($this->getHttpResponse($params));
     }
 
     /**
@@ -73,7 +74,7 @@ class TokenResponseTest extends \PHPUnit_Framework_TestCase
      */
     public function testGetToken(array $params, $token)
     {
-        $incomingToken = new TokenResponse($params);
+        $incomingToken = new TokenResponse($this->getHttpResponse($params));
         $this->assertEquals($token, $incomingToken->getToken());
     }
 
@@ -84,10 +85,43 @@ class TokenResponseTest extends \PHPUnit_Framework_TestCase
      */
     public function testGetTokenWithErrorCondition(array $params, $expectedError)
     {
-        $incomingToken = new TokenResponse($params);
+        $incomingToken = new TokenResponse($this->getHttpResponse($params));
         $exceptionClass = '\EasyBib\OAuth2\Client\TokenResponse\TokenRequestErrorException';
         $this->setExpectedException($exceptionClass, $expectedError);
 
         $incomingToken->getToken();
+    }
+
+    public function testConstructorWithHttpError()
+    {
+        $httpResponse = new Response(
+            504,
+            ['Content-Type' => 'text/html'],
+            '<html><head></head><body>Some error message</body></html>'
+        );
+        $exceptionClass = '\EasyBib\OAuth2\Client\TokenResponse\UnexpectedHttpErrorException';
+        $this->setExpectedException($exceptionClass, 504);
+        new TokenResponse($httpResponse);
+    }
+
+    public function testConstructorWithNonJson()
+    {
+        $httpResponse = new Response(
+            200,
+            [],
+            '<html><head></head><body>Some error message</body></html>'
+        );
+        $exceptionClass = '\EasyBib\OAuth2\Client\TokenResponse\InvalidTokenResponseException';
+        $this->setExpectedException($exceptionClass, JSON_ERROR_SYNTAX);
+        new TokenResponse($httpResponse);
+    }
+
+    /**
+     * @param array $params
+     * @return Response
+     */
+    private function getHttpResponse(array $params)
+    {
+        return new Response(200, [], json_encode($params));
     }
 }
