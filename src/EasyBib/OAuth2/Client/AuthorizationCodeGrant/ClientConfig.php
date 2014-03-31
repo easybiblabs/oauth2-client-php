@@ -24,7 +24,7 @@ class ClientConfig
      */
     private static $permittedParams = [
         'client_id',
-        'redirect_url',
+        'redirect_uri',
     ];
 
     /**

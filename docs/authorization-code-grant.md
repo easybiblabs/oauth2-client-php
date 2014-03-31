@@ -50,7 +50,7 @@ class MyWebController
         // your application's settings for the OAuth2 provider
         $clientConfig = new ClientConfig([
             'client_id' => 'client_123',
-            'redirect_url' => 'http://myapp.example.com/',
+            'redirect_uri' => 'http://myapp.example.com/',
         ]);
 
         // the OAuth2 provider's settings
@@ -82,7 +82,7 @@ $this->oauthSession->authorize();
 The OAuth2 server will redirect the user back to your application
 with the user's token, at the
 [url specified when the client was registered with the OAuth2 provider](http://tools.ietf.org/html/rfc6749#section-2),
-or at the `redirect_url` optionally specified in the `ClientConfig`. Your
+or at the `redirect_uri` optionally specified in the `ClientConfig`. Your
 application should handle that request as follows:
 
 ```php

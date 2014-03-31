@@ -118,12 +118,12 @@ class StatelessAuthorizationCodeSessionTest extends TestCase
     private function expectRedirectToAuthorizationEndpoint()
     {
         $message = vsprintf(
-            'Redirecting to %s?response_type=%s&client_id=%s&redirect_url=%s&scope=%s',
+            'Redirecting to %s?response_type=%s&client_id=%s&redirect_uri=%s&scope=%s',
             [
                 $this->apiBaseUrl . $this->serverConfig->getParams()['authorization_endpoint'],
                 'code',
                 'client_123',
-                urlencode($this->clientConfig->getParams()['redirect_url']),
+                urlencode($this->clientConfig->getParams()['redirect_uri']),
                 'USER_READ+DATA_READ_WRITE',
             ]
         );
