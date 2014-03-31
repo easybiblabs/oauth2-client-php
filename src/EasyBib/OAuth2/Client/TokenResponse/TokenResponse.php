@@ -3,6 +3,7 @@
 namespace EasyBib\OAuth2\Client\TokenResponse;
 
 use EasyBib\OAuth2\Client\ArrayValidator;
+use Guzzle\Http\Message\Response;
 
 class TokenResponse
 {
@@ -35,12 +36,9 @@ class TokenResponse
         'error_uri',
     ];
 
-    /**
-     * @param array $params
-     * @throws InvalidTokenResponseException
-     */
-    public function __construct(array $params)
+    public function __construct(Response $httpResponse)
     {
+        $params = json_decode($httpResponse->getBody(true), true);
         $this->params = $params;
 
         if (!$this->isSuccess() && !$this->isError()) {

@@ -63,9 +63,9 @@ class TokenRequest implements TokenRequestInterface
             $this->clientConfig->getParams()['client_password']
         );
 
-        $responseBody = $request->send()->getBody(true);
+        $response = $request->send();
 
-        return new TokenResponse(json_decode($responseBody, true));
+        return new TokenResponse($response);
     }
 
     /**

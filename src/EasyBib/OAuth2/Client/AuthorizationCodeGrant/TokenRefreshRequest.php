@@ -52,8 +52,8 @@ class TokenRefreshRequest
         ];
 
         $request = $this->httpClient->post($url, [], $params);
-        $responseBody = $request->send()->getBody(true);
+        $response = $request->send();
 
-        return new TokenResponse(json_decode($responseBody, true));
+        return new TokenResponse($response);
     }
 }

@@ -68,9 +68,9 @@ class TokenRequest implements TokenRequestInterface
     {
         $url = $this->serverConfig->getParams()['token_endpoint'];
         $request = $this->httpClient->post($url, [], $this->getParams());
-        $responseBody = $request->send()->getBody(true);
+        $response = $request->send();
 
-        return new TokenResponse(json_decode($responseBody, true));
+        return new TokenResponse($response);
     }
 
     /**
