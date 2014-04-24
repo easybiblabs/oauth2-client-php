@@ -17,17 +17,26 @@ class Given
      */
     public function iAmReadyToRespondToATokenRequest($token, Scope $scope, MockPlugin $mockResponses)
     {
+        $mockResponses->addResponse($this->rawTokenResponse($token, $scope));
+    }
+
+    /**
+     * @param string $token
+     * @param Scope $scope
+     * @return Response
+     */
+    public function rawTokenResponse($token, Scope $scope)
+    {
         $params = [
-            'access_token' => $token,
-            'expires_in' => 3600,
-            'token_type' => 'bearer',
-            'refresh_token' => 'refresh_XYZ987',
-        ] + $scope->getQuerystringParams();
+                'access_token' => $token,
+                'expires_in' => 3600,
+                'token_type' => 'bearer',
+                'refresh_token' => 'refresh_XYZ987',
+            ] + $scope->getQuerystringParams();
 
         $tokenData = json_encode($params);
 
-        $rawTokenResponse = new Response(200, [], $tokenData);
-        $mockResponses->addResponse($rawTokenResponse);
+        return new Response(200, [], $tokenData);
     }
 
     /**

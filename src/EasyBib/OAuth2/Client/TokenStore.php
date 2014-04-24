@@ -71,11 +71,10 @@ class TokenStore
      */
     public function updateFromTokenResponse(TokenResponse $tokenResponse)
     {
-        $this->session->replace([
-            self::KEY_ACCESS_TOKEN  => $tokenResponse->getToken(),
-            self::KEY_REFRESH_TOKEN => $tokenResponse->getRefreshToken(),
-            self::KEY_EXPIRES_AT    => $this->expirationTimeFor($tokenResponse),
-        ]);
+        // don't use replace(), as that resets first and then sets
+        $this->session->set(self::KEY_ACCESS_TOKEN, $tokenResponse->getToken());
+        $this->session->set(self::KEY_REFRESH_TOKEN, $tokenResponse->getRefreshToken());
+        $this->session->set(self::KEY_EXPIRES_AT, $this->expirationTimeFor($tokenResponse));
     }
 
     /**
