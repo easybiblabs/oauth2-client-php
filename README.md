@@ -3,6 +3,17 @@
 You can read all about OAuth2 at the
 [standard](http://tools.ietf.org/html/rfc6749).
 
+## Tests
+
+Running the full suite of code quality tools plus tests can be done via the
+following, which is the same command as Travis runs:
+
+```shell
+make -k ci
+```
+
+Specific commands for subsets of the full suite can be found in the Makefile.
+
 ## Grant types
 
 ### Supported
