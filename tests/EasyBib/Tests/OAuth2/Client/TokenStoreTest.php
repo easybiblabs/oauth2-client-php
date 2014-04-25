@@ -2,6 +2,8 @@
 
 namespace EasyBib\Tests\OAuth2\Client;
 
+use EasyBib\OAuth2\Client\Scope;
+use EasyBib\OAuth2\Client\TokenResponse\TokenResponse;
 use EasyBib\OAuth2\Client\TokenStore;
 use Symfony\Component\HttpFoundation\Session\Session;
 use Symfony\Component\HttpFoundation\Session\Storage\MockArraySessionStorage;
@@ -68,6 +70,17 @@ class TokenStoreTest extends \PHPUnit_Framework_TestCase
         $this->tokenStore->reset();
 
         $this->assertNull($this->tokenStore->getToken());
+        $this->assertEquals('bar', $this->tokenSession->get('foo'));
+    }
+
+    public function testUpdateFromTokenResponse()
+    {
+        $this->given->iHaveRandomOtherDataInMySession($this->tokenSession, ['foo' => 'bar']);
+
+        $rawTokenResponse = $this->given->rawTokenResponse('123', new Scope(['read']));
+        $tokenResponse = new TokenResponse($rawTokenResponse);
+
+        $this->tokenStore->updateFromTokenResponse($tokenResponse);
         $this->assertEquals('bar', $this->tokenSession->get('foo'));
     }
 
