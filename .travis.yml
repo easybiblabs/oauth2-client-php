@@ -8,4 +8,4 @@ php:
   - 5.5
 
 script:
-  - ./bin/phpci
+  - make -k ci
