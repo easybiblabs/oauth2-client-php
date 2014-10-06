@@ -44,7 +44,11 @@ class BearerAuth implements EventSubscriberInterface
      */
     public function onRequestBeforeSend(Event $event)
     {
-        if ($event['request']->getHeader('Authorization') instanceof Guzzle\Http\Message\Header) {
+        if (!isset($event['request'])) {
+            throw new \UnexpectedValueException('Request missing from this event');
+        }
+
+        if ($event['request']->getHeader('Authorization') instanceof \Guzzle\Http\Message\Header) {
             return;
         }
 
@@ -60,6 +64,10 @@ class BearerAuth implements EventSubscriberInterface
      */
     public function onRequestException(Event $event)
     {
+        if (!isset($event['response'])) {
+            throw new \UnexpectedValueException('Response missing from this event');
+        }
+
         if (null !== $event['response']->getHeader("WWW-Authenticate")) {
             throw BearerErrorResponseException::factory($event['request'], $event['response']);
         }
