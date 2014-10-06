@@ -44,7 +44,7 @@ class BearerAuthTest extends \PHPUnit_Framework_TestCase
 
     public function testReusedPluginInstanceStillSetsHeader()
     {
-        $plugin = new BearerAuth($this->session);
+        $plugin = $this->createPlugin();
 
         $request1 = new \Guzzle\Http\Message\Request('GET', '/');
         $request2 = new \Guzzle\Http\Message\Request('GET', '/');
@@ -54,5 +54,27 @@ class BearerAuthTest extends \PHPUnit_Framework_TestCase
 
         $plugin->onRequestBeforeSend(new Event(['request' => $request2]));
         $this->assertSame('Bearer token_123', $request2->getHeader('Authorization') . '');
+    }
+
+    public function testBeforeSendEventWithRequestMissing()
+    {
+        $plugin = $this->createPlugin();
+        $this->setExpectedException(\UnexpectedValueException::class);
+        $plugin->onRequestBeforeSend(new Event());
+    }
+
+    public function testRequestExceptionEventWithResponseMissing()
+    {
+        $plugin = $this->createPlugin();
+        $this->setExpectedException(\UnexpectedValueException::class);
+        $plugin->onRequestException(new Event());
+    }
+
+    /**
+     * @return BearerAuth
+     */
+    private function createPlugin()
+    {
+        return new BearerAuth($this->session);
     }
 }
