@@ -66,11 +66,20 @@ class TokenRequest implements TokenRequestInterface
      */
     private function getParams()
     {
-        return [
+        $clientConfig = $this->clientConfig->getParams();
+        $params = [
             'grant_type' => self::GRANT_TYPE,
             'code' => $this->authorizationResponse->getCode(),
-            'redirect_uri' => $this->clientConfig->getParams()['redirect_uri'],
-            'client_id' => $this->clientConfig->getParams()['client_id'],
+            'redirect_uri' => $clientConfig['redirect_uri'],
+            'client_id' => $clientConfig['client_id'],
         ];
+        $addOptionalParam = function ($key) use (&$params, $clientConfig) {
+            if (isset($clientConfig[$key])) {
+                $params[$key] = $clientConfig[$key];
+            }
+        };
+        $addOptionalParam('client_secret');
+        $addOptionalParam('resource');
+        return $params;
     }
 }
