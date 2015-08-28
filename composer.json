@@ -21,13 +21,12 @@
     "require": {
         "php": ">=5.4",
         "guzzle/guzzle": "3.8.*",
-        "symfony/http-foundation": ">=2.3.0",
-        "firebase/php-jwt": "dev-master"
+        "symfony/http-foundation": "2.*",
+        "firebase/php-jwt": "3.0.0"
     },
     "require-dev": {
-      "phpunit/phpunit": ">=3.7",
-      "phpmd/phpmd": "*",
-      "fabpot/php-cs-fixer": "dev-master",
+      "phpunit/phpunit": "4.8.*",
+      "phpmd/phpmd": "^2.2.3",
       "squizlabs/php_codesniffer": "1.*"
     },
     "minimum-stability": "stable",
@@ -37,7 +36,9 @@
             "EasyBib\\Guzzle\\": "src/",
             "EasyBib\\OAuth2\\Client\\": "src/",
             "EasyBib\\Tests\\OAuth2\\Client\\": "tests/"
-        },
+        }
+    },
+    "autoload-dev": {
         "classmap": ["tests/"]
     }
 }
