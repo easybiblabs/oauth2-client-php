@@ -10,7 +10,7 @@ use EasyBib\Tests\OAuth2\Client\Given;
 use Guzzle\Http\Client;
 use Guzzle\Plugin\History\HistoryPlugin;
 use Guzzle\Plugin\Mock\MockPlugin;
-use JWT;
+use Firebase\JWT\JWT;
 
 /**
  * @SuppressWarnings(PHPMD.CouplingBetweenObjects)

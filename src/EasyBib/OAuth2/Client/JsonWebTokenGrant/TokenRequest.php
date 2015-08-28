@@ -7,7 +7,7 @@ use EasyBib\OAuth2\Client\ServerConfig;
 use EasyBib\OAuth2\Client\TokenRequestInterface;
 use EasyBib\OAuth2\Client\TokenResponse\TokenResponse;
 use Guzzle\Http\ClientInterface;
-use JWT;
+use Firebase\JWT\JWT;
 
 class TokenRequest implements TokenRequestInterface
 {
