@@ -1,7 +1,7 @@
 {
     "name": "easybiblabs/oauth2-client-php",
     "description": "OAuth2 client for PHP",
-    "license": "BSD-2-Clause",
+    "license": "Apache-2.0",
     "authors": [
         {
             "name": "Yitzchak Schaffer",
