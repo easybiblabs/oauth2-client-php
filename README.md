@@ -47,7 +47,4 @@ See [Contributing](CONTRIBUTING.md)
 
 ## License
 
-This library is licensed under the BSD 2-Clause License. Enjoy!
-
-You can find more about this
-license at http://opensource.org/licenses/BSD-2-Clause
+This library is licensed under the Apache-2.0 License. Enjoy!
