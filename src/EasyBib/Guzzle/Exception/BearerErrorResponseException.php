@@ -1,17 +1,17 @@
 <?php
 
-namespace EasyBib\Guzzle\Plugin\BearerAuth\Exception;
+namespace EasyBib\Guzzle\Exception;
 
-use Guzzle\Http\Message\RequestInterface;
-use Guzzle\Http\Message\Response;
-use Guzzle\Http\Exception\ClientErrorResponseException;
+use GuzzleHttp\Exception\RequestException;
+use Psr\Http\Message\RequestInterface;
+use Psr\Http\Message\ResponseInterface;
 
 /**
  * Class BearerErrorResponseException
  * @link https://github.com/fkooman/guzzle-bearer-auth-plugin
  * @package EasyBib\Guzzle\Plugin\BearerAuth\Exception
  */
-class BearerErrorResponseException extends ClientErrorResponseException
+class BearerErrorResponseException extends RequestException
 {
     /**
      * @var string
@@ -36,37 +36,34 @@ class BearerErrorResponseException extends ClientErrorResponseException
 
     /**
      * @param RequestInterface $request
-     * @param Response $response
+     * @param ResponseInterface $response
      * @return \Guzzle\Http\Exception\BadResponseException
      */
-    public static function factory(RequestInterface $request, Response $response)
+    public static function create(RequestInterface $request, ResponseInterface $response)
     {
         $label = 'Bearer error response';
         $bearerReason = self::headerToReason($response->getHeader("WWW-Authenticate"));
-        $message = $label . PHP_EOL . implode(PHP_EOL, array(
+        $message = $label . PHP_EOL . implode(PHP_EOL, [
             '[status code] ' . $response->getStatusCode(),
             '[reason phrase] ' . $response->getReasonPhrase(),
             '[bearer reason] ' . $bearerReason,
-            '[url] ' . $request->getUrl(),
-        ));
+            '[url] ' . $request->getUri(),
+        ]);
 
-        $exception = new static($message);
-        $exception->setResponse($response);
-        $exception->setRequest($request);
+        $exception = new static($message, $request, $response);
         $exception->setBearerReason($bearerReason);
 
         return $exception;
     }
 
     /**
-     * @param string $header
+     * @param string[]|false $headers
      * @return string
      */
-    public static function headerToReason($header)
+    public static function headerToReason($headers)
     {
-        if (null !== $header) {
-            $params = $header->parseParams();
-            foreach ($params as $value) {
+        if (!empty($headers)) {
+            foreach ($headers as $value) {
                 if (isset($value['error'])) {
                     return $value['error'];
                 }

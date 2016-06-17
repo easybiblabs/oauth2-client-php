@@ -6,8 +6,8 @@ use EasyBib\OAuth2\Client\Scope;
 use EasyBib\OAuth2\Client\ServerConfig;
 use EasyBib\OAuth2\Client\TokenRequestInterface;
 use EasyBib\OAuth2\Client\TokenResponse\TokenResponse;
-use Guzzle\Http\ClientInterface;
-use Firebase\JWT\JWT;
+use GuzzleHttp\ClientInterface;
+use JWT;
 
 class TokenRequest implements TokenRequestInterface
 {
@@ -67,8 +67,7 @@ class TokenRequest implements TokenRequestInterface
     public function send()
     {
         $url = $this->serverConfig->getParams()['token_endpoint'];
-        $request = $this->httpClient->post($url, [], $this->getParams());
-        $response = $request->send();
+        $response = $this->httpClient->request('POST', $url, ['payload' => $this->getParams()]);
 
         return new TokenResponse($response);
     }
@@ -104,7 +103,7 @@ class TokenRequest implements TokenRequestInterface
     private function getTokenEndpoint()
     {
         return vsprintf('%s%s', [
-            $this->httpClient->getBaseUrl(),
+            $this->httpClient->getConfig('base_uri'),
             $this->serverConfig->getParams()['token_endpoint'],
         ]);
     }
