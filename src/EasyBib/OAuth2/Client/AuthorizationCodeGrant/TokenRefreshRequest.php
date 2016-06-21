@@ -3,7 +3,7 @@
 namespace EasyBib\OAuth2\Client\AuthorizationCodeGrant;
 
 use EasyBib\OAuth2\Client\TokenResponse\TokenResponse;
-use Guzzle\Http\ClientInterface;
+use GuzzleHttp\ClientInterface;
 
 class TokenRefreshRequest
 {
@@ -20,7 +20,7 @@ class TokenRefreshRequest
     private $serverConfig;
 
     /**
-     * @var \Guzzle\Http\ClientInterface
+     * @var ClientInterface
      */
     private $httpClient;
 
@@ -47,12 +47,17 @@ class TokenRefreshRequest
         $url = $this->serverConfig->getParams()['token_endpoint'];
 
         $params = [
-            'grant_type' => self::GRANT_TYPE,
-            'refresh_token' => $this->refreshToken,
+            [
+                'name' => 'grant_type',
+                'contents' => self::GRANT_TYPE,
+            ],
+            [
+                'name' => 'refresh_token',
+                'contents' => $this->refreshToken,
+            ],
         ];
 
-        $request = $this->httpClient->post($url, [], $params);
-        $response = $request->send();
+        $response = $this->httpClient->request('POST', $url, ['multipart' => $params]);
 
         return new TokenResponse($response);
     }

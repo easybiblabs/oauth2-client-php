@@ -9,7 +9,6 @@ use Psr\Http\Message\ResponseInterface;
 /**
  * Class BearerErrorResponseException
  * @link https://github.com/fkooman/guzzle-bearer-auth-plugin
- * @package EasyBib\Guzzle\Plugin\BearerAuth\Exception
  */
 class BearerErrorResponseException extends RequestException
 {
@@ -37,7 +36,7 @@ class BearerErrorResponseException extends RequestException
     /**
      * @param RequestInterface $request
      * @param ResponseInterface $response
-     * @return \Guzzle\Http\Exception\BadResponseException
+     * @return RequestException
      */
     public static function create(RequestInterface $request, ResponseInterface $response)
     {

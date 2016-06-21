@@ -4,7 +4,7 @@ namespace EasyBib\OAuth2\Client\AuthorizationCodeGrant;
 
 use EasyBib\OAuth2\Client\AuthorizationCodeGrant\Authorization\AuthorizationResponse;
 use EasyBib\OAuth2\Client\TokenStore;
-use Guzzle\Http\ClientInterface;
+use GuzzleHttp\ClientInterface;
 use Symfony\Component\HttpFoundation\Session\Session;
 
 class StatelessAuthorizationCodeSession extends AbstractSession
@@ -57,7 +57,7 @@ class StatelessAuthorizationCodeSession extends AbstractSession
         }
 
         return vsprintf('%s%s%s%s', [
-            $this->httpClient->getBaseUrl(),
+            $this->httpClient->getConfig('base_uri'),
             $this->serverConfig->getParams()['authorization_endpoint'],
             '?',
             http_build_query($params),

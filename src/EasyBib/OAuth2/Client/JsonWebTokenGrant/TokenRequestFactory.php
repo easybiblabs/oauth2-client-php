@@ -5,7 +5,7 @@ namespace EasyBib\OAuth2\Client\JsonWebTokenGrant;
 use EasyBib\OAuth2\Client\Scope;
 use EasyBib\OAuth2\Client\ServerConfig;
 use EasyBib\OAuth2\Client\TokenRequestFactoryInterface;
-use Guzzlehttp\ClientInterface;
+use GuzzleHttp\ClientInterface;
 
 class TokenRequestFactory implements TokenRequestFactoryInterface
 {

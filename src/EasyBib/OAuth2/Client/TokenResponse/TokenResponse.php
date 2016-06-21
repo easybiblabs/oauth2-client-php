@@ -108,7 +108,7 @@ class TokenResponse
      */
     private function validateHttp(ResponseInterface $httpResponse)
     {
-        if ($httpResponse->getStatusCode() < 400) {
+        if ($httpResponse->getStatusCode() >= 400) {
             throw new UnexpectedHttpErrorException($httpResponse->getStatusCode());
         }
     }

@@ -39,7 +39,7 @@ class BearerAuthMiddleware
 
         $request = $request->withHeader('Authorization', sprintf('Bearer %s', $this->session->getToken()));
 
-        $fn($request, $options)
+        return $fn($request, $options)
             ->then(function (ResponseInterface $response) use ($request, $options) {
                 $code = $response->getStatusCode();
                 if ($code < 400) {

@@ -4,6 +4,7 @@ namespace EasyBib\OAuth2\Client\AuthorizationCodeGrant;
 
 use EasyBib\OAuth2\Client\AuthorizationCodeGrant\Authorization\AuthorizationResponse;
 use EasyBib\OAuth2\Client\Scope;
+use GuzzleHttp\ClientInterface;
 
 abstract class AbstractSession extends \EasyBib\OAuth2\Client\AbstractSession
 {
@@ -26,6 +27,9 @@ abstract class AbstractSession extends \EasyBib\OAuth2\Client\AbstractSession
      * @var Scope
      */
     protected $scope;
+
+    /** @var ClientInterface */
+    protected $httpClient;
 
     /**
      * @param AuthorizationResponse $authResponse
