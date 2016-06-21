@@ -7,10 +7,10 @@ use EasyBib\OAuth2\Client\JsonWebTokenGrant\TokenRequest;
 use EasyBib\OAuth2\Client\Scope;
 use EasyBib\OAuth2\Client\ServerConfig;
 use EasyBib\Tests\OAuth2\Client\Given;
-use Guzzle\Http\Client;
-use Guzzle\Plugin\History\HistoryPlugin;
-use Guzzle\Plugin\Mock\MockPlugin;
 use Firebase\JWT\JWT;
+use GuzzleHttp\Client;
+use GuzzleHttp\Handler\MockHandler;
+use GuzzleHttp\Psr7\MultipartStream;
 
 /**
  * @SuppressWarnings(PHPMD.CouplingBetweenObjects)
@@ -43,16 +43,6 @@ abstract class TestCase extends \PHPUnit_Framework_TestCase
     protected $httpClient;
 
     /**
-     * @var HistoryPlugin
-     */
-    protected $history;
-
-    /**
-     * @var MockPlugin
-     */
-    protected $mockResponses;
-
-    /**
      * @var Scope
      */
     protected $scope;
@@ -61,6 +51,9 @@ abstract class TestCase extends \PHPUnit_Framework_TestCase
      * @var int
      */
     protected $baseTime;
+
+    /** @var MockHandler */
+    protected $mockHandler;
 
     public function setUp()
     {
@@ -78,11 +71,11 @@ abstract class TestCase extends \PHPUnit_Framework_TestCase
             'token_endpoint' => '/oauth/token',
         ]);
 
-        $this->httpClient = new Client($this->apiBaseUrl);
-        $this->mockResponses = new MockPlugin();
-        $this->history = new HistoryPlugin();
-        $this->httpClient->addSubscriber($this->mockResponses);
-        $this->httpClient->addSubscriber($this->history);
+        $this->mockHandler = new MockHandler();
+        $this->httpClient = new Client([
+            'base_uri' => $this->apiBaseUrl,
+            'handler' => $this->mockHandler,
+        ]);
 
         $this->scope = new Scope(['USER_READ', 'DATA_READ_WRITE']);
         $this->baseTime = time();
@@ -90,12 +83,15 @@ abstract class TestCase extends \PHPUnit_Framework_TestCase
 
     public function shouldHaveMadeATokenRequest()
     {
-        $lastRequest = $this->history->getLastRequest();
+        $lastRequest = $this->mockHandler->getLastRequest();
         $requestParams = $this->getRequestParams();
 
         $this->assertEquals('POST', $lastRequest->getMethod());
-        $this->assertEquals($this->getTokenEndpoint(), $lastRequest->getUrl());
-        $this->assertEquals($requestParams, $lastRequest->getPostFields()->toArray());
+        $this->assertEquals($this->getTokenEndpoint(), $lastRequest->getUri());
+        $this->assertInstanceOf(MultipartStream::class, $lastRequest->getBody());
+
+        $expectedBody = new MultipartStream($requestParams, $lastRequest->getBody()->getBoundary());
+        $this->assertEquals((string)$expectedBody, (string)$lastRequest->getBody());
     }
 
     /**
@@ -118,8 +114,14 @@ abstract class TestCase extends \PHPUnit_Framework_TestCase
         $assertion = JWT::encode($payload, $this->clientConfig->getParams()['client_secret']);
 
         return [
-            'grant_type' => TokenRequest::GRANT_TYPE,
-            'assertion' => $assertion,
+            [
+                'name' => 'grant_type',
+                'contents' => TokenRequest::GRANT_TYPE,
+            ],
+            [
+                'name' => 'assertion',
+                'contents' => $assertion,
+            ],
         ];
     }
 

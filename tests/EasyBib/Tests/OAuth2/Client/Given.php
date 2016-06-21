@@ -4,8 +4,8 @@ namespace EasyBib\Tests\OAuth2\Client;
 
 use EasyBib\OAuth2\Client\Scope;
 use EasyBib\OAuth2\Client\TokenStore;
-use Guzzle\Http\Message\Response;
-use Guzzle\Plugin\Mock\MockPlugin;
+use GuzzleHttp\Handler\MockHandler;
+use GuzzleHttp\Psr7\Response;
 use Symfony\Component\HttpFoundation\Session\Session;
 
 class Given
@@ -13,11 +13,11 @@ class Given
     /**
      * @param string $token
      * @param Scope $scope
-     * @param \Guzzle\Plugin\Mock\MockPlugin $mockResponses
+     * @param MockHandler $mockHandler
      */
-    public function iAmReadyToRespondToATokenRequest($token, Scope $scope, MockPlugin $mockResponses)
+    public function iAmReadyToRespondToATokenRequest($token, Scope $scope, MockHandler $mockHandler)
     {
-        $mockResponses->addResponse($this->rawTokenResponse($token, $scope));
+        $mockHandler->append($this->rawTokenResponse($token, $scope));
     }
 
     /**

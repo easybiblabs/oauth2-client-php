@@ -2,9 +2,12 @@
 
 namespace EasyBib\Tests\Mocks\OAuth2\Client;
 
+use EasyBib\Guzzle\BearerAuthMiddleware;
 use EasyBib\OAuth2\Client\AbstractSession;
-use Guzzle\Http\Client;
-use Guzzle\Plugin\History\HistoryPlugin;
+use GuzzleHttp\Client;
+use GuzzleHttp\HandlerStack;
+use GuzzleHttp\Middleware;
+use Psr\Http\Message\RequestInterface;
 
 class ResourceRequest
 {
@@ -22,20 +25,20 @@ class ResourceRequest
     }
 
     /**
-     * @return \Guzzle\Http\Message\RequestInterface
+     * @return RequestInterface
      */
     public function execute()
     {
-        $history = new HistoryPlugin();
+        $container = [];
+        $history = Middleware::history($container);
 
-        $httpClient = new Client();
-        $httpClient->addSubscriber($history);
+        $stack = HandlerStack::create();
+        $stack->push($history);
+        $stack->before('http_errors', function ($callable) { return new BearerAuthMiddleware($callable, $this->session); });
 
-        $this->session->addResourceClient($httpClient);
+        $client = new Client(['handler' => $stack]);
+        $client->get('http://example.org');
 
-        $request = $httpClient->get('http://example.org');
-        $request->send();
-
-        return $history->getLastRequest();
+        return array_pop($container);
     }
 }

@@ -3,13 +3,14 @@
 namespace EasyBib\Tests\OAuth2\Client\ClientCredentialsGrant\HttpBasic;
 
 use EasyBib\OAuth2\Client\ClientCredentialsGrant\HttpBasic\TokenRequest;
+use GuzzleHttp\Psr7\MultipartStream;
 
 class TokenRequestTest extends TestCase
 {
     public function testSend()
     {
         $token = 'token_ABC123';
-        $this->given->iAmReadyToRespondToATokenRequest($token, $this->scope, $this->mockResponses);
+        $this->given->iAmReadyToRespondToATokenRequest($token, $this->scope, $this->mockHandler);
 
         $tokenRequest = new TokenRequest(
             $this->clientConfig,
@@ -28,7 +29,7 @@ class TokenRequestTest extends TestCase
 
     private function shouldHaveMadeAnHttpBasicTokenRequest()
     {
-        $lastRequest = $this->history->getLastRequest();
+        $lastRequest = $this->mockHandler->getLastRequest();
 
         $configParams = $this->clientConfig->getParams();
 
@@ -38,14 +39,17 @@ class TokenRequestTest extends TestCase
             $this->serverConfig->getParams()['token_endpoint']
         );
 
-        $expectedPostParams = [
-            'grant_type' => TokenRequest::GRANT_TYPE,
-        ];
+        $expectedBody = new MultipartStream([
+            [
+                'name' => 'grant_type',
+                'contents' => TokenRequest::GRANT_TYPE,
+            ],
+        ], $lastRequest->getBody()->getBoundary());
 
         $this->assertEquals('POST', $lastRequest->getMethod());
-        $this->assertEquals($configParams['client_id'], $lastRequest->getUsername());
-        $this->assertEquals($configParams['client_password'], $lastRequest->getPassword());
-        $this->assertEquals($expectedPostParams, $lastRequest->getPostFields()->toArray());
-        $this->assertEquals($expectedUrl, $lastRequest->getUrl());
+        $this->assertEquals((string)$expectedBody, (string)$lastRequest->getBody());
+        $this->assertEquals($expectedUrl, $lastRequest->getUri());
+        $this->assertTrue($lastRequest->hasHeader('Authorization'));
+        $this->assertEquals('Basic '.base64_encode($configParams['client_id'].':'.$configParams['client_password']), $lastRequest->getHeader('Authorization')[0]);
     }
 }
