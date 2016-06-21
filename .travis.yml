@@ -1,5 +1,8 @@
 language: php
 
+before_install:
+  - phpenv config-rm xdebug.ini
+
 before_script:
   - ./composer.phar install --dev --prefer-source --no-interaction
 
@@ -13,3 +16,8 @@ php:
 
 script:
   - make -k ci
+
+cache:
+  directories:
+  - $HOME/.composer/cache/repo/
+  - $TRAVIS_BUILD_DIR/vendor/
