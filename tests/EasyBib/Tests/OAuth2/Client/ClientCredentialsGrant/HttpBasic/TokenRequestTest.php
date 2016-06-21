@@ -50,6 +50,9 @@ class TokenRequestTest extends TestCase
         $this->assertEquals((string)$expectedBody, (string)$lastRequest->getBody());
         $this->assertEquals($expectedUrl, $lastRequest->getUri());
         $this->assertTrue($lastRequest->hasHeader('Authorization'));
-        $this->assertEquals('Basic '.base64_encode($configParams['client_id'].':'.$configParams['client_password']), $lastRequest->getHeader('Authorization')[0]);
+        $this->assertEquals(
+            'Basic '.base64_encode($configParams['client_id'].':'.$configParams['client_password']),
+            $lastRequest->getHeader('Authorization')[0]
+        );
     }
 }

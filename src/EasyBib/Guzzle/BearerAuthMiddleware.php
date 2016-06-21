@@ -31,15 +31,15 @@ class BearerAuthMiddleware
      */
     public function __invoke(RequestInterface $request, array $options)
     {
-        $fn = $this->nextHandler;
+        $nextHandler = $this->nextHandler;
 
         if ($request->hasHeader('Authorization')) {
-            return $fn($request, $options);
+            return $nextHandler($request, $options);
         }
 
         $request = $request->withHeader('Authorization', sprintf('Bearer %s', $this->session->getToken()));
 
-        return $fn($request, $options)
+        return $nextHandler($request, $options)
             ->then(function (ResponseInterface $response) use ($request, $options) {
                 $code = $response->getStatusCode();
                 if ($code < 400) {

@@ -34,7 +34,9 @@ class ResourceRequest
 
         $stack = HandlerStack::create();
         $stack->push($history);
-        $stack->before('http_errors', function ($callable) { return new BearerAuthMiddleware($callable, $this->session); });
+        $stack->before('http_errors', function ($callable) {
+            return new BearerAuthMiddleware($callable, $this->session);
+        });
 
         $client = new Client(['handler' => $stack]);
         $client->get('http://example.org');
