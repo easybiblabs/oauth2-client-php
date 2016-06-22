@@ -34,14 +34,22 @@ class BearerErrorResponseException extends RequestException
     }
 
     /**
+     *
      * @param RequestInterface $request
      * @param ResponseInterface $response
-     * @return RequestException
+     * @param \Exception $previous
+     * @param array $ctx
+     * @return BearerErrorResponseException
      */
-    public static function create(RequestInterface $request, ResponseInterface $response)
-    {
+    public static function create(
+        RequestInterface $request,
+        ResponseInterface $response = null,
+        \Exception $previous = null,
+        array $ctx = []
+    ) {
+        unset($previous, $ctx);
         $label = 'Bearer error response';
-        $bearerReason = self::headerToReason($response->getHeader("WWW-Authenticate"));
+        $bearerReason = self::headerToReason($response->getHeader('WWW-Authenticate'));
         $message = $label . PHP_EOL . implode(PHP_EOL, [
             '[status code] ' . $response->getStatusCode(),
             '[reason phrase] ' . $response->getReasonPhrase(),
@@ -62,7 +70,8 @@ class BearerErrorResponseException extends RequestException
     public static function headerToReason($headers)
     {
         if (!empty($headers)) {
-            foreach ($headers as $value) {
+            $parsedHeaders = \GuzzleHttp\Psr7\parse_header($headers);
+            foreach ($parsedHeaders as $value) {
                 if (isset($value['error'])) {
                     return $value['error'];
                 }
