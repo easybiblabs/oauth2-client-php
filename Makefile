@@ -8,7 +8,6 @@ phpcs:
 	./vendor/bin/phpcs --standard=psr2 ./tests
 
 phpmd:
-	./vendor/bin/phpmd tests/ text codesize,controversial,design,naming,unusedcode
 	./vendor/bin/phpmd src/ text codesize,controversial,design,naming,unusedcode
 
 phpunit:

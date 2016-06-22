@@ -6,7 +6,7 @@ use EasyBib\OAuth2\Client\Scope;
 use EasyBib\OAuth2\Client\ServerConfig;
 use EasyBib\OAuth2\Client\TokenRequestInterface;
 use EasyBib\OAuth2\Client\TokenResponse\TokenResponse;
-use Guzzle\Http\ClientInterface;
+use GuzzleHttp\ClientInterface;
 
 class TokenRequest implements TokenRequestInterface
 {
@@ -56,25 +56,27 @@ class TokenRequest implements TokenRequestInterface
     public function send()
     {
         $url = $this->serverConfig->getParams()['token_endpoint'];
-        $request = $this->httpClient->post($url, [], $this->getParams());
-
-        $request->setAuth(
-            $this->clientConfig->getParams()['client_id'],
-            $this->clientConfig->getParams()['client_password']
-        );
-
-        $response = $request->send();
+        $response = $this->httpClient->request('POST', $url, [
+            'multipart' => $this->getParams(),
+            'auth' => [
+                $this->clientConfig->getParams()['client_id'],
+                $this->clientConfig->getParams()['client_password'],
+            ],
+        ]);
 
         return new TokenResponse($response);
     }
 
     /**
-     * @return array
+     * @return array[]
      */
     private function getParams()
     {
         return [
-            'grant_type' => self::GRANT_TYPE,
+            [
+                'name' => 'grant_type',
+                'contents' => self::GRANT_TYPE,
+            ],
         ];
     }
 }

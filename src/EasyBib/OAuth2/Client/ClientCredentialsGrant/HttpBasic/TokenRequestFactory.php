@@ -5,7 +5,7 @@ namespace EasyBib\OAuth2\Client\ClientCredentialsGrant\HttpBasic;
 use EasyBib\OAuth2\Client\Scope;
 use EasyBib\OAuth2\Client\ServerConfig;
 use EasyBib\OAuth2\Client\TokenRequestFactoryInterface;
-use Guzzle\Http\ClientInterface;
+use GuzzleHttp\ClientInterface;
 
 class TokenRequestFactory implements TokenRequestFactoryInterface
 {
@@ -15,17 +15,17 @@ class TokenRequestFactory implements TokenRequestFactoryInterface
     private $clientConfig;
 
     /**
-     * @var \EasyBib\OAuth2\Client\ServerConfig
+     * @var ServerConfig
      */
     private $serverConfig;
 
     /**
-     * @var \Guzzle\Http\ClientInterface
+     * @var ClientInterface
      */
     private $httpClient;
 
     /**
-     * @var \EasyBib\OAuth2\Client\Scope
+     * @var Scope
      */
     private $scope;
 

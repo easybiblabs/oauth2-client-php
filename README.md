@@ -32,7 +32,7 @@ has minimal support.
 
 ## Prerequisites
 
-This library requires PHP 5.4 or later.
+This library requires PHP 5.5 or later.
 
 Use [Composer](https://getcomposer.org/) to add this project to your project's
 dependencies.

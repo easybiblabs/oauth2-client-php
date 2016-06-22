@@ -5,11 +5,11 @@ namespace EasyBib\Tests\OAuth2\Client\AuthorizationCodeGrant;
 use EasyBib\OAuth2\Client\AuthorizationCodeGrant\Authorization\AuthorizationResponse;
 use EasyBib\OAuth2\Client\AuthorizationCodeGrant\AuthorizationCodeSession;
 use EasyBib\OAuth2\Client\AuthorizationCodeGrant\State\StateStore;
-use EasyBib\OAuth2\Client\Scope;
 use EasyBib\OAuth2\Client\TokenStore;
 use EasyBib\Tests\Mocks\OAuth2\Client\ExceptionMockRedirector;
 use EasyBib\Tests\Mocks\OAuth2\Client\ResourceRequest;
-use Guzzle\Http\Client;
+use GuzzleHttp\Psr7\MultipartStream;
+use Psr\Http\Message\RequestInterface;
 use Symfony\Component\HttpFoundation\Session\Session;
 use Symfony\Component\HttpFoundation\Session\Storage\MockArraySessionStorage;
 
@@ -56,20 +56,20 @@ class AuthorizationCodeSessionTest extends TestCase
     public function testHandleAuthorizationResponse()
     {
         $token = 'token_ABC123';
-        $this->given->iAmReadyToRespondToATokenRequest($token, $this->scope, $this->mockResponses);
+        $this->given->iAmReadyToRespondToATokenRequest($token, $this->scope, $this->mockHandler);
 
         $this->oauthSession->handleAuthorizationResponse(
             $this->getAuthorization($this->stateStore->getState())
         );
 
-        $this->shouldHaveMadeATokenRequest($token);
+        $this->shouldHaveMadeATokenRequest();
         $this->shouldHaveTokenInHeaderForResourceRequests($token);
     }
 
     public function testHandleAuthorizationResponseMissingState()
     {
         $token = 'token_ABC123';
-        $this->given->iAmReadyToRespondToATokenRequest($token, $this->scope, $this->mockResponses);
+        $this->given->iAmReadyToRespondToATokenRequest($token, $this->scope, $this->mockHandler);
 
         $this->expectStateException();
 
@@ -81,7 +81,7 @@ class AuthorizationCodeSessionTest extends TestCase
     public function testHandleAuthorizationResponseWrongState()
     {
         $token = 'token_ABC123';
-        $this->given->iAmReadyToRespondToATokenRequest($token, $this->scope, $this->mockResponses);
+        $this->given->iAmReadyToRespondToATokenRequest($token, $this->scope, $this->mockHandler);
 
         $this->expectStateException();
 
@@ -99,9 +99,9 @@ class AuthorizationCodeSessionTest extends TestCase
         $this->given->iHaveATokenInSession($oldToken, $this->session);
         $this->given->iHaveARefreshToken($refreshToken, $this->session);
         $this->given->myTokenIsExpired($this->session);
-        $this->given->iAmReadyToRespondToATokenRequest($newToken, $this->scope, $this->mockResponses);
+        $this->given->iAmReadyToRespondToATokenRequest($newToken, $this->scope, $this->mockHandler);
 
-        (new ResourceRequest($this->oauthSession))->execute();
+        (new ResourceRequest($this->oauthSession))->execute()['request'];
 
         $this->shouldHaveMadeATokenRefreshRequest($refreshToken);
         $this->shouldHaveTokenInHeaderForResourceRequests($newToken);
@@ -109,10 +109,12 @@ class AuthorizationCodeSessionTest extends TestCase
 
     private function shouldHaveTokenInHeaderForResourceRequests($token)
     {
-        $lastRequest = (new ResourceRequest($this->oauthSession))->execute();
+        /** @var RequestInterface $lastRequest */
+        $lastRequest = (new ResourceRequest($this->oauthSession))->execute()['request'];
 
         $this->assertEquals($token, $this->tokenStore->getToken());
-        $this->assertEquals('Bearer ' . $token, $lastRequest->getHeader('Authorization'));
+        $this->assertTrue($lastRequest->hasHeader('Authorization'));
+        $this->assertEquals('Bearer ' . $token, $lastRequest->getHeader('Authorization')[0]);
     }
 
     /**
@@ -120,16 +122,26 @@ class AuthorizationCodeSessionTest extends TestCase
      */
     private function shouldHaveMadeATokenRefreshRequest($refreshToken)
     {
-        $lastRequest = $this->history->getLastRequest();
+        $lastRequest = $this->mockHandler->getLastRequest();
 
         $this->assertEquals(
             $this->apiBaseUrl . $this->serverConfig->getParams()['token_endpoint'],
-            $lastRequest->getUrl()
+            (string)$lastRequest->getUri()
         );
 
         $this->assertEquals('POST', $lastRequest->getMethod());
-        $this->assertEquals('refresh_token', $lastRequest->getPostFields()['grant_type']);
-        $this->assertEquals($refreshToken, $lastRequest->getPostFields()['refresh_token']);
+
+        $expectedBody = new MultipartStream([
+            [
+                'name' => 'grant_type',
+                'contents' => 'refresh_token',
+            ],
+            [
+                'name' => 'refresh_token',
+                'contents' => $refreshToken,
+            ],
+        ], $lastRequest->getBody()->getBoundary());
+        $this->assertEquals((string)$expectedBody, (string)$lastRequest->getBody());
     }
 
     private function expectRedirectToAuthorizationEndpoint()

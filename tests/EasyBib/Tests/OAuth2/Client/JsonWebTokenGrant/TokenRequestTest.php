@@ -3,13 +3,14 @@
 namespace EasyBib\Tests\OAuth2\Client\JsonWebTokenGrant;
 
 use EasyBib\OAuth2\Client\JsonWebTokenGrant\TokenRequest;
+use EasyBib\OAuth2\Client\TokenResponse\TokenResponse;
 
 class TokenRequestTest extends TestCase
 {
     public function testSend()
     {
         $token = 'token_ABC123';
-        $this->given->iAmReadyToRespondToATokenRequest($token, $this->scope, $this->mockResponses);
+        $this->given->iAmReadyToRespondToATokenRequest($token, $this->scope, $this->mockHandler);
 
         $tokenRequest = new TokenRequest(
             $this->clientConfig,
@@ -20,10 +21,9 @@ class TokenRequestTest extends TestCase
         );
 
         $tokenResponse = $tokenRequest->send();
-        $class = '\EasyBib\OAuth2\Client\TokenResponse\TokenResponse';
 
         $this->shouldHaveMadeATokenRequest();
-        $this->assertInstanceOf($class, $tokenResponse);
+        $this->assertInstanceOf(TokenResponse::class, $tokenResponse);
         $this->assertEquals($token, $tokenResponse->getToken());
     }
 }

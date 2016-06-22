@@ -2,9 +2,6 @@
 
 namespace EasyBib\OAuth2\Client;
 
-use EasyBib\Guzzle\Plugin\BearerAuth\BearerAuth;
-use Guzzle\Http\ClientInterface;
-
 abstract class AbstractSession
 {
     /**
@@ -42,14 +39,5 @@ abstract class AbstractSession
         }
 
         $this->tokenStore = $tokenStore;
-    }
-
-    /**
-     * @param ClientInterface $httpClient
-     */
-    public function addResourceClient(ClientInterface $httpClient)
-    {
-        $subscriber = new BearerAuth($this);
-        $httpClient->addSubscriber($subscriber);
     }
 }

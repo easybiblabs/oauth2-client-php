@@ -13,7 +13,7 @@ use EasyBib\OAuth2\Client\ClientCredentialsGrant\HttpBasic\ClientConfig;
 use EasyBib\OAuth2\Client\ServerConfig;
 use EasyBib\OAuth2\Client\SimpleSession;
 use EasyBib\OAuth2\Client\Scope;
-use Guzzle\Http\Client;
+use GuzzleHttp\Client;
 
 class MyWebController
 {
@@ -32,7 +32,7 @@ class MyWebController
             'token_endpoint' => '/oauth/token',
         ]);
 
-        $oauthHttpClient = new Client('http://myoauth2provider.example.com');
+        $oauthHttpClient = new Client(['base_uri' => 'http://myoauth2provider.example.com']);
 
         $scope = new Scope(['USER_DATA_READ']);
 
@@ -43,10 +43,15 @@ class MyWebController
             $scope
         );
 
-        $this->resourceHttpClient = new Client('http://coolresources.example.com');
-
         $session = new SimpleSession($tokenRequestFactory);
-        $session->addResourceClient($this->resourceHttpClient);
+        $handler = \GuzzleHttp\HandlerStack::create()
+        $stackHandler->before('http_errors', function ($callable) use ($session) {
+            return new \EasyBib\Guzzle\BearerAuthMiddleware($callable, $session);
+        });
+        $this->resourceHttpClient = new \GuzzleHttp\Client([
+            'base_uri' => 'http://coolresources.example.com',
+            'handler' => $handler,
+        ]);
     }
 
     public function fooAction()
@@ -65,7 +70,7 @@ use EasyBib\OAuth2\Client\ClientCredentialsGrant\RequestParams\ClientConfig;
 use EasyBib\OAuth2\Client\ServerConfig;
 use EasyBib\OAuth2\Client\SimpleSession;
 use EasyBib\OAuth2\Client\Scope;
-use Guzzle\Http\Client;
+use GuzzleHttp\Client;
 
 class MyWebController
 {
@@ -84,7 +89,7 @@ class MyWebController
             'token_endpoint' => '/oauth/token',
         ]);
 
-        $oauthHttpClient = new Client('http://myoauth2provider.example.com');
+        $oauthHttpClient = new Client(['base_uri' => 'http://myoauth2provider.example.com']);
 
         $scope = new Scope(['USER_DATA_READ']);
 
@@ -95,10 +100,14 @@ class MyWebController
             $scope
         );
 
-        $this->resourceHttpClient = new Client('http://coolresources.example.com');
-
-        $session = new SimpleSession($tokenRequestFactory);
-        $session->addResourceClient($this->resourceHttpClient);
+        $handler = \GuzzleHttp\HandlerStack::create()
+        $stackHandler->before('http_errors', function ($callable) use ($session) {
+            return new \EasyBib\Guzzle\BearerAuthMiddleware($callable, $session);
+        });
+        $this->resourceHttpClient = new \GuzzleHttp\Client([
+            'base_uri' => 'http://coolresources.example.com',
+            'handler' => $handler,
+        ]);
     }
 
     public function fooAction()

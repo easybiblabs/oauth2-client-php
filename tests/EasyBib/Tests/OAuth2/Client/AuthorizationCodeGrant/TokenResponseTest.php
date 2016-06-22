@@ -2,8 +2,10 @@
 
 namespace EasyBib\Tests\OAuth2\Client\AuthorizationCodeGrant;
 
+use EasyBib\OAuth2\Client\TokenResponse\InvalidTokenResponseException;
 use EasyBib\OAuth2\Client\TokenResponse\TokenResponse;
-use Guzzle\Http\Message\Response;
+use EasyBib\OAuth2\Client\TokenResponse\UnexpectedHttpErrorException;
+use GuzzleHttp\Psr7\Response;
 
 class TokenResponseTest extends \PHPUnit_Framework_TestCase
 {
@@ -99,8 +101,7 @@ class TokenResponseTest extends \PHPUnit_Framework_TestCase
             ['Content-Type' => 'text/html'],
             '<html><head></head><body>Some error message</body></html>'
         );
-        $exceptionClass = '\EasyBib\OAuth2\Client\TokenResponse\UnexpectedHttpErrorException';
-        $this->setExpectedException($exceptionClass, 504);
+        $this->setExpectedException(UnexpectedHttpErrorException::class, '504');
         new TokenResponse($httpResponse);
     }
 
@@ -111,8 +112,7 @@ class TokenResponseTest extends \PHPUnit_Framework_TestCase
             [],
             '<html><head></head><body>Some error message</body></html>'
         );
-        $exceptionClass = '\EasyBib\OAuth2\Client\TokenResponse\InvalidTokenResponseException';
-        $this->setExpectedException($exceptionClass, JSON_ERROR_SYNTAX);
+        $this->setExpectedException(InvalidTokenResponseException::class, (string)JSON_ERROR_SYNTAX);
         new TokenResponse($httpResponse);
     }
 

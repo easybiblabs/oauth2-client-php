@@ -22,8 +22,14 @@ This is accomplished by creating a second Guzzle `Client` for use with your
 resource provider, and attaching it to your Session:
 
 ```php
-$client = new \Guzzle\Http\Client('http://cool-api.example.org');
-$session->addResourceClient($client);
+$handler = \GuzzleHttp\HandlerStack::create()
+$stackHandler->before('http_errors', function ($callable) use ($session) {
+    return new \EasyBib\Guzzle\BearerAuthMiddleware($callable, $session);
+});
+$client = new \GuzzleHttp\Client([
+    'base_uri' => 'http://cool-api.example.org',
+    'handler' => $handler,
+]);
 ```
 
 ## Token grants

@@ -8,7 +8,8 @@ use EasyBib\OAuth2\Client\ClientCredentialsGrant\RequestParams\TokenRequestFacto
 use EasyBib\OAuth2\Client\TokenStore;
 use EasyBib\Tests\Mocks\OAuth2\Client\ResourceRequest;
 use EasyBib\Tests\OAuth2\Client\ClientCredentialsGrant\RequestParams\TestCase;
-use Guzzle\Http\Client;
+use GuzzleHttp\Psr7\MultipartStream;
+use Psr\Http\Message\RequestInterface;
 use Symfony\Component\HttpFoundation\Session\Session;
 use Symfony\Component\HttpFoundation\Session\Storage\MockArraySessionStorage;
 
@@ -41,7 +42,7 @@ class SimpleSessionTest extends TestCase
     public function testSetTokenStoreWhenRequestsAlreadyMade()
     {
         $token = 'ABC123';
-        $this->given->iAmReadyToRespondToATokenRequest($token, $this->scope, $this->mockResponses);
+        $this->given->iAmReadyToRespondToATokenRequest($token, $this->scope, $this->mockHandler);
 
         $this->session->getToken();
 
@@ -52,7 +53,7 @@ class SimpleSessionTest extends TestCase
     public function testGetTokenWhenNotSet()
     {
         $token = 'ABC123';
-        $this->given->iAmReadyToRespondToATokenRequest($token, $this->scope, $this->mockResponses);
+        $this->given->iAmReadyToRespondToATokenRequest($token, $this->scope, $this->mockHandler);
 
         $this->session->getToken();
 
@@ -75,7 +76,7 @@ class SimpleSessionTest extends TestCase
 
         $this->given->iHaveATokenInSession($oldToken, $this->tokenSession);
         $this->given->myTokenIsExpired($this->tokenSession);
-        $this->given->iAmReadyToRespondToATokenRequest($newToken, $this->scope, $this->mockResponses);
+        $this->given->iAmReadyToRespondToATokenRequest($newToken, $this->scope, $this->mockHandler);
 
         (new ResourceRequest($this->session))->execute();
 
@@ -85,21 +86,17 @@ class SimpleSessionTest extends TestCase
 
     private function shouldHaveTokenInHeaderForResourceRequests($token)
     {
-        $lastRequest = (new ResourceRequest($this->session))->execute();
+        /** @var RequestInterface $lastRequest */
+        $lastRequest = (new ResourceRequest($this->session))->execute()['request'];
 
         $this->assertEquals($token, $this->tokenStore->getToken());
-        $this->assertEquals('Bearer ' . $token, $lastRequest->getHeader('Authorization'));
+        $this->assertTrue($lastRequest->hasHeader('Authorization'));
+        $this->assertEquals('Bearer ' . $token, $lastRequest->getHeader('Authorization')[0]);
     }
 
     private function shouldHaveMadeATokenRequest()
     {
-        $lastRequest = $this->history->getLastRequest();
-
-        $expectedParams = [
-            'grant_type' => TokenRequest::GRANT_TYPE,
-            'client_id' => $this->clientConfig->getParams()['client_id'],
-            'client_secret' => $this->clientConfig->getParams()['client_secret'],
-        ];
+        $lastRequest = $this->mockHandler->getLastRequest();
 
         $expectedUrl = sprintf(
             '%s%s',
@@ -108,8 +105,27 @@ class SimpleSessionTest extends TestCase
         );
 
         $this->assertEquals('POST', $lastRequest->getMethod());
-        $this->assertEquals($expectedParams, $lastRequest->getPostFields()->toArray());
-        $this->assertEquals($expectedUrl, $lastRequest->getUrl());
+        $this->assertEquals($expectedUrl, $lastRequest->getUri());
+
+        $requestBody = $lastRequest->getBody();
+        $this->assertInstanceOf(MultipartStream::class, $requestBody);
+
+        $expectedBody = new MultipartStream([
+            [
+                'name' => 'grant_type',
+                'contents' => TokenRequest::GRANT_TYPE,
+            ],
+            [
+                'name' => 'client_id',
+                'contents' => $this->clientConfig->getParams()['client_id'],
+            ],
+            [
+                'name' => 'client_secret',
+
+                'contents' => $this->clientConfig->getParams()['client_secret'],
+            ],
+        ], $requestBody->getBoundary());
+        $this->assertEquals((string)$expectedBody, (string)$lastRequest->getBody());
     }
 
     /**

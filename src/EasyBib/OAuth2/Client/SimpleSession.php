@@ -13,11 +13,12 @@ class SimpleSession extends AbstractSession
 
     /**
      * @param TokenRequestFactoryInterface $tokenRequestFactory
+     * @param TokenStore $tokenStore
      */
-    public function __construct(TokenRequestFactoryInterface $tokenRequestFactory)
+    public function __construct(TokenRequestFactoryInterface $tokenRequestFactory, TokenStore $tokenStore = null)
     {
         $this->tokenRequestFactory = $tokenRequestFactory;
-        $this->tokenStore = new TokenStore(new Session());
+        $this->tokenStore = $tokenStore ? : new TokenStore(new Session());
     }
 
     /**

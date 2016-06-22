@@ -36,7 +36,7 @@ use EasyBib\OAuth2\Client\AuthorizationCodeGrant\ClientConfig;
 use EasyBib\OAuth2\Client\AuthorizationCodeGrant\ServerConfig;
 use EasyBib\OAuth2\Client\AuthorizationCodeGrant\AuthorizationCodeSession;
 use EasyBib\OAuth2\Client\Scope;
-use Guzzle\Http\Client;
+use GuzzleHttp\Client;
 
 class MyWebController
 {
@@ -44,7 +44,7 @@ class MyWebController
 
     private function setUpOAuth()
     {
-        $httpClient = new Client('http://myoauth2provider.example.com');
+        $httpClient = new Client(['base_uri' => 'http://myoauth2provider.example.com']);
         $redirector = new MyRedirector($this);
 
         // your application's settings for the OAuth2 provider
@@ -103,9 +103,15 @@ At this point you can access the service being provided, via a fresh Guzzle
 client.
 
 ```php
-$resourceHttpClient = new Client('http://coolresources.example.com');
-$this->oauthSession->addResourceHttpClient($resourceHttpClient);
-$request = $resourceHttpClient->get('/some/resource');
+$handler = \GuzzleHttp\HandlerStack::create()
+$stackHandler->before('http_errors', function ($callable) {
+    return new \EasyBib\Guzzle\BearerAuthMiddleware($callable, $this->oauthSession);
+});
+$resourceHttpClient = new \GuzzleHttp\Client([
+    'base_uri' => 'http://coolresources.example.com',
+    'handler' => $handler,
+]);
+$response = $resourceHttpClient->get('/some/resource');
 // etc.
 ```
 

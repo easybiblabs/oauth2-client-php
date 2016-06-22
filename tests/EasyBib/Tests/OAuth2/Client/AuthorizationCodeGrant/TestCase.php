@@ -7,9 +7,9 @@ use EasyBib\OAuth2\Client\AuthorizationCodeGrant\ClientConfig;
 use EasyBib\OAuth2\Client\AuthorizationCodeGrant\ServerConfig;
 use EasyBib\OAuth2\Client\Scope;
 use EasyBib\Tests\OAuth2\Client\Given;
-use Guzzle\Http\Client;
-use Guzzle\Plugin\History\HistoryPlugin;
-use Guzzle\Plugin\Mock\MockPlugin;
+use GuzzleHttp\Client;
+use GuzzleHttp\Handler\MockHandler;
+use GuzzleHttp\Psr7\MultipartStream;
 
 /**
  * @SuppressWarnings(PHPMD.CouplingBetweenObjects)
@@ -27,19 +27,9 @@ abstract class TestCase extends \PHPUnit_Framework_TestCase
     protected $apiBaseUrl = 'http://data.easybib.example.com';
 
     /**
-     * @var HistoryPlugin
-     */
-    protected $history;
-
-    /**
      * @var Client
      */
     protected $httpClient;
-
-    /**
-     * @var MockPlugin
-     */
-    protected $mockResponses;
 
     /**
      * @var ClientConfig
@@ -61,6 +51,9 @@ abstract class TestCase extends \PHPUnit_Framework_TestCase
      */
     protected $scope;
 
+    /** @var MockHandler */
+    protected $mockHandler;
+
     public function setUp()
     {
         parent::setUp();
@@ -77,11 +70,11 @@ abstract class TestCase extends \PHPUnit_Framework_TestCase
             'token_endpoint' => '/oauth/token',
         ]);
 
-        $this->httpClient = new Client($this->apiBaseUrl);
-        $this->mockResponses = new MockPlugin();
-        $this->history = new HistoryPlugin();
-        $this->httpClient->addSubscriber($this->mockResponses);
-        $this->httpClient->addSubscriber($this->history);
+        $this->mockHandler = new MockHandler();
+        $this->httpClient = new Client([
+            'base_uri' => $this->apiBaseUrl,
+            'handler' => $this->mockHandler,
+        ]);
 
         $this->authorization = new AuthorizationResponse(['code' => 'ABC123']);
         $this->scope = new Scope(['USER_READ', 'DATA_READ_WRITE']);
@@ -89,17 +82,31 @@ abstract class TestCase extends \PHPUnit_Framework_TestCase
 
     protected function shouldHaveMadeATokenRequest()
     {
-        $lastRequest = $this->history->getLastRequest();
-
-        $expectedParams = [
-            'grant_type' => 'authorization_code',
-            'code' => $this->authorization->getCode(),
-            'redirect_uri' => $this->clientConfig->getParams()['redirect_uri'],
-            'client_id' => $this->clientConfig->getParams()['client_id'],
-        ];
+        $lastRequest = $this->mockHandler->getLastRequest();
 
         $this->assertEquals('POST', $lastRequest->getMethod());
-        $this->assertEquals($expectedParams, $lastRequest->getPostFields()->toArray());
-        $this->assertEquals($this->apiBaseUrl . '/oauth/token', $lastRequest->getUrl());
+        $this->assertEquals($this->apiBaseUrl . '/oauth/token', $lastRequest->getUri());
+
+        $requestBody = $lastRequest->getBody();
+        $expectedBody = new MultipartStream([
+            [
+                'name' => 'grant_type',
+                'contents' => 'authorization_code',
+            ],
+            [
+                'name' => 'code',
+                'contents' => $this->authorization->getCode(),
+            ],
+            [
+                'name' => 'redirect_uri',
+                'contents' => $this->clientConfig->getParams()['redirect_uri'],
+            ],
+            [
+                'name' => 'client_id',
+                'contents' => $this->clientConfig->getParams()['client_id'],
+            ],
+        ], $requestBody->getBoundary());
+
+        $this->assertEquals((string)$expectedBody, (string)$requestBody);
     }
 }

@@ -3,13 +3,14 @@
 namespace EasyBib\Tests\OAuth2\Client\ClientCredentialsGrant\RequestParams;
 
 use EasyBib\OAuth2\Client\ClientCredentialsGrant\RequestParams\TokenRequest;
+use GuzzleHttp\Psr7\MultipartStream;
 
 class TokenRequestTest extends TestCase
 {
     public function testSend()
     {
         $token = 'token_ABC123';
-        $this->given->iAmReadyToRespondToATokenRequest($token, $this->scope, $this->mockResponses);
+        $this->given->iAmReadyToRespondToATokenRequest($token, $this->scope, $this->mockHandler);
 
         $tokenRequest = new TokenRequest(
             $this->clientConfig,
@@ -28,13 +29,7 @@ class TokenRequestTest extends TestCase
 
     private function shouldHaveMadeAParamsTokenRequest()
     {
-        $lastRequest = $this->history->getLastRequest();
-
-        $expectedParams = [
-            'grant_type' => TokenRequest::GRANT_TYPE,
-            'client_id' => $this->clientConfig->getParams()['client_id'],
-            'client_secret' => $this->clientConfig->getParams()['client_secret'],
-        ];
+        $lastRequest = $this->mockHandler->getLastRequest();
 
         $expectedUrl = sprintf(
             '%s%s',
@@ -43,7 +38,24 @@ class TokenRequestTest extends TestCase
         );
 
         $this->assertEquals('POST', $lastRequest->getMethod());
-        $this->assertEquals($expectedParams, $lastRequest->getPostFields()->toArray());
-        $this->assertEquals($expectedUrl, $lastRequest->getUrl());
+        $this->assertEquals($expectedUrl, $lastRequest->getUri());
+        $this->assertInstanceOf(MultipartStream::class, $lastRequest->getBody());
+
+        $expectedBody = new MultipartStream([
+            [
+                'name' => 'grant_type',
+                'contents' => TokenRequest::GRANT_TYPE,
+            ],
+            [
+                'name' => 'client_id',
+                'contents' => $this->clientConfig->getParams()['client_id'],
+            ],
+            [
+                'name' => 'client_secret',
+                'contents' => $this->clientConfig->getParams()['client_secret'],
+            ],
+        ], $lastRequest->getBody()->getBoundary());
+
+        $this->assertEquals((string)$expectedBody, (string)$lastRequest->getBody());
     }
 }

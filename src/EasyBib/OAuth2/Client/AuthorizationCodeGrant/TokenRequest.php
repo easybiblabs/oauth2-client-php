@@ -5,7 +5,7 @@ namespace EasyBib\OAuth2\Client\AuthorizationCodeGrant;
 use EasyBib\OAuth2\Client\AuthorizationCodeGrant\Authorization\AuthorizationResponse;
 use EasyBib\OAuth2\Client\TokenRequestInterface;
 use EasyBib\OAuth2\Client\TokenResponse\TokenResponse;
-use Guzzle\Http\ClientInterface;
+use GuzzleHttp\ClientInterface;
 
 class TokenRequest implements TokenRequestInterface
 {
@@ -22,7 +22,7 @@ class TokenRequest implements TokenRequestInterface
     private $serverConfig;
 
     /**
-     * @var \Guzzle\Http\ClientInterface
+     * @var ClientInterface
      */
     private $httpClient;
 
@@ -55,8 +55,7 @@ class TokenRequest implements TokenRequestInterface
     public function send()
     {
         $url = $this->serverConfig->getParams()['token_endpoint'];
-        $request = $this->httpClient->post($url, [], $this->getParams());
-        $response = $request->send();
+        $response = $this->httpClient->request('POST', $url, ['multipart' => $this->getParams()]);
 
         return new TokenResponse($response);
     }
@@ -68,14 +67,29 @@ class TokenRequest implements TokenRequestInterface
     {
         $clientConfig = $this->clientConfig->getParams();
         $params = [
-            'grant_type' => self::GRANT_TYPE,
-            'code' => $this->authorizationResponse->getCode(),
-            'redirect_uri' => $clientConfig['redirect_uri'],
-            'client_id' => $clientConfig['client_id'],
+            [
+                'name' => 'grant_type',
+                'contents' => self::GRANT_TYPE,
+            ],
+            [
+                'name' => 'code',
+                'contents' => $this->authorizationResponse->getCode(),
+            ],
+            [
+                'name' => 'redirect_uri',
+                'contents' => $clientConfig['redirect_uri'],
+            ],
+            [
+                'name' => 'client_id',
+                'contents' => $clientConfig['client_id'],
+            ],
         ];
         $addOptionalParam = function ($key) use (&$params, $clientConfig) {
             if (isset($clientConfig[$key])) {
-                $params[$key] = $clientConfig[$key];
+                $params[] = [
+                    'name' => $key,
+                    'contents' => $clientConfig[$key],
+                ];
             }
         };
         $addOptionalParam('client_secret');

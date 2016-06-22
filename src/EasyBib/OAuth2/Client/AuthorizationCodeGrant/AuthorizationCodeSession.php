@@ -6,7 +6,7 @@ use EasyBib\OAuth2\Client\AuthorizationCodeGrant\Authorization\AuthorizationResp
 use EasyBib\OAuth2\Client\AuthorizationCodeGrant\State\StateMismatchException;
 use EasyBib\OAuth2\Client\AuthorizationCodeGrant\State\StateStore;
 use EasyBib\OAuth2\Client\TokenStore;
-use Guzzle\Http\ClientInterface;
+use GuzzleHttp\ClientInterface;
 use Symfony\Component\HttpFoundation\Session\Session;
 
 class AuthorizationCodeSession extends AbstractSession
@@ -78,7 +78,7 @@ class AuthorizationCodeSession extends AbstractSession
         }
 
         return vsprintf('%s%s%s%s', [
-            $this->httpClient->getBaseUrl(),
+            $this->httpClient->getConfig('base_uri'),
             $this->serverConfig->getParams()['authorization_endpoint'],
             '?',
             http_build_query($params),

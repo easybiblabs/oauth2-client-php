@@ -6,6 +6,9 @@ class SimpleStateGenerator implements StateGeneratorInterface
 {
     const DEFAULT_STRING_LENGTH = 30;
 
+    /** @var int */
+    private $stringLength;
+
     /**
      * @param int $stringLength
      */
